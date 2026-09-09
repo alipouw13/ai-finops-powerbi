@@ -6,3 +6,7 @@ __pycache__/
 
 # demo build artifact (regenerate with build_demo_db.py)
 platform/demo/*.db
+
+# REAL tenant extracts (extract_m365_graph.py). Never commit customer or
+# corporate licence data — the committed Bronze CSVs are MOCK by design.
+platform/fabric/bronze_real/

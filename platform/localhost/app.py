@@ -19,7 +19,14 @@ import json
 import os
 import re
 import sqlite3
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+# The startup banner uses →; the default Windows console codepage (cp1252)
+# raises UnicodeEncodeError on it and the server dies before it binds.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "..", "AIFinOps.SemanticModel", "data"))

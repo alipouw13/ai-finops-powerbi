@@ -9,8 +9,10 @@ model Model
 
 /// Absolute path to AIFinOps.SemanticModel/data/ (include trailing separator).
 /// Every table partition reads its CSV from this single parameter so the model is
-/// portable: set it once via Transform data -> Manage Parameters -> DataFolder.
-expression DataFolder = "C:\Users\snatesan\ai-finops-powerbi\AIFinOps.SemanticModel\data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+/// portable. PBIP has no relative-path primitive, so point it at your own clone:
+///   python platform/validate/validate_pbip.py --fix-data-folder
+/// or set it manually via Transform data -> Manage Parameters -> DataFolder.
+expression DataFolder = "C:\path\to\ai-finops-powerbi\AIFinOps.SemanticModel\data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 	lineageTag: 9c1b7a10-1111-4111-8111-000000000001
 
 	annotation PBI_ResultType = Text

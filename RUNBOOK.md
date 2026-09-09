@@ -16,6 +16,13 @@ python3 platform/data-store/build_store.py        # -> platform/data-store/finop
 python3 platform/localhost/app.py                 # -> http://localhost:8080
 ```
 
+On Windows use `python` rather than `python3`:
+
+```powershell
+python platform\data-store\build_store.py
+python platform\localhost\app.py
+```
+
 Open <http://localhost:8080> and click through the tabs.
 
 ---
@@ -47,7 +54,7 @@ Copilot / semantic-model Q&A but runs 100% locally. Try:
 | Step | Layer | Artifact |
 |------|-------|----------|
 | 1. Extract | Source telemetry | `docs/extractable-data-by-product.md`, `extractable_data_catalog` |
-| 2. Bronze  | Raw per-platform tables | `platform/fabric/gen_bronze_data.py` → `bronze_out/*.csv` |
+| 2. Bronze  | Raw per-platform tables | `platform/fabric/gen_bronze_data.py` → `bronze_out/*.csv` (MOCK)<br>`platform/fabric/extract_m365_graph.py` → `bronze_real/*.csv` (**REAL**, Microsoft Graph) |
 | 3. Store   | Portable data source | `platform/data-store/build_store.py` → `finops.db` |
 | 4. Gold + BI + AI | Semantic model + dashboards + Q&A | `AIFinOps.SemanticModel/`, `platform/localhost/app.py` |
 | 5. **Fabric push** | Land Bronze in a Lakehouse | `platform/fabric/load_bronze.py` (run once a Power BI license is assigned) |
@@ -57,6 +64,13 @@ Fabric workspace — see `docs/bronze-layer-architecture.md`.
 
 ## Also runnable
 - **Power BI Desktop:** open `AIFinOps.pbip` (10 persona report pages, no Fabric needed).
+  Run `python platform/validate/validate_pbip.py --fix-data-folder` first.
+- **Validate the PBIP offline:** `python platform/validate/validate_pbip.py`
+- **REAL M365 licence data:** `python platform/fabric/extract_m365_graph.py --probe`
+  (see `platform/fabric/README-m365-graph.md`)
 - **Ad-hoc SQL:** `python3 platform/data-store/build_store.py --query "SELECT product, COUNT(*) FROM extractable_data_catalog GROUP BY product"`
 
-> All figures are **MOCK** demo data. Nothing here is relabeled as real customer spend.
+> All figures in the committed CSVs are **MOCK** demo data. Nothing here is
+> relabeled as real customer spend. The one REAL path is
+> `extract_m365_graph.py`, which writes to a gitignored directory and reports
+> seat counts as REAL while keeping derived dollars `cost_is_estimated=TRUE`.

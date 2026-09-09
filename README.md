@@ -18,13 +18,101 @@ conversation.
 ```bash
 git clone https://github.com/natesanshreyas/ai-finops-powerbi.git
 cd ai-finops-powerbi
-python3 build_data.py        # regenerate CSVs
+
+# point the model's DataFolder parameter at this clone, then check the model
+python platform/validate/validate_pbip.py --fix-data-folder
 ```
 
 1. Open `AIFinOps.pbip` in **Power BI Desktop** (Dec 2023+, with *Preview → Power BI Project* on).
-2. **Transform data → Manage Parameters → `DataFolder`** — set to the absolute path of
-   `AIFinOps.SemanticModel/data/` (trailing slash, escaped backslashes on Windows).
-3. **Refresh.**
+2. **Refresh.** (`--fix-data-folder` already set the `DataFolder` parameter; you can also set
+   it by hand via *Transform data → Manage Parameters → `DataFolder`* — absolute path to
+   `AIFinOps.SemanticModel/data/`, trailing separator included.)
+
+`validate_pbip.py` checks the whole PBIP offline — CSV headers against every TMDL
+`sourceColumn`, declared data types against the actual values, relationship keys for
+uniqueness and orphans, all 42 DAX measures, and all 141 report field bindings. Run it
+after changing any CSV or measure; it catches the failures that otherwise surface only as
+a refresh error or a silently blank visual.
+
+If you are working on the Fabric medallion notebooks, also run:
+
+```bash
+python platform/validate/check_notebooks.py
+```
+
+It catches the PySpark trap where a column name collides with a DataFrame member
+(`resolve.alias` returns the bound *method*, and the join dies 40 seconds into a
+remote Spark run), and verifies the gold table contracts still match the CSV
+headers column-for-column.
+
+### Publishing to Fabric / Direct Lake
+
+The PBIP is an **import** model reading local CSVs, which is what lets it open
+with no Fabric dependency. For the service, generate a separate Direct Lake model
+over the gold Lakehouse — `AIFinOps.pbip` is never modified:
+
+```bash
+python platform/validate/build_directlake.py \
+    --workspace <workspace-guid> --lakehouse <gold-lakehouse-guid>
+python platform/deploy/deploy_semantic_model.py \
+    --workspace <workspace-guid> --model-dir AIFinOps.DirectLake.SemanticModel
+```
+
+> The committed `AIFinOps.DirectLake.*` folders are **build outputs**, so the
+> OneLake path in `model.tmdl` and the dataset id in `definition.pbir` point at
+> the environment they were generated in. They are resource locators, not
+> secrets — access is still gated by Entra — but they will not resolve for you.
+> Re-run the two generators above with your own GUIDs before deploying.
+
+### The Fabric report
+
+`build_report_directlake.py` generates the **10-page** report defined in the
+repo specification above, bound live to the Direct Lake dataset — deep-indigo
+canvas, gradient KPI strip, white rounded content cards, right-hand filter rail:
+
+```bash
+python platform/validate/build_report_directlake.py --dataset <dataset-guid>
+python platform/validate/check_report.py --report AIFinOps.DirectLake.Report \
+    --blank "M365 Prompts" "Error Rate"
+python platform/deploy/deploy_report.py \
+    --workspace <workspace-guid> --report-dir AIFinOps.DirectLake.Report
+```
+
+`check_report.py` is the gate. It fails the build on:
+- any two visuals on a page whose rectangles intersect, or anything off-canvas
+- a projection `queryRef` with no matching entry in the visual's
+  `prototypeQuery.Select` (the visual renders its title and stays permanently
+  blank — no error anywhere)
+- a binding to a table/column/measure that does not exist, including a measure
+  bound to the wrong table (the catalogue measures live on `dim_data_source`,
+  not the fact)
+- a binding to a measure passed via `--blank`, i.e. one known to return no data
+  on this dataset, so empty cards can never ship
+- title/background colour pairs below the WCAG AA 4.5:1 contrast minimum
+
+Two measures are legitimately blank and are excluded by design:
+`[M365 Prompts]` (Graph exposes activity dates, never prompt counts) and
+`[Error Rate]` (Azure Monitor metrics carry no per-request error flag).
+
+See [platform/medallion/README.md](platform/medallion/README.md) for the full
+pipeline and the three TMDL traps that break publishing (Desktop accepts them,
+Fabric does not — including one that silently broke 21 of the 42 measures).
+
+### Regenerating the CSVs
+
+`build_data.py` emits only the base star schema. The conformed dimensions, the universal
+identity columns and `dim_platform[enterprise_discount_pct]` are added by
+`build_dimensions.py`, and the semantic model requires all of them — so the two always run
+as a pair, in this order:
+
+```bash
+python build_data.py         # base CSVs from the real gateway export + mock platforms
+python build_dimensions.py   # additive: conformed dims, identity columns, discounts
+python platform/validate/validate_pbip.py    # confirm the model still binds
+```
+
+> Running `build_data.py` on its own leaves the model unrefreshable: seven columns the TMDL
+> declares no longer exist in the CSVs.
 
 > If Desktop rejects `report.json`, delete it and reopen the `.pbip`. Desktop regenerates a
 > blank report bound to the same semantic model and you drag the measures on. The semantic
@@ -206,10 +294,20 @@ depending purely on the invoker's licence. `msdyn_creditconsumed` is already net
 
 ```
 build_data.py                     real gateway JSON + mock → 7 CSVs
-build_dimensions.py               additive: conformed BU/app/env dims + universal identity
+build_dimensions.py               additive: conformed BU/app/env dims, universal identity,
+                                  platform discounts (run after build_data.py)
 build_personas.py                 additive: 5 persona pages + extractable data spectrum
-build_pbip.py                     → TMDL semantic model
-build_report.py                   → 4-page report layout
+build_pbip.py                     → TMDL semantic model (regenerator — see note below)
+build_report.py                   → 4-page report layout (regenerator — see note below)
+platform/validate/validate_pbip.py  offline PBIP validator + --fix-data-folder
+platform/validate/check_notebooks.py  static checks for the medallion notebooks
+platform/validate/check_report.py   report geometry/binding/contrast gate
+platform/validate/fix_tmdl_measures.py  wrap multi-line DAX in triple backticks
+platform/validate/build_directlake.py  import model -> Direct Lake model
+platform/validate/build_report_directlake.py  themed 5-page Fabric report
+platform/validate/probe_fabric.py   read-only "what can my account actually do" check
+platform/deploy/deploy_semantic_model.py  deploy a TMDL model to Fabric
+platform/deploy/deploy_report.py    deploy a PBIR report to Fabric
 AIFinOps.pbip                     open this
 AIFinOps.SemanticModel/
   definition/model.tmdl           relationships + DataFolder parameter
@@ -225,6 +323,13 @@ docs/medallion-examples.md        worked example rows for every table, traced Br
 docs/ai-insight-layer.md          Fabric Copilot + NL + RAG strategy
 data/                             raw Log Analytics exports (real Foundry)
 ```
+
+> **`build_pbip.py` and `build_report.py` are full regenerators and are currently behind the
+> committed artifacts.** `build_pbip.py` emits 7 tables / 5 relationships / 27 measures and no
+> `DataFolder` parameter; the committed model has 11 tables, 8 relationships and 42 measures.
+> `build_report.py` emits 4 pages against the committed 10. Re-running either one discards
+> that work. Treat the TMDL and `report.json` as the source of truth, and run
+> `platform/validate/validate_pbip.py` after any change.
 
 ## References
 - [Copilot Credits billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)

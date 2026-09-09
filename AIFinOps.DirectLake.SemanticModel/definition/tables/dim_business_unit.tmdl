@@ -1,0 +1,42 @@
+table dim_business_unit
+
+	column business_unit_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: business_unit_key
+
+	column business_unit_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: business_unit_name
+
+	column division
+		dataType: string
+		summarizeBy: none
+		sourceColumn: division
+
+	/// MOCK monthly budget for variance/forecast demo. Overwrite with the customer's real budget.
+	column monthly_budget_usd
+		dataType: int64
+		formatString: \$#,0
+		summarizeBy: sum
+		sourceColumn: monthly_budget_usd
+
+	column executive_owner
+		dataType: string
+		summarizeBy: none
+		sourceColumn: executive_owner
+
+	column is_mock_budget
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_mock_budget
+
+	partition dim_business_unit = entity
+		mode: directLake
+		source
+			entityName: dim_business_unit
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

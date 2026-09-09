@@ -20,7 +20,10 @@ RP.mkdir(parents=True, exist_ok=True)
 T = "\t"
 
 # Absolute path baked into every partition - no parameter to configure.
-DATA_DIR = "C:\\\\Users\\\\snatesan\\\\ai-finops-powerbi\\\\AIFinOps.SemanticModel\\\\data\\\\"
+# Derived from this clone so the generator never bakes in another user's home
+# directory. Run platform/validate/validate_pbip.py --fix-data-folder to
+# re-point an already-generated model at a different clone.
+DATA_DIR = str(SM / "data") + "\\"
 
 
 def w(p: Path, s: str):

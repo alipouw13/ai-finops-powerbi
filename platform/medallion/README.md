@@ -1,40 +1,166 @@
 # Medallion pipeline — bronze → silver → gold
 
-Reference implementation for landing the PoC's mock/real telemetry in Microsoft
-Fabric and materializing the exact 10-table star the semantic model reads. These
-are Fabric notebook scripts (PySpark); they are **not** wired into the PBIP, so
-they cannot affect whether `AIFinOps.pbip` opens. The CSVs + TMDL remain the
+Fabric notebook scripts (PySpark) that land the telemetry in a Lakehouse and
+materialise the exact star the semantic model reads. The CSVs + TMDL remain the
 source of truth — gold is written to *match* them, never to replace them.
 
+## Runnable vs design
+
+| File | Status |
+|---|---|
+| `bronze/00_load_bronze_csv.py` | **RUNNABLE** — `Files/bronze/*.csv` → `dbo.bronze_*` Delta |
+| `silver/10_conform_usage.py` | **RUNNABLE** — bronze → `dbo.usage_conformed` |
+| `gold/20_build_star.py` | **RUNNABLE** — silver + bronze refs → the 11-table star |
+| `bronze/01_ingest_foundry_apim.py` | design scaffold — placeholder paths |
+| `bronze/02_ingest_copilot_platforms.py` | design scaffold — placeholder paths |
+| `*.design.py` | the original scaffolds, kept for reference |
+
+The scaffolds contain literals like `LAKE = "abfss://finops@<lake>..."` and read
+from landing paths that do not exist; they fail immediately if executed.
+`fabric_deploy.py` runs only the runnable set unless you pass `--only`.
+
+## One lakehouse per layer
+
+Each notebook writes to **its own** lakehouse and reads upstream ones by abfss
+path, so the layers stay separable and independently securable:
+
+```bash
+python platform/deploy/fabric_deploy.py \
+  --steps preflight workspace lakehouse upload notebooks run \
+  --workspace       <workspace-guid> \
+  --lakehouse       <bronze-guid> \
+  --lakehouse-silver <silver-guid> \
+  --lakehouse-gold   <gold-guid>
 ```
-landing (ADLS/OneLake)          BRONZE (Delta, append-only)        SILVER (conformed)          GOLD (star)
-──────────────────────          ───────────────────────────        ──────────────────          ───────────
-APIM AI Gateway  ──────────────► finops_bronze.foundry_gateway_raw ─┐
-  (Entra JWT claims → DCR → LA)  finops_bronze.foundry_model_rate   │
-                                 finops_bronze.foundry_*_ownership  ├─► finops_silver.usage_conformed ─► finops_gold.fact_ai_usage
-M365 / GitHub / Studio APIs ───► finops_bronze.{platform}_raw ──────┘   (date×platform×identity×          + finops_gold.dim_*
-                                                                          model×unit_type, USD)
+
+`fabric_deploy.py` injects `WS_ID` / `BRONZE_ID` / `SILVER_ID` / `GOLD_ID` as a
+parameters cell at import time, so no GUID is ever hard-coded in the repo.
+
+```
+Files/bronze/*.csv ──► BRONZE lakehouse          SILVER lakehouse            GOLD lakehouse
+                       dbo.bronze_m365_*   ──┐
+                       dbo.bronze_ghc_*      ├─► dbo.usage_conformed ──► dbo.fact_ai_usage
+                       dbo.bronze_studio_*   │   (date×platform×identity     + dbo.dim_* (10)
+                       dbo.bronze_ref_*    ──┘    ×model×unit_type, USD)
 ```
 
 | Layer | Rule | Why |
 |---|---|---|
-| **Bronze** | Raw, append-only, source columns preserved, partitioned by source/ingest day | Historical system of record; Cost-Management exports *replace* MTD, so append protects prior days. Azure Monitor metrics retention is 93 days — bronze is the durable copy. |
-| **Silver** | Conform to one grain; USD is the only common measure; `unit_type` is a dimension | Four platforms, four incompatible billing units, only Foundry exposes tokens. USD is the sole thing that reconciles. Identity/app/model normalization lives here. |
-| **Gold** | Emit the star under a fixed **column contract** identical to the CSV headers | The semantic model's TMDL partition casts are keyed to those exact columns; gold asserts the contract so a schema drift fails loudly, not silently. |
+| **Bronze** | Raw, source columns preserved, ingest lineage added | Historical system of record; Cost-Management exports *replace* MTD, so keeping bronze protects prior days. Azure Monitor metrics retention is 93 days — bronze is the durable copy. |
+| **Silver** | Conform to one grain; USD is the only common measure; `unit_type` is a dimension | Four platforms, four incompatible billing units, only Foundry exposes tokens. USD is the sole thing that reconciles. |
+| **Gold** | Emit the star under a fixed **column contract** identical to the CSV headers | The TMDL partition casts are keyed to those exact columns; gold asserts the contract and fails loudly on drift. It also fails on orphaned foreign keys and on duplicate dimension keys. |
+
+### Two gold assertions worth knowing
+
+`write_gold()` refuses to publish a table that would break the semantic model,
+because both failures otherwise surface late and cryptically:
+
+1. **Column contract** — a missing column makes Direct Lake refuse to frame with
+   `Delta protocol violation: the column 'sla_tier' is not found in delta table
+   'dim_environment'`.
+2. **Dimension key uniqueness** — a duplicate key makes Power BI reject the
+   whole relationship, and it only shows up when a visual runs:
+   `Column 'application_key' in Table 'dim_application' contains a duplicate
+   value 'APP-UNKNOWN' and this is not allowed for columns on the one side of a
+   relationship`. Every visual touching that dimension fails at once.
+
+## Two Fabric constraints worth knowing
+
+1. **Schema-enabled lakehouses cannot use the Load Table REST API.** A lakehouse
+   with `properties.defaultSchema` (`"dbo"` by default on new lakehouses) rejects
+   `/tables/{name}/load` with `UnsupportedOperationForSchemasEnabledLakehouse`.
+   That is why the CSV→Delta step is a Spark notebook rather than a REST call.
+2. **A notebook needs an attached lakehouse to write tables.** The import sets
+   `metadata.dependencies.lakehouse.default_lakehouse`; without it Spark has no
+   default catalog and every `saveAsTable()` fails at runtime.
+
+## Debugging a failed run
+
+Fabric only reports *"System cancelled the Spark session due to statement
+execution failures"* — the traceback is not in the job API. The notebook wrapper
+therefore writes it to `Files/_errors/<script>.log` in that layer's lakehouse,
+and `fabric_deploy.py` prints it automatically when a run fails.
+
+Before deploying, catch the common PySpark trap locally:
+
+```bash
+python platform/validate/check_notebooks.py
+```
+
+It flags attribute-style column access that collides with a DataFrame member —
+`resolve.alias` returns the bound *method*, and the resulting join dies with
+`'function' object has no attribute '_get_object_id'` 40 seconds into a remote run.
 
 ## Provenance never blurs
-Real vs mock is `dim_platform.data_source` + `fact.cost_is_estimated`, a **column**,
-not a code branch. To take a mock platform live you swap one bronze reader
-(`02_ingest_copilot_platforms.py`); silver/gold/model are unchanged and the
-dashboards immediately show REAL. Nothing ever relabels modelled dollars as billed.
+Real vs mock is `dim_platform.data_source` + `fact.cost_is_estimated`, a
+**column**, not a code branch. Silver preserves per-row provenance: GitHub
+`net_amount` and the Studio/M365 credit meters are billed
+(`cost_is_estimated=False`); seat costs are modelled from the rate card
+(`True`). Nothing ever relabels modelled dollars as billed.
 
-## Going to DirectLake
+## Direct Lake
+
 The PoC reads CSVs via the `DataFolder` parameter so it opens with zero Fabric
-dependency. In production, either (a) export gold to the same CSV layout, or
-(b) repoint the semantic model to the gold Lakehouse and convert import
-partitions to **DirectLake** for no-refresh, near-real-time cost.
+dependency. That same import model cannot refresh in the service without a
+gateway, so Direct Lake is the production path — and it is implemented and
+verified end to end.
+
+`platform/validate/build_directlake.py` generates a **separate**
+`AIFinOps.DirectLake.SemanticModel` from the committed import model: same
+tables, columns, relationships and all 42 measures, with every partition swapped
+from `m`/CSV to `entity`/`directLake`. `AIFinOps.pbip` is never modified, so the
+offline demo keeps working.
+
+```bash
+python platform/validate/build_directlake.py \
+    --workspace <workspace-guid> --lakehouse <gold-lakehouse-guid>
+python platform/deploy/deploy_semantic_model.py \
+    --workspace <workspace-guid> --model-dir AIFinOps.DirectLake.SemanticModel
+```
+
+Then trigger one refresh to **frame** the model. Framing binds it to the Delta
+files; until it succeeds the tables are not queryable. A framing failure names
+the offending table and column, e.g.
+`Delta protocol violation: the column 'sla_tier' is not found in delta table 'dim_environment'`.
+`GOLD_CONTRACT` in the gold notebook asserts every table's columns up front so
+that mismatch fails in Spark, where the message is clearer.
 
 | Option | Effort | Tradeoff |
 |---|---|---|
 | CSV export from gold | S | Zero model change; still an import refresh |
-| DirectLake on gold | M | Live data, no refresh; requires Fabric capacity + partition rewrite |
+| Direct Lake on gold | M | Live data, no refresh, no gateway; needs Fabric capacity |
+
+### Three TMDL traps this surfaced
+
+All three are accepted by Power BI Desktop and rejected — or silently broken — by
+the Fabric TMDL parser. `platform/validate/validate_pbip.py` now checks all
+three; `platform/validate/fix_tmdl_measures.py` repairs the third.
+
+1. **`///` description followed by a blank line** -> `Unexpected line type: Empty!`
+2. **`//` comment directly above a `///` description** -> `Invalid indentation was detected`
+3. **Multi-line DAX not wrapped in triple backticks** -> the following
+   `formatString:` line is folded *into* the expression. The measure still
+   deploys, then fails at query time with `Failed to resolve name 'SYNTAXERROR'`.
+   **21 of this repo's 42 measures** were affected; every visual bound to them
+   would have rendered blank with no error surfaced anywhere.
+
+### Known gap: `[M365 Prompts]` and `[Error Rate]` are blank
+
+Microsoft Graph returns per-app **last-activity dates**, not prompt counts, so
+silver emits `unit_type = "active_day"` (one row per user per day they were
+active) rather than inventing a prompt count. `[M365 Prompts]` therefore returns
+blank against the medallion data. Likewise Azure Monitor metrics carry no
+per-request error flag, so `[Error Rate]` is blank — `throttled_count` is a
+capacity signal, not a failure count, and mapping it would report a false ~90%
+error rate.
+
+Both are the honest result; the committed CSV demo fabricates these numbers, the
+pipeline does not. `check_report.py --blank` keeps them off the report.
+
+### Shelfware is modelled deliberately
+
+`gen_bronze_data.py` marks two users as holding paid seats with **zero activity
+on every platform**. Without them no user is ever idle for a full 28 days,
+`[Idle Licensed Users]` is always blank, and the Waste & Utilisation and License
+Optimization pages have nothing to show. `build_data.py` models the same two
+users for the CSV demo, so both paths tell the same story.

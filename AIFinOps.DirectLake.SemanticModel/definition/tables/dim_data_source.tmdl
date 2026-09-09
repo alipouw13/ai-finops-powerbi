@@ -1,0 +1,77 @@
+/// Catalogue of every extractable AI telemetry signal per platform: what can be
+/// pulled, from which API, at what identity grain and cost fidelity, and whether it
+/// is REAL / AVAILABLE / MOCK / ROADMAP today. Disconnected reference (no relationship).
+table dim_data_source
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+	column signal_category
+		dataType: string
+		summarizeBy: none
+		sourceColumn: signal_category
+
+	column signal
+		dataType: string
+		summarizeBy: none
+		sourceColumn: signal
+
+	column source_api
+		dataType: string
+		summarizeBy: none
+		sourceColumn: source_api
+
+	column grain
+		dataType: string
+		summarizeBy: none
+		sourceColumn: grain
+
+	column identity_granularity
+		dataType: string
+		summarizeBy: none
+		sourceColumn: identity_granularity
+
+	column cost_fidelity
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_fidelity
+
+	column retention
+		dataType: string
+		summarizeBy: none
+		sourceColumn: retention
+
+	/// REAL (live now) · AVAILABLE (API exists, not yet wired) · MOCK (needs SKU/policy) · ROADMAP
+	column availability
+		dataType: string
+		summarizeBy: none
+		sourceColumn: availability
+
+	column notes
+		dataType: string
+		summarizeBy: none
+		sourceColumn: notes
+
+	measure 'Extractable Signals' = COUNTROWS(dim_data_source)
+		formatString: #,0
+
+	/// Signals live in the model today (REAL data source).
+	measure 'Signals Live (REAL)' = ```
+			CALCULATE(COUNTROWS(dim_data_source), dim_data_source[availability] = "REAL")
+			```
+		formatString: #,0
+
+	/// Signals whose API exists and could be wired without new licensing.
+	measure 'Signals Available' = ```
+			CALCULATE(COUNTROWS(dim_data_source), dim_data_source[availability] = "AVAILABLE")
+			```
+		formatString: #,0
+
+	partition dim_data_source = entity
+		mode: directLake
+		source
+			entityName: extractable_data_catalog
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

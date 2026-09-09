@@ -1,0 +1,69 @@
+table dim_identity
+
+	column identity_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: identity_key
+
+	column display_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: display_name
+
+	column principal_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: principal_type
+
+	column upn
+		dataType: string
+		summarizeBy: none
+		sourceColumn: upn
+
+	column github_login
+		dataType: string
+		summarizeBy: none
+		sourceColumn: github_login
+
+	column team
+		dataType: string
+		summarizeBy: none
+		sourceColumn: team
+
+	column business_unit
+		dataType: string
+		summarizeBy: none
+		sourceColumn: business_unit
+
+	column cost_center_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cost_center_key
+
+	/// Universal identity class: Human · ServicePrincipal · ManagedIdentity · Agent · Application.
+	/// Not every AI request maps to a person; this normalizes principals across all platforms.
+	column identity_class
+		dataType: string
+		summarizeBy: none
+		sourceColumn: identity_class
+
+	column is_human
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_human
+
+	column home_business_unit_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: home_business_unit_key
+
+	partition dim_identity = entity
+		mode: directLake
+		source
+			entityName: dim_identity
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

@@ -6,6 +6,21 @@
 > **Status of every table below is a DESIGN target.** Mock equivalents already exist
 > for 5 feeds; the rest are proposed collectors (see §3, §4).
 
+> **The M365 slice now has a REAL collector.**
+> `platform/fabric/extract_m365_graph.py` implements the §1.1 design against live
+> Microsoft Graph and emits the documented Bronze schemas with `_data_class=REAL`.
+> Verified against a production tenant: 122 subscribed SKUs, 50,949 users and
+> 19,291 AI seat assignments returned. Two findings worth carrying forward:
+>
+> 1. **`getMicrosoft365CopilotUsageUserDetail` is Graph *beta* only.** The v1.0 path
+>    returns `400 Resource not found for the segment`. The collector calls
+>    `/beta/copilot/reports/...` first, then falls back to `/beta/reports/...`.
+> 2. **`subscribedSkus` + `users?$select=assignedLicenses` need only delegated
+>    read access**, but the usage report needs `Reports.Read.All` and returns
+>    `403` without it. Seat *entitlement* and seat *activity* therefore have
+>    different permission floors — plan for tenants where you get one and not
+>    the other.
+
 ---
 
 ## 0. Design principles (Bronze)

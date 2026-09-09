@@ -1,7 +1,7 @@
+/// Catalogue of every extractable AI telemetry signal per platform: what can be
+/// pulled, from which API, at what identity grain and cost fidelity, and whether it
+/// is REAL / AVAILABLE / MOCK / ROADMAP today. Disconnected reference (no relationship).
 table dim_data_source
-	/// Catalogue of every extractable AI telemetry signal per platform: what can be
-	/// pulled, from which API, at what identity grain and cost fidelity, and whether it
-	/// is REAL / AVAILABLE / MOCK / ROADMAP today. Disconnected reference (no relationship).
 
 	column platform
 		dataType: string
@@ -58,13 +58,15 @@ table dim_data_source
 		formatString: #,0
 
 	/// Signals live in the model today (REAL data source).
-	measure 'Signals Live (REAL)' =
-		CALCULATE(COUNTROWS(dim_data_source), dim_data_source[availability] = "REAL")
+	measure 'Signals Live (REAL)' = ```
+			CALCULATE(COUNTROWS(dim_data_source), dim_data_source[availability] = "REAL")
+			```
 		formatString: #,0
 
 	/// Signals whose API exists and could be wired without new licensing.
-	measure 'Signals Available' =
-		CALCULATE(COUNTROWS(dim_data_source), dim_data_source[availability] = "AVAILABLE")
+	measure 'Signals Available' = ```
+			CALCULATE(COUNTROWS(dim_data_source), dim_data_source[availability] = "AVAILABLE")
+			```
 		formatString: #,0
 
 	partition dim_data_source = m

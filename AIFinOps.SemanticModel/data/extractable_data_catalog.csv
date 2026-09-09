@@ -13,11 +13,11 @@ Azure OpenAI,Throughput,PTU utilisation,Azure Monitor metrics,Per deployment,NON
 APIM AI Gateway,Governance,Subscription key / product,APIM diagnostics,Per request,Per app/product,n/a,Log Analytics,AVAILABLE,Policy enforcement point
 APIM AI Gateway,Governance,Rate-limit / quota events,APIM policy logs,Per request,Per product,n/a,Log Analytics,AVAILABLE,Token-per-minute throttle telemetry
 APIM AI Gateway,Optimization,Semantic cache hit,APIM policy logs,Per request,Per app,Billed savings,Log Analytics,AVAILABLE,GenAI gateway semantic caching
-M365 Copilot,Usage,Per-app last activity date,Graph getMicrosoft365CopilotUsageUserDetail,Per user per app,Per user (UPN),n/a,180 days,MOCK,Needs Reports.Read.All + concealed-names OFF
-M365 Copilot,Usage,Active users by app (Teams/Word/etc),Graph usage report,Per user per app,Per user,n/a,180 days,MOCK,No tokens - usage signal only
-M365 Copilot,Licensing,Assigned seats,Graph subscribedSkus/assignedLicenses,Per user,Per user,Fixed (seat),Live,MOCK,Fixed cost - does not vary with usage
+M365 Copilot,Usage,Per-app last activity date,Graph getMicrosoft365CopilotUsageUserDetail,Per user per app,Per user (UPN),n/a,180 days,AVAILABLE,Connector wired (extract_m365_graph.py); Graph beta only. Needs Reports.Read.All + concealed-names OFF.
+M365 Copilot,Usage,Active users by app (Teams/Word/etc),Graph usage report,Per user per app,Per user,n/a,180 days,AVAILABLE,Same beta usage report as above. No tokens - usage signal only.
+M365 Copilot,Licensing,Assigned seats,Graph subscribedSkus/assignedLicenses,Per user,Per user,Fixed (seat),Live,REAL,Live via platform/fabric/extract_m365_graph.py. Fixed cost - does not vary with usage.
 M365 Copilot,Governance,Interaction audit,Purview audit log,Per interaction,Per user,n/a,90-365 days,MOCK,Prompt/response governance
-M365 Copilot,Cost,Seat cost USD,Contract / EA (manual),Per user/month,Per user,Billed,n/a,MOCK,No price API - dim_rate_card input
+M365 Copilot,Cost,Seat cost USD,Contract / EA (manual),Per user/month,Per user,Billed,n/a,MOCK,No price API anywhere in Graph. seats(REAL) x list price(dim_rate_card) = modelled cost.
 GitHub Copilot,Usage,Active/engaged users,REST /copilot/metrics,Org/team/day,Aggregate,n/a,28 days rolling,MOCK,Metrics API is aggregate not per-user
 GitHub Copilot,Usage,Suggestions/acceptances by lang,REST /copilot/metrics,Org/team/day,Aggregate,n/a,28 days,MOCK,Acceptance rate = value signal
 GitHub Copilot,Usage,Chat turns,REST /copilot/metrics,Org/team/day,Aggregate,n/a,28 days,MOCK,

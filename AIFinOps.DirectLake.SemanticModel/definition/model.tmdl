@@ -1,0 +1,60 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+/// Direct Lake connection to the gold Lakehouse. Tables bind to Delta
+/// files in OneLake, so there is no refresh and no gateway.
+expression 'DirectLake - AIFinOps' =
+		let
+		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/0cb77528-27b4-4298-a48a-477caff105f3/0e297e22-c266-4f5d-baf8-38a3d71efa10", [HierarchicalNavigation=true])
+		in
+		    Source
+
+ref table fact_ai_usage
+ref table dim_date
+ref table dim_platform
+ref table dim_identity
+ref table dim_model
+ref table dim_cost_center
+ref table dim_rate_card
+ref table dim_business_unit
+ref table dim_application
+ref table dim_environment
+ref table dim_data_source
+
+relationship rel_usage_date
+	fromColumn: fact_ai_usage.usage_date
+	toColumn: dim_date.date_key
+
+relationship rel_usage_platform
+	fromColumn: fact_ai_usage.platform_key
+	toColumn: dim_platform.platform_key
+
+relationship rel_usage_identity
+	fromColumn: fact_ai_usage.identity_key
+	toColumn: dim_identity.identity_key
+
+relationship rel_usage_model
+	fromColumn: fact_ai_usage.model_key
+	toColumn: dim_model.model_key
+
+relationship rel_usage_costcenter
+	fromColumn: fact_ai_usage.cost_center_key
+	toColumn: dim_cost_center.cost_center_key
+
+relationship rel_usage_businessunit
+	fromColumn: fact_ai_usage.business_unit_key
+	toColumn: dim_business_unit.business_unit_key
+
+relationship rel_usage_application
+	fromColumn: fact_ai_usage.application_key
+	toColumn: dim_application.application_key
+
+relationship rel_usage_environment
+	fromColumn: fact_ai_usage.environment_key
+	toColumn: dim_environment.environment_key

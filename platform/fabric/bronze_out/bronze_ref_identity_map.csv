@@ -11,3 +11,4 @@ sam.chen,Sam Chen,User,sam.chen@contoso.com,sam.chen,sam-chen,TRUE,Search,BU-DIS
 robin.hale,Robin Hale,User,robin.hale@contoso.com,robin.hale,robin-hale,TRUE,Checkout,BU-RETAIL,CC-1000,2026-09-04T18:00:00Z,AI-FinOps-MOCK,entra.users+servicePrincipals / manual-map,2026-09-04,batch-2026-09-04,MOCK
 lee.novak,Lee Novak,User,lee.novak@contoso.com,lee.novak,lee-novak,TRUE,Data,BU-TECH,CC-3000,2026-09-04T18:00:00Z,AI-FinOps-MOCK,entra.users+servicePrincipals / manual-map,2026-09-04,batch-2026-09-04,MOCK
 kim.arroyo,Kim Arroyo,User,kim.arroyo@contoso.com,kim.arroyo,kim-arroyo,TRUE,Actuarial,BU-INSURANCE,CC-4000,2026-09-04T18:00:00Z,AI-FinOps-MOCK,entra.users+servicePrincipals / manual-map,2026-09-04,batch-2026-09-04,MOCK
+unknown,Unattributed Identity,Unknown,,,,FALSE,,BU-UNALLOC,,2026-09-04T18:00:00Z,AI-FinOps-MOCK,entra.users+servicePrincipals / manual-map,2026-09-04,batch-2026-09-04,MOCK

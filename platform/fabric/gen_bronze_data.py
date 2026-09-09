@@ -39,9 +39,27 @@ ccs = read_dim("dim_cost_center")
 humans = [i for i in identities if i["is_human"] == "TRUE"]
 sps = [i for i in identities if i["principal_type"] == "ServicePrincipal"]
 
-END = date(2026, 8, 28)
+# Shelfware: users holding a paid seat who never actually use it. Without this
+# every generated user is active on some day, [Idle Licensed Users] is always
+# empty, and the Waste & Utilisation / License Optimization pages have nothing
+# to show. build_data.py models the same two users as idle for the CSV demo.
+IDLE_LOGINS = {"lee.novak", "kim.arroyo"}
+
+
+def is_idle(identity):
+    return identity["identity_key"] in IDLE_LOGINS
+
+
+ACTIVE_HUMANS = [u for u in humans if not is_idle(u)]
+
+# A hardcoded end date silently ages the demo out: every month-to-date and
+# forecast measure reads BLANK once "today" moves past it, so the CFO page shows
+# -100% budget variance for every business unit and looks broken rather than
+# empty. Anchor on today, and let FINOPS_MOCK_END pin it for reproducible tests.
+END = (date.fromisoformat(os.environ["FINOPS_MOCK_END"])
+       if os.environ.get("FINOPS_MOCK_END") else date.today())
 DAYS = [END - timedelta(days=d) for d in range(60)]
-MONTH_DAYS = [d for d in DAYS if d.month == 8]
+MONTH_DAYS = [d for d in DAYS if d.month == END.month and d.year == END.year]
 
 
 def lineage(source_api, watermark):
@@ -66,7 +84,7 @@ def gen_m365_usage():
     rows = []
     for d in DAYS:
         for u in humans:
-            active = random.random() > 0.25
+            active = random.random() > 0.25 and not is_idle(u)
             la = d.isoformat() if active else ""
             rows.append({
                 "report_date": d.isoformat(),
@@ -105,7 +123,7 @@ def gen_m365_credits():
     caps = [("Cowork", 2), ("Autopilot", 3), ("agent_action", 3), ("generative_answer", 2)]
     rows = []
     for d in MONTH_DAYS:
-        for u in random.sample(humans, k=min(5, len(humans))):
+        for u in random.sample(ACTIVE_HUMANS, k=min(5, len(ACTIVE_HUMANS))):
             cap, rate = random.choice(caps)
             credits = random.randint(200, 3000)
             rows.append({
@@ -154,7 +172,7 @@ def gen_ghc_seats():
     rows = []
     for d in DAYS:
         for u in humans:
-            active = random.random() > 0.3
+            active = random.random() > 0.3 and not is_idle(u)
             rows.append({
                 "snapshot_date": d.isoformat(),
                 "assignee_login": u["github_login"],
@@ -173,7 +191,7 @@ def gen_ghc_premium():
     models = [("gpt-4.1", 1), ("claude-sonnet-4.5", 1), ("code-review", 13), ("o3", 10)]
     rows = []
     for d in MONTH_DAYS:
-        for u in random.sample(humans, k=min(4, len(humans))):
+        for u in random.sample(ACTIVE_HUMANS, k=min(4, len(ACTIVE_HUMANS))):
             model, mult = random.choice(models)
             qty = random.randint(1, 60)
             net = round(qty * 0.04 * mult, 2)

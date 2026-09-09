@@ -23,14 +23,25 @@ Requires: az CLI logged into the tenant that owns the workspace.
 """
 import argparse
 import json
+import shutil
 import subprocess
 import sys
+import urllib.parse
 import urllib.request
+
+
+def az_exe():
+    """On Windows the CLI is az.cmd, which CreateProcess will not resolve from
+    the bare name 'az'. shutil.which honours PATHEXT and returns the full path."""
+    exe = shutil.which("az") or shutil.which("az.cmd")
+    if not exe:
+        sys.exit("Azure CLI (`az`) not found on PATH. Install it and run `az login`.")
+    return exe
 
 
 def az_token(resource):
     out = subprocess.run(
-        ["az", "account", "get-access-token", "--resource", resource,
+        [az_exe(), "account", "get-access-token", "--resource", resource,
          "--query", "accessToken", "-o", "tsv"],
         capture_output=True, text=True,
     )
@@ -47,7 +58,7 @@ def graph_lookup(upn):
     url = ("https://graph.microsoft.com/v1.0/users?"
            f"$filter={urllib.parse.quote(filt)}&$select=id,displayName,userPrincipalName")
     out = subprocess.run(
-        ["az", "rest", "--method", "GET", "--url", url,
+        [az_exe(), "rest", "--method", "GET", "--url", url,
          "--headers", "ConsistencyLevel=eventual", "--query", "value", "-o", "json"],
         capture_output=True, text=True,
     )

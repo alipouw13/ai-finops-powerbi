@@ -11,3 +11,4 @@ sam.chen,Sam Chen,User,sam.chen@contoso.com,sam-chen,Search,Discovery,CC-2000,Hu
 robin.hale,Robin Hale,User,robin.hale@contoso.com,robin-hale,Checkout,Retail,CC-1000,Human,TRUE,BU-RETAIL
 lee.novak,Lee Novak,User,lee.novak@contoso.com,lee-novak,Data,Technology,CC-3000,Human,TRUE,BU-TECH
 kim.arroyo,Kim Arroyo,User,kim.arroyo@contoso.com,kim-arroyo,Actuarial,Insurance,CC-4000,Human,TRUE,BU-INSURANCE
+unknown,Unattributed Identity,Unknown,,,,Unallocated,,Unknown,FALSE,BU-UNALLOC

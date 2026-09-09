@@ -1,0 +1,57 @@
+table dim_platform
+
+	column platform_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: platform_key
+
+	column platform_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform_name
+
+	column billing_model
+		dataType: string
+		summarizeBy: none
+		sourceColumn: billing_model
+
+	column native_unit
+		dataType: string
+		summarizeBy: none
+		sourceColumn: native_unit
+
+	column has_token_telemetry
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: has_token_telemetry
+
+	column has_native_cost
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: has_native_cost
+
+	column is_variable_cost
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_variable_cost
+
+	column data_source
+		dataType: string
+		summarizeBy: none
+		sourceColumn: data_source
+
+	/// MOCK negotiated discount off list (EA / volume tier / credit pack). Overwrite per contract.
+	column enterprise_discount_pct
+		dataType: double
+		formatString: 0.0%
+		summarizeBy: none
+		sourceColumn: enterprise_discount_pct
+
+	partition dim_platform = entity
+		mode: directLake
+		source
+			entityName: dim_platform
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

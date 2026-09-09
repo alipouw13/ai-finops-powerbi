@@ -1,0 +1,54 @@
+table dim_application
+
+	column application_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: application_key
+
+	column application_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: application_name
+
+	/// api · agent · copilot · notebook · unknown
+	column application_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: application_type
+
+	column owner_business_unit_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: owner_business_unit_key
+
+	column owner_upn
+		dataType: string
+		summarizeBy: none
+		sourceColumn: owner_upn
+
+	column default_environment_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: default_environment_key
+
+	column criticality
+		dataType: string
+		summarizeBy: none
+		sourceColumn: criticality
+
+	/// TRUE where the application's telemetry is mocked (see dim_platform[data_source]).
+	column is_mock
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_mock
+
+	partition dim_application = entity
+		mode: directLake
+		source
+			entityName: dim_application
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

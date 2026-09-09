@@ -7,15 +7,25 @@ and authenticates through the Azure CLI you already have (`az login`).
 
 ---
 
-## 1. Why it isn't deployed yet (the blocker)
+## 1. Check what your account can actually do
 
-Your signed-in user (`snatesan@MngEnvMCAP025145.onmicrosoft.com`) currently has
-**no Power BI / Fabric license**, and you are a **Global Reader** (read-only),
-so the Fabric REST API rejects every call with `UserNotLicensed`. The tenant has
-no Fabric capacity provisioned. Nothing about this is a code problem — it is
-pure licensing, and it is fixed by you in **2 one-time browser clicks**.
+Before anything else, run the read-only probe. It creates and changes nothing —
+it just reports whether your user is licensed, which capacities are active, and
+which workspaces you can write to:
 
-## 2. Unblock — 2 clicks, $0
+```bash
+python platform/validate/probe_fabric.py
+python platform/validate/probe_fabric.py --workspace <name-or-guid>   # one workspace
+```
+
+If it reports `licence : OK` and at least one active Fabric capacity, you are
+ready to deploy and can skip section 2.
+
+## 2. If you are blocked — 2 clicks, $0
+
+A user with **no Power BI / Fabric license** gets `UserNotLicensed` on every
+Fabric REST call, and a tenant with no capacity has nowhere to put a lakehouse.
+Neither is a code problem — both are fixed in **2 one-time browser clicks**.
 
 1. **Get a free Power BI license.** Open <https://app.fabric.microsoft.com> and
    sign in with your work account. This self-service-provisions a **free Power BI
@@ -26,11 +36,13 @@ pure licensing, and it is fixed by you in **2 one-time browser clicks**.
 That's it. Re-run the preflight and it will go green:
 
 ```bash
-python3 platform/deploy/fabric_deploy.py --steps preflight
+python platform/deploy/fabric_deploy.py --steps preflight
 ```
 
 > If self-service trials are disabled by your tenant admin, ask an admin to
 > either enable trials or assign you a Pro license + an F-SKU capacity.
+> Note that a **Premium-Per-User (PPU) capacity cannot host a Lakehouse** — you
+> need a Trial (FT1) or an F-SKU.
 
 ## 3. Cost — so you don't burn your account
 
@@ -55,29 +67,116 @@ trivial. Key numbers:
 
 ```bash
 # dry check first
-python3 platform/deploy/fabric_deploy.py --steps preflight
+python platform/deploy/fabric_deploy.py --steps preflight
 
-# full deploy: workspace + lakehouse + CSV upload + notebooks + run
-python3 platform/deploy/fabric_deploy.py
+# full deploy into a NEW workspace: workspace + lakehouse + CSV upload + notebooks + run
+python platform/deploy/fabric_deploy.py --capacity <capacity-guid>
+
+# deploy into an EXISTING workspace/lakehouse you already own
+python platform/deploy/fabric_deploy.py \
+    --workspace <workspace-guid> \
+    --lakehouse <lakehouse-guid>
+
+# full medallion into three lakehouses (the verified path)
+python platform/deploy/fabric_deploy.py \
+    --steps preflight workspace lakehouse upload notebooks run \
+    --workspace        <workspace-guid> \
+    --lakehouse        <bronze-guid> \
+    --lakehouse-silver <silver-guid> \
+    --lakehouse-gold   <gold-guid>
+
+# blended: mock bronze + REAL tenant bronze in a fourth lakehouse
+# (run platform/fabric/extract_real_bronze.py first)
+python platform/deploy/fabric_deploy.py \
+    --steps preflight workspace lakehouse upload upload-real notebooks run \
+    --workspace             <workspace-guid> \
+    --lakehouse             <bronze-guid> \
+    --lakehouse-bronze-real LH_tokenomics_bronze_real \
+    --lakehouse-silver      <silver-guid> \
+    --lakehouse-gold        <gold-guid>
 
 # deploy, demo, then remove everything ($0 residual)
-python3 platform/deploy/fabric_deploy.py --delete-after
+python platform/deploy/fabric_deploy.py --capacity <capacity-guid> --delete-after
 ```
 
+Real tenant extracts land in their **own** lakehouse, never beside the mock
+data. The separation is physical rather than a column filter, so "which of
+these numbers is real" is answered by pointing at storage. Silver unions both
+and carries `_data_class` per row; gold derives each platform's REAL/MOCK label
+from it, so the Governance page updates itself and no label is hand-written.
+
+Lakehouses are created with **schemas enabled**, matching what the Fabric UI
+now does by default. Without it there is no `dbo` schema, every
+`saveAsTable("dbo.x")` fails with `SCHEMA_NOT_FOUND`, and the `Tables/dbo/...`
+abfss paths the medallion notebooks use do not resolve either.
+
+`--workspace` and `--lakehouse` accept either a **GUID** or a **display name**. A
+GUID is only ever resolved, never created, so passing one cannot accidentally
+create a second workspace; a display name is created if it does not exist.
+
+`--capacity` matters in a large tenant: many capacities can be visible to you that
+you do not own, and without it the deployer picks the first Trial/F-SKU it finds.
+Run `platform/validate/probe_fabric.py` to list them. `--delete-after` is refused
+when `--workspace` is a GUID, so teardown can only ever remove a workspace this
+tool created.
+
 Run a subset of stages with `--steps` (e.g. `--steps workspace lakehouse upload`).
-Override names with env vars `FINOPS_WORKSPACE` / `FINOPS_LAKEHOUSE`.
+Names can also be defaulted with env vars `FINOPS_WORKSPACE` / `FINOPS_LAKEHOUSE`.
 
 ### What each step does
 | step | action |
 |---|---|
 | `preflight` | verify `az` login + Fabric token + that you're licensed |
-| `capacity` | find an active capacity (prefers the Trial), else guidance |
-| `workspace` | create/reuse `AI FinOps Accelerator`, assign to capacity |
-| `lakehouse` | create/reuse `finops_lakehouse` |
-| `upload` | push all `data/*.csv` to `Files/bronze` via OneLake (ADLS Gen2) |
-| `notebooks` | import bronze/silver/gold notebooks (`.py` → single-cell `.ipynb`) |
-| `run` | execute bronze → silver → gold in order, polling to completion |
+| `capacity` | resolve `--capacity`, else find an active capacity (prefers Trial, excludes PPU) |
+| `workspace` | resolve/create the target workspace, assign to capacity |
+| `lakehouse` | resolve/create the target lakehouse |
+| `upload` | push all `data/*.csv` to `Files/bronze` via OneLake (ADLS Gen2, GUID-addressed) |
+| `notebooks` | import the notebooks, attaching the lakehouse as their default |
+| `run` | execute them, polling to completion |
 | teardown | `--delete-after` deletes the workspace |
+
+> OneLake is addressed as `<workspaceGUID>/<itemGUID>/...`. The friendly-name form
+> (`<workspace>/<item>.Lakehouse/...`) is rejected with `FriendlyNameSupportDisabled`
+> in tenants that disable it, and breaks on workspace names containing spaces.
+
+### Verified end-to-end
+
+Run against workspace `AI-tokenomics` with three lakehouses
+(`LH_tokenomics_bronze` / `_silver` / `_gold`): Bronze CSVs uploaded to OneLake,
+notebooks imported with their lakehouse attached, and bronze → silver executed
+to completion. Four things that path taught us:
+
+**1. Only the medallion chain is runnable.** `00_load_bronze_csv`,
+`10_silver_conform` and `20_gold_star` run as-is. `01_ingest_foundry_apim` and
+`02_ingest_copilot_platforms` are *design scaffolds* containing placeholders such
+as `LAKE = "abfss://finops@<lake>.dfs.core.windows.net"`, and fail if executed.
+`--steps run` therefore defaults to the runnable set; use `--only` to override.
+
+**2. Schema-enabled lakehouses cannot use the Load Table REST API.** A lakehouse
+with `properties.defaultSchema` set (`"dbo"` by default on new lakehouses) rejects
+both `/tables/{name}/load` and `/tables` with:
+
+```
+errorCode: UnsupportedOperationForSchemasEnabledLakehouse
+```
+
+Spark has no such restriction, which is why the CSV→Delta step is a notebook.
+`load_bronze.py` detects this, still uploads the files, and tells you to run the
+notebook step rather than reporting a wall of 400s.
+
+**3. Notebooks must have a lakehouse attached to write tables.** The import sets
+`metadata.dependencies.lakehouse.default_lakehouse`; without it Spark has no
+default catalog and every `saveAsTable()` fails at runtime. Re-importing an
+existing notebook updates its definition rather than silently reusing a stale one.
+
+**4. Fabric hides notebook tracebacks.** A failed run reports only *"System
+cancelled the Spark session due to statement execution failures"*. The import
+wrapper therefore persists the traceback to `Files/_errors/<script>.log` in that
+layer's lakehouse, and `step_run` prints it automatically on failure.
+
+> Also note: the Load Table API wants `format` **inside** `formatOptions`. At the
+> top level the service rejects the request with a bare
+> `"An invalid request has been received"` that names no field.
 
 ## 5. Publishing the semantic model + report
 

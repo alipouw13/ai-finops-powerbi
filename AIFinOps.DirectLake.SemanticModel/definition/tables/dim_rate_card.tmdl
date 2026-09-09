@@ -1,0 +1,57 @@
+table dim_rate_card
+
+	column rate_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: rate_key
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+	column unit_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: unit_type
+
+	column model
+		dataType: string
+		summarizeBy: none
+		sourceColumn: model
+
+	column unit_price_usd
+		dataType: double
+		formatString: \$#,0.000000
+		summarizeBy: none
+		sourceColumn: unit_price_usd
+
+	column effective_from
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: effective_from
+
+	column currency
+		dataType: string
+		summarizeBy: none
+		sourceColumn: currency
+
+	column source
+		dataType: string
+		summarizeBy: none
+		sourceColumn: source
+
+	column note
+		dataType: string
+		summarizeBy: none
+		sourceColumn: note
+
+	partition dim_rate_card = entity
+		mode: directLake
+		source
+			entityName: dim_rate_card
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'
