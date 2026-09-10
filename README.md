@@ -237,6 +237,17 @@ events attributable to a real user.
 > `msdyn_aievent` can lag by up to ~24h after the traffic run. The collector is
 > already wired — re-running the extractor after the lag window is all it takes.
 
+### Running this on a schedule
+
+Everything above runs interactively on `az login` tokens, which is right for a
+laptop and wrong for production. **[docs/production-ingestion-architecture.md](docs/production-ingestion-architecture.md)**
+covers the production design: why the pipeline **Webhook activity is the wrong
+tool** (it blocks waiting for a callback nothing sends) and the Web activity's
+4 MB response cap rules it out for a 61,340-row cost feed, why Azure cost should
+use a native **Cost Management Export + OneLake shortcut** instead of API calls
+at all, the service-principal and Key Vault identity model, a full
+**least-privilege permissions matrix** per source, and a setup runbook.
+
 ### Regenerating the CSVs
 
 `build_data.py` emits only the base star schema. The conformed dimensions, the universal
@@ -492,6 +503,8 @@ platform/medallion/               Fabric bronze/silver/gold notebooks (→ the g
   bronze/00_load_bronze_csv.py    MOCK bronze CSVs -> Delta (overwrite)
   bronze/01_load_bronze_real_csv.py  REAL bronze CSVs -> Delta (append + dedupe)
 docs/ARCHITECTURE.md              decision record (rationale/tradeoffs/value/effort)
+docs/production-ingestion-architecture.md  how this runs on a schedule: pipeline
+                                  design, identity model, permissions matrix, runbook
 docs/real-data-spec.md            REAL-data availability matrix + collector specs
 docs/extractable-fields.md        per-platform field catalog (M365/GHC/Studio/Foundry) + medallion verdict
 docs/medallion-tables.md          full Bronze/Silver/Gold table inventory + Gold column schemas
