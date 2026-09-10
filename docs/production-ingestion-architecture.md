@@ -41,32 +41,100 @@ failure notifications — just not data movement.
 
 The highest-value recommendation in this document.
 
-Azure Cost Management has a **native scheduled Export**: it writes daily/monthly
-actual-cost data as CSV/Parquet into a storage account on its own schedule. You
-then put a **OneLake shortcut** over that container and Bronze reads it as if it
-were local. No API calls, no pagination, no throttling, no 4 MB ceiling.
+### Can Cost Management export straight to OneLake?
+
+**No.** The export Destination tab offers a **Storage type** (Azure blob storage
+or ADLS Gen2) and asks for a storage subscription, resource group, storage
+account, container and directory. There is no OneLake or Fabric destination.
+
+That is not a gap you have to work around, though — **ADLS + shortcut is
+Microsoft's own published FinOps-on-Fabric pattern**
+([Create a Fabric workspace for FinOps](https://learn.microsoft.com/cloud-computing/finops/fabric/create-fabric-workspace-finops)),
+so this is the sanctioned path rather than a workaround:
+
+```
+Cost Management Export ──► ADLS Gen2 ──► OneLake shortcut ──► Bronze
+     (native, scheduled)   (container)   (no copy, no compute)
+```
+
+Because the shortcut is a *reference*, not a copy, the data is not duplicated and
+no Fabric compute is spent moving it. The only real cost is storage.
 
 This matters because of something we hit directly: the **Cost Management Query
 API is permanently HTTP 429 in the test tenant** — it never succeeded across 11+
 retries with backoff. `Microsoft.Consumption/usageDetails` worked, but it is a
 paginated read that is unpleasant at enterprise volume **[verified]**.
 
-```
-Cost Management Export ──► ADLS Gen2 container ──► OneLake shortcut ──► Bronze
-        (native, scheduled)                          (no copy, no compute)
-```
+### Export it in FOCUS format
 
-Two behaviours to design around, both **[verified]**:
+Use **FOCUS** (FinOps Open Cost and Usage Specification) rather than the legacy
+actual/amortised schema. It is provider-agnostic, so the same Silver conforming
+logic extends to AWS/GCP cost later without reshaping the model. Microsoft's
+FinOps guidance defaults to it.
 
-- Exports **replace** the month-to-date file each run, so Bronze must append and
-  de-duplicate rather than trust the file as a delta.
-- Azure **restates** recent usage. Two rows can share resource, meter, day and
-  price and still be different charges, differing only by resource tag. De-duplicate
-  on the **whole natural key**; a hand-picked subset silently merged distinct
-  charges and lost 824 rows / $166.99 in testing.
+> One scope caveat: the **management group scope is not supported** for FOCUS
+> cost-and-usage exports. Export per subscription (or at billing-profile scope)
+> and let Silver union them.
+
+### Three export behaviours to design around
+
+All three are documented behaviour, and two are **[verified]** here:
+
+1. **Exports partition large files automatically**, and Microsoft explicitly warns
+   *"avoid hardcoding or guessing partition names, as file naming conventions may
+   change"*. Read the directory with a wildcard and let Spark handle multi-file
+   ingestion — never enumerate expected filenames.
+2. **Exports replace the month-to-date file** each run, so Bronze must append and
+   de-duplicate rather than treat the file as a delta **[verified]**.
+3. **Azure restates recent usage.** Two rows can share resource, meter, day and
+   price and still be different charges, differing only by resource tag.
+   De-duplicate on the **whole natural key**; a hand-picked subset silently merged
+   distinct charges and lost 824 rows / $166.99 in testing **[verified]**.
 
 Keep `extract_real_bronze.py` as the fallback for tenants where you cannot
 configure an Export, and for the non-cost sources.
+
+---
+
+## 2b. Securing the storage account: trusted workspace access
+
+The shortcut should not require the storage account to be open to the internet.
+**Trusted workspace access** lets a Fabric workspace reach a *firewall-enabled*
+ADLS Gen2 account, scoped to that specific workspace via a resource instance rule.
+
+### Workspace identity is not a preference here — it is the only option
+
+Worth stating plainly, because it removes a decision: for connections that use
+trusted workspace access, **workspace identity is the only supported
+authentication method.** The documentation is explicit that *"test connection
+fails if organizational account or service principal authentication methods are
+used."*
+
+A workspace identity **is** a service principal — a Fabric-managed one, created
+and rotated by Fabric rather than registered by hand. So it satisfies the
+"no interactive credentials in production" requirement while removing the secret
+entirely: there is nothing to store in Key Vault and nothing to rotate.
+
+### Requirements
+
+| Requirement | Detail |
+|---|---|
+| **Capacity** | A **purchased F SKU**. Trusted workspace access is **not supported on Trial capacities** — this is the requirement most likely to bite. *(The workspace used here is on **F4**, so it qualifies **[verified]**.)* |
+| Workspace identity | Created on the workspace, and granted **Contributor** on the workspace itself via *Manage access* |
+| Storage firewall | A **resource instance rule** naming the specific Fabric workspace |
+| Storage RBAC | The identity needs **Storage Blob Data Reader** at storage-account scope (Contributor/Owner also work; Reader is sufficient and is the least privilege for an ingestion-only path) |
+| Tenancy | **Not compatible with cross-tenant requests** — storage and Fabric must be in the same tenant |
+
+### Two limitations to design around
+
+- **Pipelines cannot write to OneLake table shortcuts** on storage accounts with
+  trusted workspace access (documented as temporary). Harmless here: the shortcut
+  is read-only ingest, and Bronze/Silver/Gold are written to native lakehouse
+  tables.
+- **Don't reuse the connection elsewhere.** A trusted-workspace-access connection
+  reused in items other than shortcuts, pipelines and semantic models — or in
+  another workspace — may silently stop working. Create a dedicated connection
+  for this shortcut.
 
 ---
 
@@ -131,8 +199,14 @@ schedule.
 | Secret storage | **Azure Key Vault**, referenced by a Fabric connection | Never a secret in a notebook, pipeline parameter or the repo. |
 | Fabric → Key Vault | **Workspace identity** with `Key Vault Secrets User` | Removes the bootstrap secret problem — no credential needed to fetch credentials. |
 | Fabric → OneLake | **Workspace identity** | Native, nothing to rotate. |
-| Rotation | 90-day secrets, or **certificate credentials** | Certificates are preferable; they can be rotated without a co-ordinated redeploy. |
+| Fabric → cost storage account | **Workspace identity** (mandatory) | Trusted workspace access accepts *no other* authentication method — see §2b. It also removes the secret entirely: Fabric creates and rotates this identity, so there is nothing to store or expire. |
+| Rotation | 90-day secrets, or **certificate credentials** | Certificates are preferable; they can be rotated without a co-ordinated redeploy. Workspace identity needs neither. |
 | Copilot Studio invoke | **Delegated** (exception) | App-only is rejected: `405 App-only S2S access is not enabled for this environment` **[verified]**. See §6. |
+
+> **Terminology worth being precise about:** a *workspace identity* **is** a
+> service principal — one that Fabric creates and manages, rather than an app
+> registration you create. Prefer it wherever it is accepted, because it is the
+> only option in this design with no credential to leak, store or rotate.
 
 ---
 
@@ -145,7 +219,9 @@ pipeline must write to Fabric.
 
 | Source | API | Permission | Scope | Granted by |
 |---|---|---|---|---|
-| Invoiced cost | Cost Management Export | **Cost Management Contributor** (to create the export) then **Storage Blob Data Reader** for the reader | Subscription / MG / billing profile | Subscription Owner |
+| Invoiced cost | Cost Management Export | **Cost Management Contributor** (to create the export) | Subscription / billing profile | Subscription Owner |
+| Cost storage (write) | Export → ADLS | Export writes via the Cost Management service; grant it **Storage Blob Data Contributor** on the account when prompted | Storage account | Storage Owner |
+| Cost storage (read) | OneLake shortcut | **Storage Blob Data Reader** for the **Fabric workspace identity**, plus a **resource instance rule** naming the workspace | Storage account | Storage Owner |
 | Invoiced cost (API fallback) | `Microsoft.Consumption/usageDetails` | **Cost Management Reader** | Subscription, or **Billing account reader** at EA/MCA scope | Subscription Owner / Billing admin |
 | Resource inventory | Azure Resource Graph | **Reader** | Every subscription in scope — Resource Graph honours RBAC and silently returns fewer rows without it | Subscription Owner |
 | AI telemetry | Azure Monitor metrics | **Monitoring Reader** | Resource group holding the AI resources | RG Owner |
@@ -275,23 +351,32 @@ Ordered so each step's prerequisite already exists.
    custom read-only security role.
 5. **Create the GitHub App**, install it on the org, store the private key in
    Key Vault.
-6. **Configure the Cost Management Export** to an ADLS Gen2 container (daily,
-   actual cost, Parquet).
-7. **Create the Key Vault**, store every secret, grant the Fabric **workspace
-   identity** `Key Vault Secrets User`.
-8. **Enable the two tenant settings**: service principals can use Fabric APIs and
+6. **Configure the Cost Management Export** to an ADLS Gen2 container — daily,
+   **FOCUS** format, Parquet, file overwrite enabled. Export per subscription;
+   management group scope is not supported for FOCUS.
+7. **Lock down the storage account and wire trusted workspace access**:
+   enable the storage firewall, create the **workspace identity** on the Fabric
+   workspace, give it **Contributor** on the workspace, add a **resource instance
+   rule** naming that workspace, and grant it **Storage Blob Data Reader**.
+   Confirm the capacity is a **purchased F SKU** first — this step cannot work on
+   a Trial capacity.
+8. **Create the Key Vault**, store every remaining secret, grant the Fabric
+   **workspace identity** `Key Vault Secrets User`.
+9. **Enable the two tenant settings**: service principals can use Fabric APIs and
    Power BI APIs. Scope them to a security group containing only these SPNs.
-9. **Create the workspace and four lakehouses** — bronze, bronze_real, silver,
-   gold. Create them **with schemas enabled**: without it there is no `dbo`
-   schema, every `saveAsTable` fails `SCHEMA_NOT_FOUND`, and the Load Table REST
-   API rejects the lakehouse outright **[verified]**.
-10. **Create the OneLake shortcut** over the Export container.
-11. **Deploy notebooks and pipelines** (`fabric_deploy.py` already does the
+10. **Create the workspace and four lakehouses** — bronze, bronze_real, silver,
+    gold. Create them **with schemas enabled**: without it there is no `dbo`
+    schema, every `saveAsTable` fails `SCHEMA_NOT_FOUND`, and the Load Table REST
+    API rejects the lakehouse outright **[verified]**.
+11. **Create the OneLake shortcut** over the Export container, using a
+    **dedicated** connection authenticated with the workspace identity. Don't
+    reuse that connection for anything else.
+12. **Deploy notebooks and pipelines** (`fabric_deploy.py` already does the
     notebook half).
-12. **Seed the control table**, with everything `enabled = 0`.
-13. **Enable one source at a time**, verifying row counts and `_data_class`
+13. **Seed the control table**, with everything `enabled = 0`.
+14. **Enable one source at a time**, verifying row counts and `_data_class`
     before enabling the next.
-14. **Schedule `PL_master`** and confirm two consecutive runs produce identical
+15. **Schedule `PL_master`** and confirm two consecutive runs produce identical
     totals — the idempotency check.
 
 ---
@@ -300,14 +385,19 @@ Ordered so each step's prerequisite already exists.
 
 1. **Export vs API for cost.** Export is strictly better at scale; the API path
    only wins if you cannot get Cost Management Contributor to create one.
-2. **Concealed user names.** Per-user Copilot attribution is impossible while
+2. **Capacity SKU.** Trusted workspace access needs a **purchased F SKU**. If the
+   production workspace lands on a Trial capacity, the firewalled-storage design
+   silently isn't available and you fall back to a public endpoint — decide this
+   before someone provisions the workspace.
+3. **Concealed user names.** Per-user Copilot attribution is impossible while
    that setting is on. It is a privacy decision with a works-council dimension in
    some geographies, not an ops toggle.
-3. **Management group vs per-subscription RBAC.** MG scope is far less
-   maintenance; some orgs won't permit it.
-4. **GitHub App vs PAT.** A PAT tied to an individual will break when they move
+4. **Management group vs per-subscription RBAC.** MG scope is far less
+   maintenance; some orgs won't permit it. Note FOCUS exports don't support MG
+   scope regardless, so you will be exporting per subscription either way.
+5. **GitHub App vs PAT.** A PAT tied to an individual will break when they move
    teams.
-5. **Do you need Copilot Studio invocation at all?** Almost certainly not in
+6. **Do you need Copilot Studio invocation at all?** Almost certainly not in
    production — real users are the traffic.
 
 ---
@@ -331,3 +421,6 @@ why they are worth writing down.
 | Fabric hides notebook tracebacks | Persist them to `Files/_errors/` |
 | Direct Lake tables aren't queryable until framed | Explicit refresh step after Gold |
 | Pagination caps look like successful completion | Warn loudly when a page cap is hit |
+| Cost Management **cannot** export to OneLake; destination is a storage account only | ADLS + shortcut, which is Microsoft's own published FinOps-on-Fabric pattern |
+| Trusted workspace access is **not supported on Trial capacities** | Confirm a purchased F SKU before designing around a firewalled storage account |
+| Trusted-workspace-access connections accept **workspace identity only** | Not a preference — organizational account and SPN auth fail the connection test |
