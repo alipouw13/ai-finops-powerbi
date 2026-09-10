@@ -651,10 +651,12 @@ def main() -> int:
     credits_total = sum(r["credits_consumed"] for r in studio)
     print(f"  {len(studio)} row(s), {credits_total:,.0f} credit(s)")
     if not studio:
-        print("  ! zero consumption: the agents exist but have never been run.\n"
-              "    This is the tenant's true state, not a collector failure — no\n"
-              "    API can extract spend that was never incurred. Publish an agent\n"
-              "    and hold a conversation with it to generate real credits.")
+        print("  ! zero credit consumption reported.\n"
+              "    Either the agents have never been run, or traffic was driven\n"
+              "    recently and has not surfaced yet: msdyn_aievent is a BILLING\n"
+              "    surface, not a live trace, and can lag by up to ~24h.\n"
+              "    Drive traffic with platform/fabric/generate_studio_traffic.py,\n"
+              "    then re-run this after the lag window.")
 
     # Application inventory = every resource that either is an AI account or
     # actually incurred cost. Deriving it from the cost rows as well as from
