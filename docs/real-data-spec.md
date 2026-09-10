@@ -432,12 +432,51 @@ a first-party app and only Microsoft, as the API owner, can preauthorise it.
 consent plus one interactive sign-in. The Power Platform API service principal
 does exist in the tenant, so that path is available.
 
+### Resolved: the custom app registration works
+
+`platform/fabric/generate_studio_traffic.py --setup` builds exactly that path and
+it is now **verified end to end** — 48 real messages sent to a published agent,
+48 reply activities received, HTTP 200 throughout.
+
+Two findings from getting there:
+
+1. **App-only (client credentials) is a dead end.** Entra happily issues a token
+   carrying the `CopilotStudio.Copilots.Invoke` *app role*, and the service then
+   rejects it with `405 App-only S2S access is not enabled for this environment`.
+   There is no corresponding toggle in the Dataverse `organization` settings, so
+   the delegated flow is the supported route. It also keeps the generated events
+   attributable to a real user, which is what the report wants anyway.
+2. **The request body must wrap the activity.** A bare
+   `{"type":"message","text":"..."}` is a silent `400` with an empty body;
+   `{"activity": {...}}` returns `200` with the bot's reply activities.
+
+The script only drives **published** agents, because an unpublished agent cannot
+be invoked over the API at all — and Copilot Studio only bills published ones.
+
+### Still outstanding: the telemetry lag
+
+`msdyn_aievent` and `conversationtranscript` were both still **0 rows**
+immediately after the traffic run. That is expected — `msdyn_aievent` is a
+*billing* surface rather than a live trace and can lag by up to ~24h. The
+collector is already wired, so re-running `extract_real_bronze.py` after the lag
+window picks the credits up with no code change.
+
 ### Recommended unlock (2 minutes, beats the automation)
 
 Open any agent in Copilot Studio → **Publish** → chat with it in the test pane.
 That produces genuine sessions and credits. Then re-run
 `extract_real_bronze.py`; `dim_platform[data_source]` flips itself to
 `MOCK/REAL` with no code change.
+
+Or drive it from the CLI, which does the same thing repeatably:
+
+```bash
+# one-time: app registration + admin consent + device-code sign-in
+python platform/fabric/generate_studio_traffic.py --setup
+
+python platform/fabric/generate_studio_traffic.py --list
+python platform/fabric/generate_studio_traffic.py --conversations 6 --turns 8
+```
 
 Two caveats worth setting expectations on:
 

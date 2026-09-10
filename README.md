@@ -209,6 +209,34 @@ Two deliberate choices worth calling out:
   card and marked `cost_is_estimated = True`, so a modelled number can never
   masquerade as invoiced spend.
 
+### Generating real Copilot Studio usage
+
+`msdyn_aievent` — the table the Power Platform admin centre bills from — stays
+empty until an agent is actually run. No API can extract spend that was never
+incurred, so `generate_studio_traffic.py` drives **published** agents over the
+Copilot Studio conversations API and lets the extractor pick up the result.
+
+```bash
+# one-time: app registration + admin consent + device-code sign-in
+python platform/fabric/generate_studio_traffic.py --setup
+
+python platform/fabric/generate_studio_traffic.py --list
+python platform/fabric/generate_studio_traffic.py --conversations 6 --turns 8
+```
+
+The setup step exists because the Azure CLI **cannot** be used here. Asking for
+`CopilotStudio.Copilots.Invoke` with the CLI's client id returns
+`AADSTS65002: … must be configured via preauthorization`, and only Microsoft — as
+the API owner — can preauthorise a first-party client. A tenant-owned app
+registration has no such restriction. App-only (client-credentials) tokens are
+issued but then rejected by the service with `405 App-only S2S access is not
+enabled for this environment`, so the flow is delegated, which also keeps the
+events attributable to a real user.
+
+> Copilot Studio credit telemetry is a **billing** surface, not a live trace, so
+> `msdyn_aievent` can lag by up to ~24h after the traffic run. The collector is
+> already wired — re-running the extractor after the lag window is all it takes.
+
 ### Regenerating the CSVs
 
 `build_data.py` emits only the base star schema. The conformed dimensions, the universal
@@ -444,6 +472,8 @@ platform/validate/build_report_directlake.py  themed 10-page Fabric report
 platform/validate/probe_fabric.py   read-only "what can my account actually do" check
 platform/validate/probe_real_sources.py  read-only REAL-data availability probe
 platform/fabric/extract_real_bronze.py  live Azure/Graph/Dataverse -> REAL bronze CSVs
+platform/fabric/generate_studio_traffic.py  drive published Copilot Studio agents to
+                                  create real, billable credit consumption
 platform/fabric/extract_m365_graph.py   M365 Copilot seats + usage via Graph
 platform/fabric/price_seats.py          price seat entitlement from the rate card
 platform/deploy/deploy_semantic_model.py  deploy a TMDL model to Fabric
