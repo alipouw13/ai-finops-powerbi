@@ -118,6 +118,70 @@ def check(path: Path) -> None:
     print(f"  checked {rel}")
 
 
+def check_medallion_layering() -> None:
+    """Silver must publish the documented entities, and Gold must read Silver.
+
+    Two architectural regressions this catches, both of which look harmless in a
+    diff and are invisible at runtime:
+
+    1. Silver collapsing back to one table. Silver is the curation layer; a
+       single fact-shaped output leaves nowhere to resolve identity once, hold a
+       de-duplicated reference entity, or run a quality gate.
+    2. Gold reaching past Silver into Bronze. That duplicates conforming logic
+       in two places, and the copies drift.
+
+    The expected table list is docs/medallion-tables.md, which specified this
+    design long before it was implemented.
+    """
+    silver = ROOT / "platform" / "medallion" / "silver" / "10_conform_usage.py"
+    gold = ROOT / "platform" / "medallion" / "gold" / "20_build_star.py"
+    if not silver.exists() or not gold.exists():
+        return
+
+    expected = {
+        "silver_org_hierarchy", "silver_identity_resolved",
+        "silver_application_map", "silver_model_map", "silver_rate_card",
+        "silver_usage_foundry", "silver_usage_m365", "silver_usage_ghc",
+        "silver_usage_studio", "silver_usage_unified",
+        "silver_cost_reconciliation", "silver_grain_audit",
+    }
+    src = silver.read_text(encoding="utf-8")
+    # Nested parens in the write_silver(...) argument defeat a naive
+    # "write_silver(...)" match, so look for the quoted table names directly.
+    written = set(re.findall(r'"(silver_[a-z0-9_]+)"', src))
+    missing = sorted(expected - written)
+    if missing:
+        errors.append(
+            f"10_conform_usage.py does not write {missing} — silver is the "
+            f"curated-entity layer, not a single conformed fact "
+            f"(see docs/medallion-tables.md)")
+    else:
+        print(f"  checked silver publishes {len(written)} curated entities")
+
+    # Gold may inspect bronze for provenance labels, but must not source a
+    # dimension from it.
+    gsrc = gold.read_text(encoding="utf-8")
+    for m in re.finditer(r"^(dim_\w+|fact)\s*=\s*.*?read_bronze\(", gsrc, re.M):
+        errors.append(
+            f"20_build_star.py builds {m.group(1)} from read_bronze() — gold "
+            f"must consume the silver entity instead, or the conforming logic "
+            f"exists twice and the copies drift")
+    if not re.search(r"def silver\(", gsrc):
+        errors.append("20_build_star.py has no silver() reader — gold should "
+                      "source its dimensions from the silver layer")
+    else:
+        print("  checked gold sources its dimensions from silver")
+
+    # The grain guard is the one piece of silver that prevents a silent
+    # order-of-magnitude overcount; assert it is still wired.
+    if "ACCUMULATION" not in src or "def grain_guard" not in src:
+        errors.append("10_conform_usage.py lost the cumulative-vs-delta grain "
+                      "guard — summing a cumulative feed overstates spend "
+                      "silently")
+    else:
+        print("  checked cumulative-vs-delta grain guard is present")
+
+
 def check_gold_contract() -> None:
     """Gold's declared schemas must match the CSV headers exactly.
 
@@ -189,6 +253,7 @@ def main() -> int:
             continue
         check(nb)
     check_gold_contract()
+    check_medallion_layering()
     print()
     for e in errors:
         print(f"  FAIL {e}")

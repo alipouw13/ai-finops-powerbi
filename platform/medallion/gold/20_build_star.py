@@ -1,7 +1,21 @@
 # Fabric notebook — GOLD: emit the star the semantic model consumes
 # ---------------------------------------------------------------------------
-# RUNNABLE. Reads silver.usage_conformed + bronze reference tables, writes the
-# full 11-table star into the gold lakehouse.
+# RUNNABLE. Reads the curated SILVER entities and writes the full 11-table star
+# into the gold lakehouse.
+#
+# Gold reads Silver, never Bronze. An earlier version built its dimensions
+# straight from the bronze reference tables, which bypassed the curation layer:
+# identity resolution and de-duplication then had to be repeated here, and the
+# two implementations could drift. Silver now owns conforming and resolving;
+# Gold owns the dimensional model, the sentinel members and referential
+# integrity.
+#
+#   silver_usage_unified      -> fact_ai_usage
+#   silver_identity_resolved  -> dim_identity
+#   silver_org_hierarchy      -> dim_business_unit
+#   silver_application_map    -> dim_application
+#   silver_model_map          -> dim_model
+#   silver_rate_card          -> dim_rate_card
 #
 # The column contract below MUST stay identical to the CSV headers in
 # AIFinOps.SemanticModel/data/, otherwise the TMDL partitions break. Run
@@ -27,11 +41,16 @@ def read(lh, tbl):
     return spark.read.format("delta").load(ONELAKE.format(ws=WS_ID, lh=lh, tbl=tbl))
 
 
-def read_bronze(tbl):
-    """Reference tables from the mock and real bronze lakehouses, unioned.
+def silver(tbl):
+    return read(SILVER_ID, tbl)
 
-    Mirrors silver's bronze(): the dimensions have to cover every key the fact
-    can produce, and half of those keys now come from the real extract.
+
+def read_bronze(tbl):
+    """Bronze fallback, used only for provenance inspection and the catalog.
+
+    dim_platform[data_source] is derived by reading _data_class off the bronze
+    feed a platform came from, which is deliberately a Bronze-level question:
+    it asks "what kind of data was ingested", not "what did we curate".
     """
     dfs = []
     for lh in (BRONZE_ID, BRONZE_REAL):
@@ -47,21 +66,6 @@ def read_bronze(tbl):
     for d in dfs[1:]:
         out = out.unionByName(d, allowMissingColumns=True)
     return out
-
-
-def latest_snapshot(df, key):
-    """Collapse an append-only reference table to one row per key.
-
-    The real bronze loader keeps every daily snapshot so history survives the
-    source APIs' rolling windows. A dimension must still be unique on its key,
-    so take the most recent observation per key here rather than at load time.
-    """
-    if "_watermark" not in df.columns:
-        return df.dropDuplicates([key])
-    order = F.col("_watermark").desc()
-    return (df.withColumn("_rn", F.row_number().over(
-                Window.partitionBy(key).orderBy(order)))
-              .filter(F.col("_rn") == 1).drop("_rn"))
 
 
 # Every gold table must expose exactly the columns the semantic model declares.
@@ -154,68 +158,27 @@ def row_like(df, **values):
     return spark.range(1).select(*cols)
 
 
-silver = read(SILVER_ID, "usage_conformed").cache()
+fact = silver("silver_usage_unified").cache()
 
 # ------------------------------------------------------------- dim_identity
-# The identity map is the core IP: github_login <-> UPN <-> service principal.
-idmap = latest_snapshot(read_bronze("bronze_ref_identity_map"), "identity_key")
-dim_identity = (idmap
-    .withColumn("identity_class",
-        F.when(F.col("principal_type") == "User", "Human")
-         .when(F.col("principal_type") == "ServicePrincipal", "ServicePrincipal")
-         .when(F.col("principal_type") == "ManagedIdentity", "ManagedIdentity")
-         .when(F.col("principal_type") == "Agent", "Agent")
-         .otherwise("Application"))
-    .select("identity_key", "display_name", "principal_type", "upn", "github_login",
-            F.col("department").alias("team"),
-            F.col("home_business_unit_key").alias("business_unit"),
-            "cost_center_key", "identity_class",
-            F.upper(F.col("is_human").cast("string")).alias("is_human"),
-            "home_business_unit_key"))
+# Silver already resolved the identity graph (github_login <-> UPN <-> service
+# principal <-> agent) and folded agents in with their owning BU, so Gold only
+# has to shape it and add the sentinel member.
+dim_identity = silver("silver_identity_resolved").select(
+    "identity_key", "display_name", "principal_type", "upn", "github_login",
+    "team", F.col("home_business_unit_key").alias("business_unit"),
+    "cost_center_key", "identity_class", "is_human", "home_business_unit_key")
 
-# Silver keys arrive as UPNs, github logins and agent ids. Resolve each to the
-# canonical identity_key, then guarantee every surviving key has a dim row.
-# NB: do not name the column "alias" — DataFrame.alias is a method, so
-# resolve.alias returns the bound method and the join silently breaks.
-resolve = (dim_identity
-    .select(F.col("identity_key").alias("canon"), "upn", "github_login")
-    .withColumn("alias_key", F.explode(F.array(
-        F.col("canon"), F.col("upn"), F.col("github_login"))))
-    .filter(F.col("alias_key").isNotNull() & (F.col("alias_key") != ""))
-    .select("alias_key", "canon").distinct())
-
-fact = (silver.join(resolve, silver["identity_key"] == resolve["alias_key"], "left")
-              .withColumn("identity_key", F.coalesce(F.col("canon"), F.col("identity_key")))
-              .drop("alias_key", "canon"))
-
-# Any key still unmatched (agents, resource-level telemetry, 'unknown') gets an
-# explicit Unattributed member rather than silently landing on a blank row.
-# Agents are NOT unattributable: bronze_ref_agent_inventory maps each one to its
-# owning BU, which is the whole point of agent chargeback. Without this join the
-# Copilot Studio spend lands on BU-UNALLOC and coverage collapses.
-agents = latest_snapshot(read_bronze("bronze_ref_agent_inventory"), "agent_key")
-agent_bu = {r["agent_key"]: (r["owner_business_unit_key"], r["agent_name"],
-                             r["owner_upn"]) for r in agents.collect()}
-agent_map = F.create_map(*sum(
-    ([F.lit(k), F.lit(v[0])] for k, v in agent_bu.items()), [])) \
-    if agent_bu else None
-agent_name_map = F.create_map(*sum(
-    ([F.lit(k), F.lit(v[1])] for k, v in agent_bu.items()), [])) \
-    if agent_bu else None
-
+# Any key silver could not resolve ('unknown', resource-level telemetry) gets an
+# explicit Unattributed member rather than silently landing on Power BI's
+# auto-generated blank row, where the spend would detach from every slicer.
 orphans = (fact.select("identity_key").distinct()
            .join(dim_identity.select("identity_key"), "identity_key", "left_anti"))
-resolved_bu = (agent_map[F.col("identity_key")] if agent_map is not None
-               else F.lit(None).cast("string"))
-resolved_name = (agent_name_map[F.col("identity_key")] if agent_name_map is not None
-                 else F.lit(None).cast("string"))
 unattributed = (orphans
-    .withColumn("agent_bu", resolved_bu)
-    .withColumn("agent_name", resolved_name)
     .withColumn("display_name",
-                F.when(F.col("identity_key") == "unknown", F.lit("Unattributed Identity"))
-                 .otherwise(F.coalesce(F.col("agent_name"),
-                                       F.concat(F.lit("Agent "), F.col("identity_key")))))
+                F.when(F.col("identity_key") == "unknown",
+                       F.lit("Unattributed Identity"))
+                 .otherwise(F.concat(F.lit("Agent "), F.col("identity_key"))))
     .withColumn("principal_type", F.when(F.col("identity_key") == "unknown",
                                          F.lit("Unknown")).otherwise(F.lit("Agent")))
     .withColumn("upn", F.lit("")).withColumn("github_login", F.lit(""))
@@ -223,8 +186,7 @@ unattributed = (orphans
     .withColumn("identity_class", F.when(F.col("identity_key") == "unknown",
                                          F.lit("Unknown")).otherwise(F.lit("Agent")))
     .withColumn("is_human", F.lit("FALSE"))
-    .withColumn("home_business_unit_key",
-                F.coalesce(F.col("agent_bu"), F.lit("BU-UNALLOC")))
+    .withColumn("home_business_unit_key", F.lit("BU-UNALLOC"))
     .withColumn("business_unit", F.col("home_business_unit_key")))
 # Force the union side onto the parent's exact types.
 unattributed = unattributed.select(
@@ -233,11 +195,11 @@ dim_identity = dim_identity.unionByName(unattributed).cache()
 write_gold(dim_identity, "dim_identity")
 
 # -------------------------------------------------------- dim_business_unit
-bh = read(BRONZE_ID, "bronze_ref_business_hierarchy")
-dim_bu = (bh.withColumn("is_mock_budget", F.lit("TRUE"))
-            .select("business_unit_key", "business_unit_name", "division",
-                    F.col("monthly_budget_usd").cast("long").alias("monthly_budget_usd"),
-                    F.col("executive_owner"), "is_mock_budget"))
+dim_bu = (silver("silver_org_hierarchy")
+          .withColumn("is_mock_budget", F.lit("TRUE"))
+          .select("business_unit_key", "business_unit_name", "division",
+                  F.col("monthly_budget_usd").cast("long").alias("monthly_budget_usd"),
+                  F.col("executive_owner"), "is_mock_budget"))
 if dim_bu.filter(F.col("business_unit_key") == "BU-UNALLOC").count() == 0:
     dim_bu = dim_bu.unionByName(row_like(
         dim_bu, business_unit_key="BU-UNALLOC", business_unit_name="Unallocated",
@@ -246,10 +208,7 @@ if dim_bu.filter(F.col("business_unit_key") == "BU-UNALLOC").count() == 0:
 write_gold(dim_bu, "dim_business_unit")
 
 # ---------------------------------------------------------- dim_application
-apps = latest_snapshot(read_bronze("bronze_ref_app_inventory"), "application_key")
-dim_app = (apps
-    .withColumn("default_environment_key",
-                F.concat(F.lit("ENV-"), F.upper(F.col("environment"))))
+dim_app = (silver("silver_application_map")
     .withColumn("is_mock", F.when(F.col("_data_class") == "REAL", F.lit("FALSE"))
                             .otherwise(F.lit("TRUE")))
     .select("application_key", "application_name", "application_type",
@@ -377,34 +336,16 @@ dim_platform = spark.createDataFrame(platform_rows, [
 write_gold(dim_platform, "dim_platform")
 
 # ------------------------------------------------------------------ dim_model
-# Rows with no model (seat_day, active_day, credits) need a real sentinel key.
-# An empty string is coerced to BLANK by the engine, and a blank foreign key
-# never matches a dimension row -- it always lands on Power BI's auto-generated
-# blank row, which then shows up as "(Blank)" in every model slicer.
-NA_MODEL = "MODEL-NA"
-fact = fact.withColumn(
-    "model_key", F.when((F.col("model_key").isNull()) | (F.col("model_key") == ""),
-                        F.lit(NA_MODEL)).otherwise(F.col("model_key")))
-
-dim_model = (fact.select(F.col("model_key")).distinct()
-    .filter(F.col("model_key").isNotNull())
-    .withColumn("model_name", F.when(F.col("model_key") == NA_MODEL,
-                                     F.lit("(not model-specific)"))
-                               .otherwise(F.col("model_key")))
-    .withColumn("model_version", F.lit(""))
-    .withColumn("provider", F.when(F.col("model_key") == NA_MODEL, F.lit("n/a"))
-                             .when(F.col("model_key").startswith("gpt"), F.lit("OpenAI"))
-                             .when(F.col("model_key").startswith("claude"), F.lit("Anthropic"))
-                             .otherwise(F.lit("Microsoft")))
-    .withColumn("modality", F.when(F.col("model_key") == NA_MODEL, F.lit("n/a"))
-                             .otherwise(F.lit("text")))
-    .select("model_key", "model_name", "model_version", "provider", "modality"))
+# Silver canonicalised the model names and already applied the MODEL-NA
+# sentinel, so Gold just binds it.
+dim_model = silver("silver_model_map").select(
+    "model_key", "model_name", "model_version", "provider", "modality")
 write_gold(dim_model, "dim_model")
 
 # -------------------------------------------------------------- dim_rate_card
 # Cast to the types the semantic model declares, so a Direct Lake model binds
 # without a type mismatch on the Delta column.
-write_gold(read(BRONZE_ID, "bronze_ref_rate_card")
+write_gold(silver("silver_rate_card")
            .select("rate_key", "platform", "unit_type", "model",
                    F.col("unit_price_usd").cast("double").alias("unit_price_usd"),
                    F.col("effective_from").cast("date").alias("effective_from"),
@@ -428,6 +369,9 @@ dim_date = (spark.sql(
 write_gold(dim_date, "dim_date")
 
 # ------------------------------------------------------ fact_ai_usage (+ keys)
+# Silver already resolved business_unit_key and cost_center_key. Gold's job here
+# is only to fill the application/environment keys and enforce referential
+# integrity against the dimensions it just built.
 sp_app = {"CopilotStudio": "APP-STUDIO", "M365Copilot": "APP-M365",
           "GitHubCopilot": "APP-GHCP", "Foundry": "APP-UNKNOWN"}
 app_expr = F.lit("APP-UNKNOWN")
@@ -446,13 +390,8 @@ valid_apps = [r[0] for r in dim_app.select("application_key").collect()]
 app_expr = F.when(app_expr.isin(valid_apps), app_expr).otherwise(F.lit("APP-UNKNOWN"))
 
 fact = (fact
-    .join(dim_identity.select("identity_key", "home_business_unit_key", "cost_center_key")
-          .withColumnRenamed("cost_center_key", "cc_from_dim"), "identity_key", "left")
     .withColumn("business_unit_key",
-                F.coalesce(F.col("home_business_unit_key"), F.lit("BU-UNALLOC")))
-    .withColumn("cost_center_key",
-                F.coalesce(F.when(F.col("cost_center_key") != "", F.col("cost_center_key")),
-                           F.col("cc_from_dim"), F.lit("")))
+                F.coalesce(F.col("business_unit_key"), F.lit("BU-UNALLOC")))
     .withColumn("application_key", app_expr)
     .withColumn("environment_key", F.lit("ENV-PROD")))
 
@@ -481,11 +420,10 @@ assert not missing, f"gold fact breaks the CSV column contract: {missing}"
 write_gold(fact.select(*CONTRACT), "fact_ai_usage")
 
 # ------------------------------------- dim_data_source (extractable catalog)
-# Reference table, uploaded as bronze_ref_extractable_catalog by the deployer.
-# The semantic model calls it dim_data_source; the CSV is extractable_data_catalog.
+# Conformed by silver as silver_data_source_catalog. The semantic model calls it
+# dim_data_source; the source CSV is extractable_data_catalog.
 try:
-    write_gold(read(BRONZE_ID, "bronze_ref_extractable_catalog"),
-               "extractable_data_catalog")
+    write_gold(silver("silver_data_source_catalog"), "extractable_data_catalog")
 except Exception as e:                                            # noqa: BLE001
     print(f"  . extractable_data_catalog skipped — Extractable Data Spectrum page "
           f"will be empty ({str(e)[:70]})")

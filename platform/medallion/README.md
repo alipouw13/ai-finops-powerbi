@@ -9,8 +9,9 @@ source of truth — gold is written to *match* them, never to replace them.
 | File | Status |
 |---|---|
 | `bronze/00_load_bronze_csv.py` | **RUNNABLE** — `Files/bronze/*.csv` → `dbo.bronze_*` Delta |
-| `silver/10_conform_usage.py` | **RUNNABLE** — bronze → `dbo.usage_conformed` |
-| `gold/20_build_star.py` | **RUNNABLE** — silver + bronze refs → the 11-table star |
+| `bronze/01_load_bronze_real_csv.py` | **RUNNABLE** — REAL extracts → `dbo.bronze_*` (append + dedupe) |
+| `silver/10_conform_usage.py` | **RUNNABLE** — bronze → the 14 curated `dbo.silver_*` entities |
+| `gold/20_build_star.py` | **RUNNABLE** — silver → the 11-table star |
 | `bronze/01_ingest_foundry_apim.py` | design scaffold — placeholder paths |
 | `bronze/02_ingest_copilot_platforms.py` | design scaffold — placeholder paths |
 | `*.design.py` | the original scaffolds, kept for reference |
@@ -47,8 +48,29 @@ Files/bronze/*.csv ──► BRONZE lakehouse          SILVER lakehouse         
 | Layer | Rule | Why |
 |---|---|---|
 | **Bronze** | Raw, source columns preserved, ingest lineage added | Historical system of record; Cost-Management exports *replace* MTD, so keeping bronze protects prior days. Azure Monitor metrics retention is 93 days — bronze is the durable copy. |
-| **Silver** | Conform to one grain; USD is the only common measure; `unit_type` is a dimension | Four platforms, four incompatible billing units, only Foundry exposes tokens. USD is the sole thing that reconciles. |
-| **Gold** | Emit the star under a fixed **column contract** identical to the CSV headers | The TMDL partition casts are keyed to those exact columns; gold asserts the contract and fails loudly on drift. It also fails on orphaned foreign keys and on duplicate dimension keys. |
+| **Silver** | Curated **entities**, not one conformed fact: normalize, de-duplicate, grain-guard, then join to the BU/application map | Silver is where cross-source correctness is established once. A single fact-shaped output leaves nowhere to resolve identity, hold a de-duplicated reference entity, or run a quality gate — and forces Gold to reach back into Bronze. |
+| **Gold** | Emit the star under a fixed **column contract** identical to the CSV headers, reading **only** Silver | The TMDL partition casts are keyed to those exact columns; gold asserts the contract and fails loudly on drift. It also fails on orphaned foreign keys and on duplicate dimension keys. |
+
+### Silver: the four responsibilities
+
+| # | Responsibility | Implementation |
+|---|---|---|
+| 1 | Normalize attributes across sources | every `silver_usage_*` is forced onto `USAGE_CONTRACT`; `silver_model_map` canonicalises model names |
+| 2 | De-duplicate | `dedupe()` for usage feeds, `dedupe_key()` for reference entities, `dedupe_month()` for monthly snapshots |
+| 3 | Grain guard: cumulative vs delta | `ACCUMULATION` declares each feed; `grain_guard()` differences cumulative series and *challenges* anything declared delta |
+| 4 | Join telemetry to BU / application | resolved once into `silver_usage_unified`, so Gold consumes business keys rather than re-deriving them |
+
+**The grain guard is the one that saves real money.** A month-to-date cumulative
+series summed across 30 days overstates spend by roughly an order of magnitude,
+and nothing errors — the number is simply wrong. `silver_grain_audit` records the
+verdict per feed, and a feed declared `delta` whose values are non-decreasing
+across ≥95% of consecutive periods is flagged as probably cumulative.
+
+**De-duplicate on the whole natural key, never a hand-picked subset.** Keying
+Azure cost on `(date, resource, meter, price)` looked reasonable and silently
+merged two genuinely different charges that differed only by resource tag —
+dropping 824 rows and $166.99 of real spend. `dedupe()` therefore keys on every
+descriptive column and treats only the declared measures as non-key.
 
 ### Two gold assertions worth knowing
 

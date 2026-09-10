@@ -71,6 +71,12 @@ Every Bronze table also carries ingestion metadata columns:
 Silver cleans, dedupes, resolves identity, normalizes taxonomy, and reconciles cost.
 These are the intermediate conformed tables that feed Gold.
 
+> **Status: implemented.** `platform/medallion/silver/10_conform_usage.py` writes
+> these 14 tables, and `platform/validate/check_notebooks.py` fails the build if
+> the list shrinks or if Gold reaches past Silver into Bronze. For a long time
+> this table was a *specification* while the runnable notebook collapsed
+> everything into a single `usage_conformed` table; that gap is now closed.
+
 | Silver table | Built from (Bronze) | What it does |
 |---|---|---|
 | `silver_identity_resolved` | ghc_seats, m365 users, entra_users, aoai caller ids, studio botid | **Identity graph**: unify github_login ↔ Entra user ↔ UPN ↔ service principal ↔ agent into one `identity_key`; assign `principal_type`, `identity_class`, `is_human`, home BU |
@@ -83,7 +89,10 @@ These are the intermediate conformed tables that feed Gold.
 | `silver_usage_ghc` | ghc_seats, ghc_usage_metrics, ghc_billing_usage | per user/day: licensed?, last_activity, acceptance, model; seat + premium-req cost |
 | `silver_usage_studio` | studio_analytics, studio_capacity, studio_cost_usage | per agent/day: sessions, resolution, messages consumed, billed $ |
 | `silver_usage_unified` | the 4 `silver_usage_*` | **union to one grain**: date × platform × identity × application × model × cost; nulls where a source's grain doesn't reach; adds `cost_is_estimated` (modelled vs billed) |
+| `silver_usage_azure` | azure_cost | REAL invoiced Azure meters, split `AzureAI` vs `AzureInfra` so AI spend is not overstated by the infrastructure it runs on |
 | `silver_cost_reconciliation` | silver_usage_unified vs Cost Mgmt totals | modelled vs billed variance → drives `Cost Confidence %` |
+| `silver_grain_audit` | every usage feed | cumulative-vs-delta verdict per feed; flags a `delta` feed behaving like a cumulative one before it double-counts |
+| `silver_data_source_catalog` | ref_extractable_catalog | the extractable-signal catalog, passed through silver so Gold never reads Bronze |
 
 **Silver grain rule:** `silver_usage_unified` is the coarsest common denominator —
 **daily**. Per-call detail stays in the Foundry table for engineering drill-down;
