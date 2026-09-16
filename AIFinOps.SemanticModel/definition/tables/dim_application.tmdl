@@ -12,7 +12,7 @@ table dim_application
 		summarizeBy: none
 		sourceColumn: application_name
 
-	/// api · agent · copilot · notebook · unknown
+	/// api · agent · copilot · notebook · unattributed
 	column application_type
 		dataType: string
 		summarizeBy: none

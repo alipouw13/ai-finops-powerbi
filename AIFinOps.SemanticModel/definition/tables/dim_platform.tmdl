@@ -22,6 +22,20 @@ table dim_platform
 		summarizeBy: none
 		sourceColumn: native_unit
 
+	/// Consumptive add-on unit billed *on top of* the native unit. M365 Copilot Cowork
+	/// draws down Copilot Credits ($0.01 each) per task; empty where a platform has no add-on.
+	column addon_unit
+		dataType: string
+		summarizeBy: none
+		sourceColumn: addon_unit
+
+	/// How the add-on is billed. Cowork is usage-based Copilot Credits stacked on the
+	/// fixed seat licence, so it is a consumptive charge over and above the native unit.
+	column addon_billing_model
+		dataType: string
+		summarizeBy: none
+		sourceColumn: addon_billing_model
+
 	column has_token_telemetry
 		dataType: boolean
 		summarizeBy: none
@@ -55,6 +69,6 @@ table dim_platform
 			let
 				Src = Csv.Document(File.Contents(DataFolder & "dim_platform.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
 				Hdr = Table.PromoteHeaders(Src, [PromoteAllScalars=true]),
-				Typed = Table.TransformColumnTypes(Hdr, {{"platform_key", type text}, {"platform_name", type text}, {"billing_model", type text}, {"native_unit", type text}, {"has_token_telemetry", type logical}, {"has_native_cost", type logical}, {"is_variable_cost", type logical}, {"data_source", type text}, {"enterprise_discount_pct", type number}})
+				Typed = Table.TransformColumnTypes(Hdr, {{"platform_key", type text}, {"platform_name", type text}, {"billing_model", type text}, {"native_unit", type text}, {"addon_unit", type text}, {"addon_billing_model", type text}, {"has_token_telemetry", type logical}, {"has_native_cost", type logical}, {"is_variable_cost", type logical}, {"data_source", type text}, {"enterprise_discount_pct", type number}})
 			in
 				Typed

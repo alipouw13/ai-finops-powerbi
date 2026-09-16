@@ -35,6 +35,13 @@ PASSES: list[str] = []
 
 NAME_RE = r"(?:'([^']+)'|([^\s=]+))"
 
+# A run of 3+ consecutive single quotes in an emitted literal can only be a
+# double-escaped apostrophe: prose that already doubled its quotes, doubled again
+# by the emitter. A genuine escaped apostrophe mid-text is exactly two quotes; the
+# literal's own delimiters are one each. Three or more means the source was
+# escaped twice, so Power BI renders visible ''pairs'' of apostrophes.
+TRIPLE_QUOTE_RE = re.compile(r"'{3,}")
+
 
 def parse_model(model_dir: Path):
     """Return {table: {'columns': set, 'measures': set}} from TMDL."""
@@ -123,6 +130,74 @@ def check_contrast(pname, kind, x, y, vco):
             f"below the WCAG AA 4.5:1 minimum — unreadable at KPI sizes")
 
 
+def _lit_value(node):
+    """Pull the Literal Value out of a {"expr": {"Literal": {"Value": ...}}} blob."""
+    return (node or {}).get("expr", {}).get("Literal", {}).get("Value")
+
+
+def check_header_tooltip(pname, kind, x, y, vco) -> bool:
+    """A header tooltip is only visible if its icon renders. `visualHeaderTooltip`
+    on its own configures the text but nothing shows it, so the answer to the
+    stakeholder's question is silently swallowed — exactly the kind of no-error
+    failure every gate in this file exists to catch. Fail when:
+      * the tooltip text is declared but visualHeader.showTooltipButton isn't true,
+      * the tooltip text is empty,
+      * visualHeaderTooltip.type is anything other than 'Default'.
+    Returns True when the visual carries a (valid or not) tooltip, so the caller
+    can warn about pages that ship no informational tooltip at all."""
+    vht = vco.get("visualHeaderTooltip")
+    if not vht:
+        return False
+    props = vht[0].get("properties", {})
+    text_val = _lit_value(props.get("text"))
+    type_val = _lit_value(props.get("type"))
+
+    vh = vco.get("visualHeader") or [{}]
+    show_btn = _lit_value(vh[0].get("properties", {}).get("showTooltipButton"))
+    if show_btn != "true":
+        ERRORS.append(
+            f"{pname}/{kind} at ({x},{y}): visualHeaderTooltip is set but "
+            f"visualHeader.showTooltipButton is {show_btn!r}, not \"true\" — the "
+            f"info icon never renders, so the tooltip is invisible")
+    if not text_val or text_val in ("''", "'"):
+        ERRORS.append(
+            f"{pname}/{kind} at ({x},{y}): visualHeaderTooltip.text is empty — a "
+            f"configured tooltip with no text tells the reader nothing")
+    if type_val != "'Default'":
+        ERRORS.append(
+            f"{pname}/{kind} at ({x},{y}): visualHeaderTooltip.type is {type_val!r}, "
+            f"expected \"'Default'\" — a 'Report' page tooltip needs a bound page "
+            f"and renders blank here")
+    return True
+
+
+def check_quote_escaping(pname, kind, x, y, sv) -> None:
+    """Fail when any literal string in the visual carries a run of 3+ consecutive
+    single quotes. That signature only arises from escaping already-escaped text
+    (e.g. a tooltip written with ''Unknown'' that the emitter then doubles to
+    ''''Unknown''''), which renders as double apostrophes and errors nowhere -
+    exactly the silent failure this file exists to catch. Covers title text,
+    header tooltip text and textbox paragraph runs alike, wherever they nest."""
+
+    def walk(node):
+        if isinstance(node, dict):
+            for v in node.values():
+                yield from walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                yield from walk(v)
+        elif isinstance(node, str):
+            if TRIPLE_QUOTE_RE.search(node):
+                yield node
+
+    for s in walk(sv):
+        ERRORS.append(
+            f"{pname}/{kind} at ({x},{y}): literal {s!r} has 3+ consecutive single "
+            f"quotes - the source text was quote-escaped twice. Write the prose "
+            f"with plain apostrophes (or double quotes) and let the emitter escape "
+            f"it once")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", required=True, help="report folder")
@@ -178,11 +253,16 @@ def main() -> int:
                         f"overlaps {b['name']} ({b['x']},{b['y']} {b['width']}x{b['height']})")
 
         # ---- 2/3/4. bindings
+        page_tooltips = 0
         for vc in vcs:
             cfg = json.loads(vc["config"])
             sv = cfg["singleVisual"]
             kind = sv["visualType"]
-            check_contrast(pname, kind, vc["x"], vc["y"], sv.get("vcObjects", {}))
+            vco = sv.get("vcObjects", {})
+            check_contrast(pname, kind, vc["x"], vc["y"], vco)
+            check_quote_escaping(pname, kind, vc["x"], vc["y"], sv)
+            if check_header_tooltip(pname, kind, vc["x"], vc["y"], vco):
+                page_tooltips += 1
             if kind == "slicer":
                 # `data.mode` is the only property that produces a dropdown.
                 # `general.orientation` accepts a value and silently ignores it,
@@ -241,6 +321,13 @@ def main() -> int:
                             f"{pname}/{kind}: projection {role} -> {ref!r} has no "
                             f"matching entry in prototypeQuery.Select "
                             f"(visual renders its title and stays empty)")
+
+        # ---- 5. informational tooltips. Every page should answer at least one
+        # "why does this number look like that?" question in a header tooltip;
+        # a page with none is usually an oversight, not a decision, so warn.
+        if page_tooltips == 0:
+            WARNINGS.append(f"{pname}: no visual carries an informational header "
+                            f"tooltip — the page explains none of its numbers")
 
         PASSES.append(f"{pname}: {len(vcs)} visuals, no overlaps"
                       if not any(pname in e for e in ERRORS)

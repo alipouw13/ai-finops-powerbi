@@ -62,9 +62,9 @@ Copilot / semantic-model Q&A but runs 100% locally. Try:
 Steps 1–4 run today with no license. Step 5 is the handoff to whoever owns the
 Fabric workspace — see `docs/bronze-layer-architecture.md`.
 
-## Real Azure billed cost (FOCUS 1.0 export)
+## Real Azure billed cost (FOCUS export)
 
-Azure cost comes from a Cost Management **FOCUS 1.0** Parquet export, surfaced in
+Azure cost comes from a Cost Management **FOCUS** Parquet export, surfaced in
 Fabric through a zero-copy OneLake shortcut. Two stdlib-only scripts stand it up
 (`az login` for auth; both support `--dry-run` and `--steps`):
 
@@ -83,7 +83,7 @@ python3 platform/deploy/create_onelake_shortcut.py
 
 | Piece | Value |
 |---|---|
-| Dataset | FOCUS 1.0 (FinOps Foundation open spec), Parquet, daily granularity |
+| Dataset | FOCUS (FinOps Foundation open spec), Parquet, daily granularity. Microsoft's current dataset is **1.2-preview**; the ingest tolerates both 1.0 and 1.2-preview (the 1.0→1.2 renames `x_InvoiceId`→`InvoiceId`, `x_PricingCurrency`→`PricingCurrency`, `x_SkuMeterName`→`SkuMeter` are handled by `focus_col` in `10_conform_usage.py`, picking each column by presence). |
 | Landing | `focus/{exportName}/{dateRange}/{runId}/part_0_0001.parquet` + `manifest.json` |
 | Files shortcut | `Files/azure_costmgmt_focus` in `bronze_real` — storage stays in the customer's subscription |
 | Bronze table | `bronze_azure_cost_focus` — a Files shortcut is not queryable as a table |
@@ -106,7 +106,7 @@ Two non-obvious constraints the scripts handle:
 > `platform/medallion/README.md`. A row-key dedupe silently drops ~30% of the cost.
 
 ## Also runnable
-- **Power BI Desktop:** open `AIFinOps.pbip` (10 persona report pages, no Fabric needed).
+- **Power BI Desktop:** open `AIFinOps.pbip` (8 report pages, no Fabric needed).
   Run `python platform/validate/validate_pbip.py --fix-data-folder` first.
 - **Validate the PBIP offline:** `python platform/validate/validate_pbip.py`
 - **REAL M365 licence data:** `python platform/fabric/extract_m365_graph.py --probe`

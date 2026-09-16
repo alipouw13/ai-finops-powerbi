@@ -27,12 +27,18 @@ tells you what Microsoft billed you for M365 Copilot. What you get is:
 | Signal | Source | Status |
 |---|---|---|
 | Seat **counts** (purchased + assigned) | `subscribedSkus`, `users?$select=assignedLicenses` | **REAL** |
-| Seat **activity** (per-app last-activity dates) | `getMicrosoft365CopilotUsageUserDetail` | **REAL** (beta, needs `Reports.Read.All`) |
+| Seat **activity** (per-app last-activity dates) | `getMicrosoft365CopilotUsageUserDetail` (`copilotReportRoot`, `/copilot` segment) | **REAL** (needs `Reports.Read.All`) |
 | Seat **dollars** | `dim_rate_card` list price × seat count | **MODELLED** — `cost_is_estimated=TRUE` |
 
 That is why the M365 rows in the model always carry `cost_is_estimated=TRUE`.
 Load the customer's EA/MCA price sheet into `dim_rate_card` and the same code
 produces contract-accurate figures — the collector itself does not change.
+
+> The usage report now lives under the `/copilot` segment (`copilotReportRoot`);
+> `extract_m365_graph.py` calls `/copilot/reports/...` first and falls back to the
+> older `/beta/reports/...` path. Either way the payload is **last-activity dates
+> only, never prompt counts** (why `[M365 Prompts]` is blank by design). See
+> <https://learn.microsoft.com/microsoft-365-copilot/extensibility/api/admin-settings/reports/resources/copilotreportroot>.
 
 ## Proving the connector on a tenant with no Copilot licences
 
@@ -52,7 +58,7 @@ clearly labelled `HYPOTHETICAL`.
 |---|---|---|
 | `/organization`, `/subscribedSkus` | `Organization.Read.All` | 403 |
 | `/users?$select=assignedLicenses` | `User.Read.All` | 403 |
-| `/beta/.../getMicrosoft365CopilotUsageUserDetail` | `Reports.Read.All` | 403 |
+| `/copilot/reports/getMicrosoft365CopilotUsageUserDetail` (falls back to `/beta/reports/...`) | `Reports.Read.All` | 403 |
 
 Seat entitlement and seat activity have **different permission floors**. A
 non-admin often gets the first two and not the third — the collector reports

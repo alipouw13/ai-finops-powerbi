@@ -141,8 +141,8 @@ def check_medallion_layering() -> None:
     expected = {
         "silver_org_hierarchy", "silver_identity_resolved",
         "silver_application_map", "silver_model_map", "silver_rate_card",
-        "silver_usage_foundry", "silver_usage_m365", "silver_usage_ghc",
-        "silver_usage_studio", "silver_usage_unified",
+        "silver_usage_foundry", "silver_usage_m365", "silver_usage_m365_cowork",
+        "silver_usage_ghc", "silver_usage_studio", "silver_usage_unified",
         "silver_cost_reconciliation", "silver_grain_audit",
     }
     src = silver.read_text(encoding="utf-8")
@@ -245,6 +245,40 @@ def check_gold_contract() -> None:
         print(f"  checked GOLD_CONTRACT vs {checked} CSV header(s)")
 
 
+def check_deterministic_ids() -> None:
+    """gen_bronze_data.py must not build surrogate ids from the built-in hash().
+
+    Python randomizes hash() of a str per process (PYTHONHASHSEED), so a bare
+    `hash(...)` call silently makes platform/fabric/bronze_out/ non-reproducible
+    even with random.seed(42) and FINOPS_MOCK_END pinned: `assignee_id` and other
+    ids change on every run, and a real data change (like the Cowork overlap that
+    hid in bronze_m365_copilot_credits) cannot be told apart from hash churn.
+    stable_id()/zlib.crc32 is process-independent; use it instead.
+
+    ast, not a text scan, so mentions of hash() in comments/docstrings are fine
+    and only genuine `hash(...)` calls (not `x.hash()`) are flagged.
+    """
+    gen = ROOT / "platform" / "fabric" / "gen_bronze_data.py"
+    if not gen.exists():
+        return
+    try:
+        tree = ast.parse(gen.read_text(encoding="utf-8"), filename=str(gen))
+    except SyntaxError as e:
+        errors.append(f"gen_bronze_data.py:{e.lineno}: syntax error: {e.msg}")
+        return
+    found = False
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "hash"):
+            found = True
+            errors.append(
+                f"gen_bronze_data.py:{node.lineno}: bare hash() call — the built-in "
+                f"hash() is per-process random (PYTHONHASHSEED), so this breaks the "
+                f"byte-for-byte reproducibility of bronze_out/. Use stable_id()/crc32.")
+    if not found:
+        print("  checked gen_bronze_data.py builds ids without process-random hash()")
+
+
 def main() -> int:
     print("notebook static checks (PySpark column/member shadowing)")
     for nb in NOTEBOOKS:
@@ -254,6 +288,7 @@ def main() -> int:
         check(nb)
     check_gold_contract()
     check_medallion_layering()
+    check_deterministic_ids()
     print()
     for e in errors:
         print(f"  FAIL {e}")

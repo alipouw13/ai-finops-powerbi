@@ -193,13 +193,47 @@ The deployer builds the **lakehouse + gold tables**. To publish the
 Hand-crafting PBIP definition REST payloads is intentionally avoided (brittle);
 Git integration is the supported, durable path for the accelerator.
 
+### Deploying the Direct Lake model — reframe on every deploy
+
+For the live Direct Lake path (over the gold Lakehouse), the verified end-to-end
+sequence is:
+
+```
+bronze upload  ->  10_silver_conform  ->  20_gold_star
+               ->  deploy_semantic_model.py   (now reframes — see below)
+               ->  deploy_report.py
+```
+
+`deploy_semantic_model.py` **reframes the model on every deploy**: after
+`updateDefinition` it calls the dataset refresh and polls it to completion,
+unconditionally. This is a correctness fix, not a convenience. "Direct Lake needs
+no refresh" is true for *data* and false for *schema*: a **newly declared column
+stays unmapped until the model reframes**. When `list_cost_usd` / `has_rate_card`
+were added to the gold fact, the deploy returned 200 and the table bound, yet
+`Rate Card Cost` / `Rate Card Coverage %` failed at query time with `The value for
+'list_cost_usd' cannot be determined` and rendered blank cards — with no error at
+deploy time. The reframe closes that gap. Note it uses the **Power BI REST surface**
+(`api.powerbi.com/v1.0/myorg/groups/{ws}/datasets/{ds}/refreshes`), not the Fabric
+one, so the script acquires a second token audience
+(`https://analysis.windows.net/powerbi/api`) — `az login` must be able to issue it.
+The accurate rule is **no gateway, and no refresh for new rows — but a schema change
+requires a reframe.**
+
+> Gotcha: the notebook **`run`** step needs **`lakehouse`** included in `--steps`
+> (or an already-resolved lakehouse), or `fabric_deploy.py` never injects the
+> `BRONZE_ID` parameter cell and the notebook dies at runtime with `NameError: name
+> 'BRONZE_ID' is not defined`. The verified `--steps preflight workspace lakehouse
+> upload notebooks run` set includes it; a hand-trimmed `--steps notebooks run` does
+> not.
+
 ## 6. Demo storyline this enables
 
 1. **Collect** — bronze notebooks show raw platform telemetry landing in OneLake.
 2. **Land in Fabric** — lakehouse Files/Tables, one place for all AI platforms.
 3. **Conform** — silver/gold build the unified FinOps star (identity/app/BU/cost).
-4. **Persona dashboards** — the 10-page report (CFO → Governance → Engineering →
-   App Owner → License Optimization → **Extractable Data Spectrum**).
+4. **Persona dashboards** — the 8-page report (Spend Overview → Engineering
+   Tokenomics → Licence Seats, Waste & Utilisation → Rate Card → CFO Finance →
+   Governance → Application Owner → **Extractable Data Spectrum**).
 5. **Optimize** — idle licenses, expensive-model usage, budget overruns, chargeback.
 
 Real vs mock provenance never blurs — `dim_platform.data_source`,

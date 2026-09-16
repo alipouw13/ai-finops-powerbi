@@ -283,7 +283,11 @@ pipeline must write to Fabric.
 Worth calling out because it will surprise whoever implements this.
 
 Copilot Studio credit consumption (`msdyn_aievent`) reads fine with an
-application user — that part is ordinary. **Invoking** an agent is not:
+application user — that part is ordinary. **Caveat:** Microsoft does **not**
+document `msdyn_aievent` as a billing/consumption source; the documented Copilot
+Credit capacity surface is Power Platform admin center → Licensing → Products →
+Copilot Studio. Reading `msdyn_aievent` is community/unsupported practice — it works,
+but it is not Microsoft guidance. **Invoking** an agent is not ordinary:
 
 - Requesting `CopilotStudio.Copilots.Invoke` with the **Azure CLI's** client id
   fails with `AADSTS65002 … must be configured via preauthorization`. Only
@@ -414,7 +418,7 @@ why they are worth writing down.
 | Azure **restates** cost; two charges can differ only by resource tag | De-duplicate on the whole natural key, never a subset |
 | Cost Management **Query API** permanently 429 in the tenant | Prefer Export; treat the API as a fallback |
 | Per-subscription AI account listing returned 0; Resource Graph returned 16 | Always enumerate via Resource Graph |
-| `getMicrosoft365CopilotUsageUserDetail` is **beta**-only; v1.0 returns 400 | Pin the beta endpoint and expect churn |
+| M365 Copilot usage APIs moved under the `/copilot` segment (`copilotReportRoot`); the older `reportRoot` beta path is superseded | Call `getMicrosoft365CopilotUsageUserDetail` / `...UserCountSummary` / `...UserCountTrend` under `/copilot`; still last-activity dates only, no prompt counts |
 | Copilot Studio app-only S2S rejected with 405 | Invocation is delegated-only |
 | Azure CLI cannot request the Copilot Studio scope (`AADSTS65002`) | Tenant-owned app registration required |
 | Schema-enabled lakehouses reject the Load Table REST API | Load via Spark |

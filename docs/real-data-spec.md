@@ -99,10 +99,10 @@ continuation URLs must be re-quoted before use.
 The real data you can get is **identity, licence and infrastructure cost** —
 *not AI usage telemetry*. That means:
 
-- Pages **5 CFO**, **6 Governance**, **8 Application Owner** and **1 Spend
+- Pages **5 CFO Finance**, **6 Governance**, **7 Application Owner** and **1 Spend
   Overview** carry genuinely real, invoiced spend.
-- Pages **2 Foundry Tokenomics** and **7 Engineering** stay MOCK, because
-  nothing in the tenant is currently emitting tokens.
+- Page **2 Engineering Tokenomics** (Azure AI Foundry + Azure OpenAI) stays MOCK,
+  because nothing in the tenant is currently emitting tokens.
 
 If real tokenomics matters for the demo, see Phase 0 below — it is a small,
 cheap unlock.
@@ -120,8 +120,10 @@ the single highest-value addition, because it turns the *token* story real:
 4. Send a few hundred requests (a loop script is enough).
 
 That yields real `processed_prompt_tokens` / `generated_tokens` /
-`latency_ms` / per-request identity, which is exactly what
-`bronze_azure_ai_metrics` expects. Cost is a few cents.
+`latency_ms`, which is exactly what `bronze_azure_ai_metrics` expects. Note that
+Azure Monitor metrics are **resource-grain and carry no identity** — per-user token
+attribution needs the APIM AI Gateway feed (`bronze_foundry_gateway`), which silver
+prefers over the metrics table when present. Cost is a few cents.
 
 Without this, treat tokenomics as permanently MOCK and say so on the page.
 
@@ -217,7 +219,7 @@ core IP.
 | Result | **0 rows in both environments** |
 | Meaning | The agents exist but have never been invoked, so no credits have been consumed |
 | To unlock | Run a few conversations against one agent, then re-query |
-| Note | `msdyn_creditconsumed` is already net of zero-rating — use it directly, never model credits from activity counts |
+| Note | `msdyn_creditconsumed` is already net of zero-rating — use it directly, never model credits from activity counts. **Caveat:** Microsoft does **not** document `msdyn_aievent` as a billing/consumption source; the *documented* Copilot Credit capacity surface is Power Platform admin center → Licensing → Products → Copilot Studio. Reading `msdyn_aievent` is community/unsupported practice — honest, but not Microsoft guidance. |
 
 Wire the collector now and it will return a truthful zero; it starts producing
 real numbers the moment someone uses an agent. Do **not** substitute mock rows
@@ -253,7 +255,7 @@ because provenance was designed as data from the start.
 
 | Phase | Deliverable | Effort | Unlocks |
 |---|---|---|---|
-| **1** | `bronze_ref_identity_map` from Graph | S | Real identities, real BU rollup → pages 6, 9 |
+| **1** | `bronze_ref_identity_map` from Graph | S | Real identities, real BU rollup → pages 3, 6 |
 | **2** | `bronze_m365_license_inventory` | XS | Already built; just retarget |
 | **3** | `bronze_ref_agent_inventory` from Dataverse | S | 8 real agents → real agent chargeback |
 | **4** | Cost Management **Export** → `bronze_azure_cost` | M | Real billed $ → pages 1, 5; makes Cost Confidence real |
@@ -269,15 +271,13 @@ the identity, licence and agent stories genuine.
 | Page | Today | After |
 |---|---|---|
 | 1 Spend Overview | MOCK | **REAL** Azure + Fabric cost |
-| 2 Foundry Tokenomics | MOCK | MOCK (unless Phase 0) |
-| 3 Waste & Utilisation | MOCK | **REAL** seats, MOCK activity |
+| 2 Engineering Tokenomics | MOCK | MOCK (unless Phase 0) |
+| 3 Licence Seats, Waste & Utilisation | MOCK | **REAL** seats, MOCK activity |
 | 4 Rate Card | list prices | list prices (unchanged by design) |
 | 5 CFO Finance | MOCK | **REAL** billed spend vs budget |
 | 6 Governance | MOCK | **REAL** identities and provenance mix |
-| 7 Engineering | MOCK | MOCK (unless Phase 0) |
-| 8 Application Owner | MOCK | partly REAL via resource tags |
-| 9 License Optimization | MOCK | **REAL** SKUs and assignments |
-| 10 Extractable Spectrum | catalogue | catalogue, with REAL flags flipped |
+| 7 Application Owner | MOCK | partly REAL via resource tags |
+| 8 Extractable Data Spectrum | catalogue | catalogue, with REAL flags flipped |
 
 ---
 
@@ -302,7 +302,7 @@ honestly.
    the two environments, but `msdyn_aievents` is empty, so credits are zero
    until someone actually runs one.
 2. **Is Phase 0 (deploy AOAI + generate traffic) acceptable?** It is the only
-   route to real tokenomics and costs pennies. Without it, pages 2 and 7 stay
+   route to real tokenomics and costs pennies. Without it, page 2 stays
    MOCK permanently and should be labelled that way on the page.
 3. **Sensitivity:** real UPNs, display names and department values will be in
    the model. Fine for a personal admin tenant; confirm before any screen-share

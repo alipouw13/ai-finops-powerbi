@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
 """
-Append 5 persona report pages to AIFinOps.Report/report.json (legacy PBIR).
+Append 4 persona report pages to AIFinOps.Report/report.json (legacy PBIR).
 
-Additive and idempotent: existing pages 1-4 are preserved untouched; persona
-pages are re-generated each run (matched by section name PERSONA_*). Every
-queryRef points at a measure/column that exists in the semantic model.
+Additive and idempotent: existing pages 1-4 (built by build_report.py) are
+preserved untouched; persona pages are re-generated each run (matched by section
+name PERSONA_* / DATA_SPECTRUM). Together they form the 8-page set in
+CHANGE-SPEC.md:
+
+    5 - CFO Finance
+    6 - Governance
+    7 - Application Owner
+    8 - Extractable Data Spectrum
+
+The old Engineering and License Optimization persona pages are removed; their
+content folds into pages 2 (Engineering Tokenomics) and 3 (Licence Seats) built
+by build_report.py. Every queryRef points at a measure/column that exists in the
+semantic model, or a measure CHANGE-SPEC.md adds in parallel via WS-MODEL.
 
 Run:  python3 build_personas.py
 """
@@ -33,6 +44,9 @@ _MEASURES = {
     "Forecast Cost (next 30d, net)", "Attributable Cost", "Unallocated Cost",
     "Chargeback Coverage %", "Chargeback Cost", "Monthly Budget",
     "Budget Variance", "Budget Variance %",
+    # New measures introduced by CHANGE-SPEC.md; added to the semantic model in
+    # parallel by WS-MODEL, so bind by exact spec name here.
+    "Cowork Add-on Cost", "Workload Attribution %",
 }
 
 
@@ -146,65 +160,42 @@ def page_cfo():
           table(16, 466, 1248, 236, [
               ("dim_business_unit", "business_unit_name"),
               ("dim_business_unit", "division"),
+              ("dim_business_unit", "is_mock_budget"),
               ("fact_ai_usage", "Total AI Cost"),
               ("fact_ai_usage", "Chargeback Cost"),
               ("fact_ai_usage", "Monthly Budget"),
               ("fact_ai_usage", "Budget Variance"),
               ("fact_ai_usage", "Budget Variance %")],
-              "Business-unit allocation vs budget")]
-    return section(4, "PERSONA_CFO", "5 · CFO — Finance", v)
+              "Business-unit allocation vs budget — is_mock_budget flags demo budgets")]
+    return section(4, "PERSONA_CFO", "5 - CFO Finance", v)
 
 
 def page_governance():
     v = cards_row([
         ("fact_ai_usage", "Active Users", "Active Principals"),
         ("fact_ai_usage", "Licensed Seats", "Licensed Seats"),
-        ("fact_ai_usage", "Total Requests", "Total Requests"),
         ("fact_ai_usage", "Cost Confidence %", "Cost Confidence"),
+        ("fact_ai_usage", "Cowork Add-on Cost", "Cowork Add-on Cost"),
     ])
     v += [column(16, 150, 624, 300, "dim_platform", "platform_name",
                  "Total AI Cost", "Platform adoption (spend)"),
-          bar(656, 150, 608, 300, "dim_identity", "identity_class",
-              "Active Users", "Adoption by principal type"),
+          bar(656, 150, 608, 300, "dim_identity", "principal_type",
+              "Total Requests", "Adoption by principal type"),
           table(16, 466, 1248, 236, [
               ("dim_platform", "platform_name"),
               ("dim_platform", "data_source"),
               ("dim_platform", "billing_model"),
-              ("dim_platform", "is_variable_cost"),
               ("fact_ai_usage", "Total AI Cost"),
+              ("fact_ai_usage", "Cowork Add-on Cost"),
               ("fact_ai_usage", "Cost Confidence %")],
-              "Platform policy & risk register — REAL vs MOCK provenance")]
-    return section(5, "PERSONA_GOV", "6 · Governance", v)
-
-
-def page_engineering():
-    v = cards_row([
-        ("fact_ai_usage", "Total Tokens", "Total Tokens"),
-        ("fact_ai_usage", "Input Tokens", "Input Tokens"),
-        ("fact_ai_usage", "Output Tokens", "Output Tokens"),
-        ("fact_ai_usage", "Cache Hit Rate", "Cache Hit Rate"),
-        ("fact_ai_usage", "Avg Latency (ms)", "Avg Latency (ms)"),
-        ("fact_ai_usage", "Error Rate", "Error Rate"),
-    ])
-    v += [line(16, 150, 624, 300, "Total Tokens", "Token consumption trend"),
-          column(656, 150, 608, 300, "dim_model", "model_name",
-                 "Cost per 1K Tokens", "Unit economics by model"),
-          table(16, 466, 1248, 236, [
-              ("dim_model", "model_name"),
-              ("dim_model", "provider"),
-              ("fact_ai_usage", "Total Tokens"),
-              ("fact_ai_usage", "Cached Tokens"),
-              ("fact_ai_usage", "Cache Hit Rate"),
-              ("fact_ai_usage", "Avg Latency (ms)"),
-              ("fact_ai_usage", "Error Rate")],
-              "Model performance & APIM telemetry (Foundry = REAL)")]
-    return section(6, "PERSONA_ENG", "7 · Engineering", v)
+              "Platform policy & risk register — REAL vs MOCK provenance, Cowork add-on")]
+    return section(5, "PERSONA_GOV", "6 - Governance", v)
 
 
 def page_appowner():
     v = cards_row([
         ("fact_ai_usage", "Total AI Cost", "Application Spend"),
-        ("fact_ai_usage", "Variable Cost", "Variable Cost"),
+        ("fact_ai_usage", "Workload Attribution %", "Workload Attribution"),
         ("fact_ai_usage", "Total Tokens", "Total Tokens"),
         ("fact_ai_usage", "MoM Cost Delta %", "MoM Cost Delta"),
     ])
@@ -218,30 +209,8 @@ def page_appowner():
               ("fact_ai_usage", "Total AI Cost"),
               ("fact_ai_usage", "Total Tokens"),
               ("fact_ai_usage", "MoM Cost Delta %")],
-              "Application cost, model usage & trend")]
-    return section(7, "PERSONA_APP", "8 · Application Owner", v)
-
-
-def page_license():
-    v = cards_row([
-        ("fact_ai_usage", "Idle Licensed Users", "Idle Licensed Users"),
-        ("fact_ai_usage", "Idle Seat Waste (monthly)", "Reclaimable / mo"),
-        ("fact_ai_usage", "Licensed Seats", "Licensed Seats"),
-        ("fact_ai_usage", "Cost per Active User", "Cost / Active User"),
-    ])
-    v += [column(16, 150, 624, 300, "dim_business_unit", "business_unit_name",
-                 "Idle Seat Waste (monthly)", "Reclaimable spend by business unit"),
-          bar(656, 150, 608, 300, "dim_business_unit", "business_unit_name",
-              "Active Users", "Active users by business unit"),
-          table(16, 466, 1248, 236, [
-              ("dim_identity", "display_name"),
-              ("dim_identity", "team"),
-              ("dim_identity", "business_unit"),
-              ("fact_ai_usage", "Licensed Seats"),
-              ("fact_ai_usage", "Total Requests"),
-              ("fact_ai_usage", "M365 Prompts")],
-              "Seat utilisation — zero activity = reclaim candidate")]
-    return section(8, "PERSONA_LIC", "9 · License Optimization", v)
+              "Application cost, type & trend — Unattributed Workload = APP-UNKNOWN")]
+    return section(6, "PERSONA_APP", "7 - Application Owner", v)
 
 
 def _ds_chart(x, y, w, h, vtype, cat_c, meas, title):
@@ -271,7 +240,7 @@ def page_datasources():
               ("dim_data_source", "cost_fidelity"),
               ("dim_data_source", "availability")],
               "Full extractable-data spectrum — every AI cost signal, its source & fidelity")]
-    return section(9, "DATA_SPECTRUM", "10 · Extractable Data Spectrum", v)
+    return section(7, "DATA_SPECTRUM", "8 - Extractable Data Spectrum", v)
 
 
 def main():
@@ -279,8 +248,11 @@ def main():
     persona_names = {"PERSONA_CFO", "PERSONA_GOV", "PERSONA_ENG", "PERSONA_APP",
                      "PERSONA_LIC", "DATA_SPECTRUM"}
     r["sections"] = [s for s in r["sections"] if s["name"] not in persona_names]
-    r["sections"] += [page_cfo(), page_governance(), page_engineering(),
-                      page_appowner(), page_license(), page_datasources()]
+    # Old PERSONA_ENG (Engineering) and PERSONA_LIC (License Optimization) are
+    # deleted; their content folds into pages 2 and 3 respectively, matching the
+    # 8-page set in CHANGE-SPEC.md.
+    r["sections"] += [page_cfo(), page_governance(),
+                      page_appowner(), page_datasources()]
     for i, s in enumerate(r["sections"]):
         s["ordinal"] = i
     with open(RP, "w") as f:

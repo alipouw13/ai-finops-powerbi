@@ -45,15 +45,15 @@ def az_exe():
     return exe
 
 
-def az_token():
+def az_token(resource="https://api.fabric.microsoft.com"):
     out = subprocess.run(
         [az_exe(), "account", "get-access-token",
-         "--resource", "https://api.fabric.microsoft.com",
+         "--resource", resource,
          "--query", "accessToken", "-o", "tsv"],
         capture_output=True, text=True)
     if out.returncode != 0:
-        sys.exit("Could not get a Fabric token. Run `az login --tenant <id>` first.\n"
-                 + out.stderr.strip())
+        sys.exit("Could not get a token for %s. Run `az login --tenant <id>` first.\n%s"
+                 % (resource, out.stderr.strip()))
     return out.stdout.strip()
 
 
@@ -96,6 +96,49 @@ def poll(loc, token, label, timeout=900):
             sys.exit("%s failed: %s" % (label, json.dumps(payload)[:600]))
         time.sleep(5)
     sys.exit("%s timed out after %ss" % (label, timeout))
+
+
+def reframe(ws_id, ds_id, timeout=900):
+    """Reframe the Direct Lake model so it re-reads the Delta schema.
+
+    "Direct Lake needs no refresh" is true for *data* and false for *schema*.
+    updateDefinition returns 200 and the model looks deployed, but a column the
+    TMDL newly declares stays unmapped until the model reframes: the table still
+    binds, the column is simply absent, and every measure referencing it fails at
+    query time with "cannot be determined". Nothing errors at deploy time and the
+    report just shows blank cards.
+
+    This is how two measures (Rate Card Cost, Rate Card Coverage %) shipped
+    broken after list_cost_usd / has_rate_card were added to the gold fact, and
+    it is why this call is unconditional rather than a flag.
+
+    Refresh lives on the Power BI REST surface, not the Fabric one, so it needs
+    its own token audience.
+    """
+    token = az_token("https://analysis.windows.net/powerbi/api")
+    url = ("https://api.powerbi.com/v1.0/myorg/groups/%s/datasets/%s/refreshes"
+           % (ws_id, ds_id))
+    status, resp, _ = req("POST", url, token, {"type": "full"})
+    if status not in (200, 202):
+        print("  ! reframe request rejected (%s): %s" % (status, str(resp)[:300]))
+        print("    Refresh the dataset by hand, or newly declared columns will")
+        print("    stay unmapped and their measures will return errors.")
+        return
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        time.sleep(5)
+        st, payload, _ = req("GET", url + "?$top=1", token)
+        rows = (payload or {}).get("value") if isinstance(payload, dict) else None
+        if not rows:
+            continue
+        state = rows[0].get("status")
+        if state == "Completed":
+            print("  ✓ reframed — Delta schema re-read")
+            return
+        if state in ("Failed", "Disabled"):
+            sys.exit("reframe failed: %s" % json.dumps(rows[0])[:600])
+    print("  ! reframe still running after %ss — check the dataset in the portal"
+          % timeout)
 
 
 def collect_parts(model_dir):
@@ -176,9 +219,15 @@ def main():
         item_id = find_item(token, args.workspace, "SemanticModel", name)
         print("  ✓ created id=%s" % item_id)
 
+    print("\nreframing so the model re-reads the Delta schema ...")
+    reframe(args.workspace, item_id)
+
     print("\nhttps://app.powerbi.com/groups/%s/datasets/%s"
           % (args.workspace, item_id))
-    print("\nDirect Lake binds to Delta files in OneLake — no refresh, no gateway.")
+    print("\nDirect Lake binds to Delta files in OneLake — no gateway, and no")
+    print("refresh is needed for new *rows*. A schema change is different: newly")
+    print("declared columns stay unmapped until the model reframes, which is why")
+    print("this script now reframes on every deploy.")
     print("If the tables show no data, confirm the gold notebook has run and that")
     print("the lakehouse GUID in the DirectLake expression is correct.")
     return 0

@@ -88,7 +88,7 @@ because both failures otherwise surface late and cryptically:
 
 ## Azure billed cost: FOCUS export via OneLake shortcut
 
-Azure Cost Management writes a **FOCUS 1.0** Parquet export into an ADLS Gen2
+Azure Cost Management writes a **FOCUS** Parquet export into an ADLS Gen2
 account in the customer's own subscription. Fabric reads it through a OneLake
 shortcut — no copy — and `bronze/03_ingest_azure_costmgmt_focus.py` materialises
 it as the Delta table `bronze_azure_cost_focus`:
@@ -151,6 +151,59 @@ read, so Azure cost cannot double-count across the two.
 Verified live: 79,426 rows / \$7,048.73 → `fact_ai_usage` 81,172 rows /
 \$12,818.69, reconciling exactly (`AzureInfra` \$6,342.24 + `AzureAI` \$706.49).
 
+### FOCUS version: 1.2-preview, tolerant of 1.0
+
+Microsoft's current FOCUS dataset is **`1.2-preview`**, not the `1.0` this fork was
+first built against. 1.2-preview promotes several vendor-prefixed 1.0 columns to
+standard names and drops the old spelling — `x_InvoiceId` → `InvoiceId`,
+`x_PricingCurrency` → `PricingCurrency`, `x_SkuMeterName` → `SkuMeter`. A plain
+`F.coalesce(F.col("x_SkuMeterName"), F.col("SkuMeter"))` throws `AnalysisException`
+on whichever version is missing one of the two columns, so `10_conform_usage.py`
+uses a `focus_col` helper that picks each column by **presence first** (tolerating
+either schema) and then coalesces the survivors for per-row nulls. The 1.2 `ListCost`
+column feeds the new `fact_ai_usage[list_cost_usd]` / `[has_rate_card]` columns and
+the `Rate Card Cost` measure; Azure rows therefore carry a genuine list price without
+any modelled rate-card row of their own.
+
+### Foundry token telemetry: prefer the gateway, fall back to metrics
+
+Foundry has two possible token sources, and silver reads **exactly one** — the same
+prefer-and-fall-back rule as FOCUS-over-`usageDetails`, so the two can never
+double-count:
+
+* `bronze_foundry_gateway` (**new**, APIM AI Gateway → Log Analytics) is per-request,
+  **per identity** (Entra `oid` / app client id) with the `cc:`/`bu:` claims the
+  caller forwards. It is the **only** per-user Foundry token attribution path, so it
+  wins when present. Its client-id → application ownership map lets a row resolve a
+  real `application_key` instead of Foundry's default `APP-UNKNOWN`.
+* `bronze_azure_ai_metrics` (Azure Monitor metrics) is **resource-grain and carries
+  no principal**, so every row lands on `identity_key = "unknown"`. It is the fallback
+  when the gateway feed is absent.
+
+This is what shrinks the "Unattributed Identity" bar: the richer source *genuinely
+knows* the identity, rather than the numbers being spread around. The residual
+`Unknown` volume is surfaced honestly by the `Unattributed Requests` /
+`Unattributed Request %` measures and can never reach zero while invoice-grain rows
+are in scope. Gold's `_foundry_feed()` names whichever source actually produced the
+numbers so the Governance page never cites a feed it did not read.
+
+### M365 Copilot Cowork add-on, and the Copilot Credits double-count guard
+
+`bronze_m365_cowork_usage` (**new**) is the Microsoft 365 Copilot **Cowork** add-on —
+a *consumptive* add-on on top of the seat, conformed by the **new** silver entity
+`silver_usage_m365_cowork` as `unit_type = "copilot_credit"` on
+`platform_key = "M365Copilot"`. There is no "Cowork unit"; the billing unit is the
+**Copilot Credit at \$0.01**. Because it is consumptive it sits inside `Variable Cost`,
+never `Fixed Cost`.
+
+The trap: on the Azure bill, Cowork, Copilot Studio **and** Work IQ credits are all
+billed through **one Azure service labelled `Microsoft Copilot Studio`** — there is no
+separate Cowork line item. Those credits are already in the model via the M365 and
+Studio credit feeds, so the FOCUS branch of `10_conform_usage.py` **excludes** that
+service from `silver_usage_azure` (printing the dollar amount it drops). Prepaid
+capacity-pack draw-down is additionally invisible in Azure Cost Management, so the
+credit feed — not the Azure line — is authoritative for this consumption.
+
 ## Two Fabric constraints worth knowing
 
 1. **Schema-enabled lakehouses cannot use the Load Table REST API.** A lakehouse
@@ -194,7 +247,7 @@ verified end to end.
 
 `platform/validate/build_directlake.py` generates a **separate**
 `AIFinOps.DirectLake.SemanticModel` from the committed import model: same
-tables, columns, relationships and all 42 measures, with every partition swapped
+tables, columns, relationships and all 57 measures, with every partition swapped
 from `m`/CSV to `entity`/`directLake`. `AIFinOps.pbip` is never modified, so the
 offline demo keeps working.
 
@@ -205,9 +258,19 @@ python platform/deploy/deploy_semantic_model.py \
     --workspace <workspace-guid> --model-dir AIFinOps.DirectLake.SemanticModel
 ```
 
-Then trigger one refresh to **frame** the model. Framing binds it to the Delta
-files; until it succeeds the tables are not queryable. A framing failure names
-the offending table and column, e.g.
+Then the model must **frame** — re-read the Delta schema — before its tables are
+queryable. `deploy_semantic_model.py` now does this for you: it calls the dataset
+refresh after `updateDefinition` and polls it to completion, unconditionally.
+That is not a convenience, it is a correctness fix (finding 4 in the root README):
+Direct Lake maps *rows* with no refresh, but a **newly declared column stays
+unmapped until the model reframes**. After `list_cost_usd` / `has_rate_card` were
+added to the gold fact, the deploy returned 200 and the table bound, yet
+`Rate Card Cost` / `Rate Card Coverage %` failed at query time with
+`The value for 'list_cost_usd' cannot be determined` and rendered as blank cards —
+no error at deploy time. The reframe is issued on the **Power BI REST surface**
+(`api.powerbi.com/.../datasets/{id}/refreshes`), not the Fabric one, so the script
+acquires a second token audience (`https://analysis.windows.net/powerbi/api`).
+A framing failure names the offending table and column, e.g.
 `Delta protocol violation: the column 'sla_tier' is not found in delta table 'dim_environment'`.
 `GOLD_CONTRACT` in the gold notebook asserts every table's columns up front so
 that mismatch fails in Spark, where the message is clearer.
@@ -215,7 +278,7 @@ that mismatch fails in Spark, where the message is clearer.
 | Option | Effort | Tradeoff |
 |---|---|---|
 | CSV export from gold | S | Zero model change; still an import refresh |
-| Direct Lake on gold | M | Live data, no refresh, no gateway; needs Fabric capacity |
+| Direct Lake on gold | M | Live data, no gateway; no refresh for new *rows*, but a **schema** change reframes; needs Fabric capacity |
 
 ### Three TMDL traps this surfaced
 
@@ -228,7 +291,7 @@ three; `platform/validate/fix_tmdl_measures.py` repairs the third.
 3. **Multi-line DAX not wrapped in triple backticks** -> the following
    `formatString:` line is folded *into* the expression. The measure still
    deploys, then fails at query time with `Failed to resolve name 'SYNTAXERROR'`.
-   **21 of this repo's 42 measures** were affected; every visual bound to them
+   **21 of the model's measures** were affected; every visual bound to them
    would have rendered blank with no error surfaced anywhere.
 
 ### Known gap: `[M365 Prompts]` and `[Error Rate]` are blank
@@ -236,13 +299,37 @@ three; `platform/validate/fix_tmdl_measures.py` repairs the third.
 Microsoft Graph returns per-app **last-activity dates**, not prompt counts, so
 silver emits `unit_type = "active_day"` (one row per user per day they were
 active) rather than inventing a prompt count. `[M365 Prompts]` therefore returns
-blank against the medallion data. Likewise Azure Monitor metrics carry no
-per-request error flag, so `[Error Rate]` is blank — `throttled_count` is a
-capacity signal, not a failure count, and mapping it would report a false ~90%
-error rate.
+blank against the medallion data.
 
-Both are the honest result; the committed CSV demo fabricates these numbers, the
-pipeline does not. `check_report.py --blank` keeps them off the report.
+`[Error Rate]` is subtler after the gateway feed was added. On the **Azure Monitor
+metrics fallback** path the reason is unchanged: metrics carry no per-request error
+flag, `throttled_count` is a capacity signal not a failure count, and mapping it
+would report a false ~90% error rate. But the **`bronze_foundry_gateway`** feed
+*does* carry a genuine per-request `status_code` / `is_error`, so on gateway-fronted
+Foundry traffic `[Error Rate]` is meaningful. It is still not bound to any visual
+and is passed to `check_report.py --blank` **by choice**, not because the data is
+always absent — so the docs no longer claim "no per-request error flag" as a blanket
+reason.
+
+The committed CSV demo fabricates these numbers, the pipeline does not.
+`check_report.py --blank` keeps them off the report.
+
+### The `inferSchema` type trap (finding 5): a clean cast that is wrong
+
+The bronze loader runs `inferSchema`, so a column's Spark type depends on the data
+in each CSV. `bronze_foundry_gateway` writes `is_error` as `True`/`False`, which
+`inferSchema` reads as a **BOOLEAN**, while the silver `USAGE_CONTRACT` declares
+`is_error` as a **STRING** (the other feeds write it as a string). Coalescing a
+boolean against a string literal fails the whole conform loudly with
+`DATATYPE_MISMATCH.DATA_DIFF_TYPES` — which is not the interesting part. The trap is
+the obvious fix, `F.col("is_error").cast("string")`: it runs clean and is **wrong**,
+because Spark renders a boolean as lowercase `'true'`/`'false'`, and `[Error Rate]`
+filters on `is_error = "True"`. The measure would have read 0% forever, silently.
+Silver therefore normalises explicitly —
+`when(coalesce(is_error.cast("boolean"), false), "True").otherwise("False")` — so
+both the boolean-typed gateway feed and the string-typed feeds land on the exact
+`"True"`/`"False"` the measure expects, rather than a bare cast that only *looks*
+right.
 
 ### Shelfware is modelled deliberately
 

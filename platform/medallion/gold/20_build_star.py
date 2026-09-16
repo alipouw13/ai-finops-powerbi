@@ -90,7 +90,8 @@ GOLD_CONTRACT = {
     "dim_model": ["model_key", "model_name", "model_version", "provider", "modality"],
     "dim_platform": ["platform_key", "platform_name", "billing_model", "native_unit",
                      "has_token_telemetry", "has_native_cost", "is_variable_cost",
-                     "data_source", "enterprise_discount_pct"],
+                     "data_source", "enterprise_discount_pct", "addon_unit",
+                     "addon_billing_model"],
     "dim_rate_card": ["rate_key", "platform", "unit_type", "model", "unit_price_usd",
                       "effective_from", "currency", "source", "note"],
     "extractable_data_catalog": ["platform", "signal_category", "signal", "source_api",
@@ -99,8 +100,9 @@ GOLD_CONTRACT = {
     "fact_ai_usage": ["usage_date", "platform_key", "identity_key", "model_key",
                       "cost_center_key", "unit_type", "quantity", "input_tokens",
                       "output_tokens", "cached_tokens", "requests", "cost_usd",
-                      "cost_is_estimated", "is_error", "latency_ms",
-                      "application_key", "environment_key", "business_unit_key"],
+                      "list_cost_usd", "cost_is_estimated", "has_rate_card",
+                      "is_error", "latency_ms", "application_key",
+                      "environment_key", "business_unit_key"],
 }
 
 # The one-side key of every relationship must be unique. Power BI rejects the
@@ -221,8 +223,8 @@ dim_app = (silver("silver_application_map")
 if dim_app.filter(F.col("application_key") == "APP-UNKNOWN").count() == 0:
     dim_app = dim_app.unionByName(row_like(
         dim_app, application_key="APP-UNKNOWN", application_name="Unattributed Workload",
-        application_type="unknown", owner_business_unit_key="BU-UNALLOC", owner_upn="",
-        default_environment_key="ENV-UNK", criticality="Unknown", is_mock="FALSE"))
+        application_type="unattributed", owner_business_unit_key="BU-UNALLOC", owner_upn="",
+        default_environment_key="ENV-UNK", criticality="Unassigned", is_mock="FALSE"))
 write_gold(dim_app, "dim_application")
 
 # ---------------------------------------------------------- dim_environment
@@ -281,14 +283,30 @@ def _azure_feed():
     try:
         read_bronze("bronze_azure_cost_focus")
         return ("bronze_azure_cost_focus",
-                "Cost Management FOCUS 1.0 export via OneLake shortcut")
+                "Cost Management FOCUS 1.2-preview export via OneLake shortcut")
     except Exception:                                             # noqa: BLE001
         return ("bronze_azure_cost", "Consumption usageDetails")
 
 AZURE_TBL, AZURE_NOTE = _azure_feed()
 
+
+# Foundry mirrors silver's prefer-the-gateway rule: when the APIM AI Gateway feed
+# is present it is the source (per-user token attribution), otherwise Azure
+# Monitor metrics are (resource-grain, no identity). The Governance page must
+# never name a source that did not produce the numbers on screen.
+def _foundry_feed():
+    try:
+        read_bronze("bronze_foundry_gateway")
+        return ("bronze_foundry_gateway",
+                "APIM AI Gateway / Log Analytics (per-user token attribution)")
+    except Exception:                                             # noqa: BLE001
+        return ("bronze_azure_ai_metrics",
+                "Azure Monitor metrics (resource-grain, no identity)")
+
+FOUNDRY_TBL, FOUNDRY_NOTE = _foundry_feed()
+
 PLATFORM_SOURCE_TABLE = {
-    "Foundry": "bronze_azure_ai_metrics",
+    "Foundry": FOUNDRY_TBL,
     "M365Copilot": "bronze_m365_copilot_seats",
     "GitHubCopilot": "bronze_ghc_seats",
     "CopilotStudio": "bronze_studio_credits",
@@ -296,8 +314,8 @@ PLATFORM_SOURCE_TABLE = {
     "AzureInfra": AZURE_TBL,
 }
 PLATFORM_NOTE = {
-    "Foundry": "Azure Monitor metrics",
-    "M365Copilot": "Graph seats; cost always modelled from the rate card",
+    "Foundry": FOUNDRY_NOTE,
+    "M365Copilot": "Graph seats + Cowork Copilot Credits (add-on modelled from the rate card)",
     "GitHubCopilot": "GitHub billing API (needs classic PAT)",
     "CopilotStudio": "Dataverse msdyn_aievent - connected, tenant has zero consumption",
     "AzureAI": f"{AZURE_NOTE} - invoiced AI service spend",
@@ -321,31 +339,37 @@ def provenance(platform_key):
     return f"{label} - {note}"
 
 
+# addon_unit / addon_billing_model describe a consumptive add-on billed ON TOP of
+# the platform's native unit. Only Microsoft 365 Copilot has one today: the
+# Cowork add-on, billed in Copilot Credits (there is no "Cowork unit"). Every
+# other platform carries empty strings, not null, so the Direct Lake column is
+# never BLANK in a slicer.
 platform_rows = [
     ("Foundry", "Azure AI Foundry", "Consumption (tokens)", "token", "TRUE", "TRUE",
-     "TRUE", provenance("Foundry"), 0.15),
+     "TRUE", provenance("Foundry"), 0.15, "", ""),
     ("GitHubCopilot", "GitHub Copilot Enterprise", "Seats + premium requests",
-     "premium_request", "FALSE", "TRUE", "TRUE", provenance("GitHubCopilot"), 0.05),
+     "premium_request", "FALSE", "TRUE", "TRUE", provenance("GitHubCopilot"), 0.05, "", ""),
     ("CopilotStudio", "Microsoft Copilot Studio", "Copilot Credits", "copilot_credit",
-     "FALSE", "FALSE", "TRUE", provenance("CopilotStudio"), 0.20),
+     "FALSE", "FALSE", "TRUE", provenance("CopilotStudio"), 0.20, "", ""),
     ("M365Copilot", "Microsoft 365 Copilot", "Per-seat licence", "seat_day",
-     "FALSE", "FALSE", "FALSE", provenance("M365Copilot"), 0.0),
+     "FALSE", "FALSE", "FALSE", provenance("M365Copilot"), 0.0,
+     "copilot_credit", "Usage-based (Copilot Credits) - Cowork"),
 ]
 # Only declare the Azure billing platforms when real cost is actually present.
 # Emitting them unconditionally would leave two empty members in every slicer.
 if BRONZE_REAL:
     platform_rows += [
         ("AzureAI", "Azure AI Services (invoiced)", "Consumption (Azure meters)",
-         "azure_meter", "FALSE", "TRUE", "TRUE", provenance("AzureAI"), 0.0),
+         "azure_meter", "FALSE", "TRUE", "TRUE", provenance("AzureAI"), 0.0, "", ""),
         ("AzureInfra", "Azure AI Supporting Infrastructure",
          "Consumption (Azure meters)", "azure_meter", "FALSE", "TRUE", "TRUE",
-         provenance("AzureInfra"), 0.0),
+         provenance("AzureInfra"), 0.0, "", ""),
     ]
 
 dim_platform = spark.createDataFrame(platform_rows, [
     "platform_key", "platform_name", "billing_model", "native_unit",
     "has_token_telemetry", "has_native_cost", "is_variable_cost", "data_source",
-    "enterprise_discount_pct"])
+    "enterprise_discount_pct", "addon_unit", "addon_billing_model"])
 write_gold(dim_platform, "dim_platform")
 
 # ------------------------------------------------------------------ dim_model
@@ -392,8 +416,12 @@ for plat, app in sp_app.items():
     app_expr = F.when(F.col("platform_key") == plat, F.lit(app)).otherwise(app_expr)
 
 # A source that genuinely knows its workload beats a per-platform guess. Real
-# Azure billing rows name the exact ARM resource, so they carry an
-# application_key from silver; everything else falls back to the platform map.
+# Azure billing rows name the exact ARM resource, and gateway-fronted Foundry
+# rows carry the calling app's client id resolved to an application_key via the
+# ownership map in silver — both arrive with application_key already set, so they
+# resolve to a real workload instead of Foundry's default APP-UNKNOWN. This is
+# what shrinks "Unattributed Workload": the feed genuinely knows the app, rather
+# than the dollars being spread around. Everything else falls back to the map.
 if "application_key" in fact.columns:
     app_expr = F.when(F.col("application_key").isNotNull()
                       & (F.col("application_key") != ""),
@@ -422,12 +450,13 @@ fact = (fact
 
 # Column order matches AIFinOps.SemanticModel/data/fact_ai_usage.csv exactly, so
 # a CSV export from gold is drop-in for the import model. Verified by
-# platform/validate/check_notebooks.py.
+# platform/validate/check_notebooks.py. list_cost_usd sits beside cost_usd and
+# has_rate_card beside cost_is_estimated, mirroring the CSV.
 CONTRACT = ["usage_date", "platform_key", "identity_key", "model_key",
             "cost_center_key", "unit_type", "quantity", "input_tokens",
             "output_tokens", "cached_tokens", "requests", "cost_usd",
-            "cost_is_estimated", "is_error", "latency_ms",
-            "application_key", "environment_key", "business_unit_key"]
+            "list_cost_usd", "cost_is_estimated", "has_rate_card", "is_error",
+            "latency_ms", "application_key", "environment_key", "business_unit_key"]
 missing = [c for c in CONTRACT if c not in fact.columns]
 assert not missing, f"gold fact breaks the CSV column contract: {missing}"
 write_gold(fact.select(*CONTRACT), "fact_ai_usage")

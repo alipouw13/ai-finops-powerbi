@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""Generate the 10-page themed report over the Direct Lake semantic model.
+"""Generate the 8-page themed report over the Direct Lake semantic model.
 
-Page set matches the repo specification in README.md:
+Page set matches the repo specification (CHANGE-SPEC.md); the old 10-page set
+collapsed to 8 by merging Foundry Tokenomics + Engineering into one Engineering
+Tokenomics page, and Waste & Utilisation + License Optimization into one Licence
+Seats page:
 
-    1  Spend Overview            total, fixed vs variable, confidence, capability matrix
-    2  Foundry Tokenomics        in/out/cached tokens, cache hit rate, $/1K
-    3  Waste & Utilisation       idle seats and recoverable spend
-    4  Rate Card                 the editable input + billed-vs-modelled by platform
-    5  CFO - Finance             spend, discounts, forecast, budget variance, chargeback
-    6  Governance                adoption by principal type, REAL-vs-MOCK register
-    7  Engineering               token consumption, unit economics, latency
-    8  Application Owner         spend by application, trend, MoM delta, criticality
-    9  License Optimization      idle users, reclaimable spend, seat utilisation
-    10 Extractable Data Spectrum catalogue of every AI cost signal per platform
+    1  Spend Overview                    total, fixed vs variable, confidence,
+                                         capability matrix incl. Cowork add-on
+    2  Engineering Tokenomics            (old 2 + 7) tokens, requests, latency and
+                                         unit economics across Foundry and Azure
+                                         OpenAI; Platform/Provider/Model slicers
+    3  Licence Seats, Waste & Utilisation (old 3 + 9) idle/low-use seats, seat
+                                         action queue, per-platform seat cards
+    4  Rate Card                         editable input + billed-vs-rate-card cost
+    5  CFO - Finance                     spend, discounts, forecast, budget, MOCK flag
+    6  Governance                        principal type, REAL-vs-MOCK, Cowork add-on
+    7  Application Owner                 spend by application, workload attribution
+    8  Extractable Data Spectrum         catalogue of every AI cost signal per platform
 
 Visual theme follows the supplied dashboard screenshot: deep-indigo canvas, a
 gradient KPI strip (blue -> teal -> green), white rounded content cards, and a
@@ -264,6 +269,130 @@ def slicer(x, y, w, h, entity, column, title):
     return v
 
 
+def multi_row_card(x, y, w, h, title, fields):
+    """A multiRowCard: one category column plus a set of measures, laid out as
+    stacked rows. Used on page 3 in place of the old per-platform donut so the
+    Fixed Cost / Licensed Seats / Idle Users figures read as numbers, not slices."""
+    pq, refs = build_query(fields)
+    objects = {
+        "dataLabels": [{"properties": {"color": solid(CARD_INK), "fontSize": num(12)}}],
+        "categoryLabels": [{"properties": {"color": solid(CARD_INK), "fontSize": num(9)}}],
+        "cardTitle": [{"properties": {"color": solid(CARD_INK), "fontSize": num(10),
+                                      "fontFamily": s_lit("Segoe UI Semibold")}}],
+    }
+    return visual("multiRowCard", x, y, w, h,
+                  {"Values": [{"queryRef": r} for r in refs]}, pq, objects,
+                  vc_common(title))
+
+
+def textbox_note(x, y, w, h, heading, lines, bg=CARD, ink=CARD_INK):
+    """A prose card (textbox). Textboxes are exempt from the binding checks, so
+    every number stays in a measure — the prose only tells the reader how to act."""
+    runs = [{"textRuns": [{"value": heading,
+                           "textStyle": {"fontSize": "12pt", "fontWeight": "bold",
+                                         "color": ink, "fontFamily": "Segoe UI"}}]}]
+    for line in lines:
+        runs.append({"textRuns": [{"value": line,
+                                   "textStyle": {"fontSize": "9.5pt", "color": ink,
+                                                 "fontFamily": "Segoe UI"}}]})
+    cfg = {
+        "name": uid("t"),
+        "layouts": [{"id": 0, "position": {"x": x, "y": y, "z": 0,
+                                           "width": w, "height": h}}],
+        "singleVisual": {
+            "visualType": "textbox", "drillFilterOtherVisuals": True,
+            "objects": {"general": [{"properties": {"paragraphs": runs}}]},
+            "vcObjects": {
+                "background": [{"properties": {"show": lit("true"),
+                                               "color": solid(bg),
+                                               "transparency": num(0)}}],
+                "border": [{"properties": {"show": lit("true"),
+                                           "color": solid(bg), "radius": num(10)}}],
+                "title": [{"properties": {"show": lit("false")}}],
+            },
+        },
+    }
+    return {"x": x, "y": y, "z": 0, "width": w, "height": h,
+            "config": json.dumps(cfg), "filters": "[]"}
+
+
+def header_tooltip(text):
+    """Visual-header tooltip objects, verified against the published PBIR schema
+    (visualContainer/1.4.0). Both VisualHeader and VisualHeaderTooltip are
+    `additionalProperties: false`, so ONLY these property names may be emitted:
+    visualHeader -> show / showTooltipButton / showVisualInformationButton, and
+    visualHeaderTooltip -> type / text. Single quotes in the text are doubled,
+    exactly as the title code escapes them."""
+    esc = text.replace("'", "''")
+    return {
+        "visualHeader": [{"properties": {
+            "show": lit("true"),
+            "showTooltipButton": lit("true"),
+            "showVisualInformationButton": lit("true")}}],
+        "visualHeaderTooltip": [{"properties": {
+            "type": s_lit("Default"),
+            "text": s_lit(esc)}}],
+    }
+
+
+def with_tooltip(container, text):
+    """Merge a header tooltip into an already-built visual container. The tooltip
+    icon only renders because showTooltipButton is true; check_report.py fails the
+    build if a tooltip is configured without it."""
+    cfg = json.loads(container["config"])
+    cfg["singleVisual"].setdefault("vcObjects", {}).update(header_tooltip(text))
+    container["config"] = json.dumps(cfg)
+    return container
+
+
+def exclude_filter(entity, column, value):
+    """An advanced filter keeping only rows where column <> value. Used to drop
+    the Unattributed Identity bar (identity_class = 'Unknown') from page 3 so it
+    stops swamping the per-user chart; the excluded volume is surfaced separately
+    as the Unattributed Requests KPI."""
+    return json.dumps([{
+        "name": uid("f"),
+        "expression": {"Column": {
+            "Expression": {"SourceRef": {"Entity": entity}}, "Property": column}},
+        "type": "Advanced",
+        "filter": {
+            "Version": 2,
+            "From": [{"Name": "s", "Entity": entity, "Type": 0}],
+            "Where": [{"Condition": {"Not": {"Expression": {"Comparison": {
+                "ComparisonKind": 0,
+                "Left": {"Column": {"Expression": {"SourceRef": {"Source": "s"}},
+                                    "Property": column}},
+                "Right": {"Literal": {"Value": f"'{value}'"}}}}}}}],
+        },
+    }])
+
+
+def include_filter(entity, column, value):
+    """An advanced filter keeping only rows where column = value.
+
+    Page 3 is about paid seats, so its per-user visuals scope to
+    identity_class = 'Human'. Merely excluding 'Unknown' is not enough: once the
+    APIM gateway feed attributes Foundry traffic, the backend service principals
+    carry ~890K requests against ~12K for every human combined, so they swamp the
+    chart exactly the way Unattributed Identity used to. Service principals hold
+    no licence, so they do not belong on a seat page at all."""
+    return json.dumps([{
+        "name": uid("f"),
+        "expression": {"Column": {
+            "Expression": {"SourceRef": {"Entity": entity}}, "Property": column}},
+        "type": "Advanced",
+        "filter": {
+            "Version": 2,
+            "From": [{"Name": "s", "Entity": entity, "Type": 0}],
+            "Where": [{"Condition": {"Comparison": {
+                "ComparisonKind": 0,
+                "Left": {"Column": {"Expression": {"SourceRef": {"Source": "s"}},
+                                    "Property": column}},
+                "Right": {"Literal": {"Value": f"'{value}'"}}}}}],
+        },
+    }])
+
+
 def banner(x, y, w, h, text, sub=None):
     runs = [{"textRuns": [{"value": text,
                            "textStyle": {"fontSize": "19pt", "fontWeight": "bold",
@@ -376,82 +505,129 @@ def build_pages():
                    order_desc=False, colors=["#4C8DFF"]))
     v.append(chart("donutChart", M, ROW2_Y, HALF, ROW2_H, "Spend by platform",
                    ("dim_platform", "platform_name"), [(FACT, "Total AI Cost")]))
-    v.append(table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Platform capability matrix",
-                   [("dim_platform", "platform_name", "c"),
-                    ("dim_platform", "native_unit", "c"),
-                    ("dim_platform", "has_token_telemetry", "c"),
-                    ("dim_platform", "has_native_cost", "c"),
-                    (FACT, "Total AI Cost", "m")]))
+    v.append(with_tooltip(
+        table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Platform capability matrix",
+              [("dim_platform", "platform_name", "c"),
+               ("dim_platform", "native_unit", "c"),
+               ("dim_platform", "addon_unit", "c"),
+               (FACT, "Cowork Credits", "m"),
+               (FACT, "Cowork Add-on Cost", "m"),
+               (FACT, "Total AI Cost", "m")]),
+        "Microsoft 365 Copilot bills a fixed seat_day licence plus consumptive "
+        "Cowork usage. The Cowork Credits column is the metered credit COUNT from "
+        "the usage feed; the Cowork Add-on Cost is those credits valued at the "
+        "$0.01 Copilot Credit list price - a MODELLED figure "
+        "(cost_is_estimated = TRUE), not an invoiced amount, which is why the "
+        "Cost Confidence % KPI on this page (and on Governance) stays below 100%. "
+        "Other platforms are blank because they have no add-on unit."))
     v += rail([PLAT_RAIL, BU_RAIL, DATE_RAIL])
     p.append(page("PageSpend", "1 - Spend Overview", v))
 
-    # ------------------------------------------------- 2. Foundry Tokenomics
-    v = [banner(M, M, W - 2 * M, HEAD_H, "Foundry Tokenomics",
-                "The only platform with true token telemetry - input, output and cached")]
+    # ---------------------------------------- 2. Engineering Tokenomics (old 2+7)
+    v = [banner(M, M, W - 2 * M, HEAD_H, "Engineering Tokenomics",
+                "Token, request and latency economics across Azure AI Foundry and "
+                "Azure OpenAI - use the Platform and Provider filters to switch")]
     v += kpi_row([("Total Tokens", "Total Tokens"),
                   ("Input Tokens", "Input Tokens"),
                   ("Output Tokens", "Output Tokens"),
-                  ("Cached Tokens", "Cached Tokens"),
+                  ("Cache Hit Rate", "Cache Hit Rate"),
                   ("Cost per 1K Tokens", "Cost / 1K Tokens")])
-    v.append(chart("clusteredColumnChart", M, BODY_Y, BODY_W, ROW1_H,
-                   "Input vs output tokens by model",
-                   ("dim_model", "model_name"),
-                   [(FACT, "Input Tokens"), (FACT, "Output Tokens")],
-                   legend=True, colors=["#4C8DFF", "#12C2A8"]))
+    v.append(with_tooltip(
+        chart("clusteredColumnChart", M, BODY_Y, BODY_W, ROW1_H,
+              "Input vs output tokens by model",
+              ("dim_model", "model_name"),
+              [(FACT, "Input Tokens"), (FACT, "Output Tokens")],
+              legend=True, colors=["#4C8DFF", "#12C2A8"]),
+        "Only gateway-fronted Azure AI Foundry traffic (APIM AI Gateway -> Log "
+        "Analytics) carries true per-request token telemetry. Azure OpenAI seen "
+        "through Azure Monitor is resource-grain, so its tokens are aggregate, not "
+        "per user. Switch between the two with the Platform and Provider filters."))
     v.append(chart("lineChart", M, ROW2_Y, HALF, ROW2_H, "Token volume over time",
                    ("dim_date", "date_key"), [(FACT, "Total Tokens")],
                    order_desc=False, colors=["#9B7CFF"]))
     v.append(table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Token economics by model",
                    [("dim_model", "model_name", "c"),
+                    ("dim_model", "provider", "c"),
                     (FACT, "Total Tokens", "m"),
-                    (FACT, "Total AI Cost", "m"),
-                    (FACT, "Cost per 1K Tokens", "m")]))
-    v += rail([("dim_model", "model_name", "Model"), PLAT_RAIL, DATE_RAIL])
-    p.append(page("PageTokens", "2 - Foundry Tokenomics", v))
-
-    # --------------------------------------------------- 3. Waste & Utilisation
-    v = [banner(M, M, W - 2 * M, HEAD_H, "Waste & Utilisation",
-                "Licensed seats with no activity in 28 days, and the spend they represent")]
-    v += kpi_row([("Idle Licensed Users", "Idle Licensed Seats"),
-                  ("Idle Seat Waste (monthly)", "Recoverable / month"),
-                  ("Licensed Seats", "Licensed Seats"),
-                  ("Active Users", "Active Users"),
-                  ("Fixed Cost", "Fixed (licence) Cost")])
-    v.append(chart("barChart", M, BODY_Y, BODY_W, ROW1_H,
-                   "Requests by user - the short bars are shelfware",
-                   ("dim_identity", "display_name"), [(FACT, "Total Requests")],
-                   colors=["#F5B93B"]))
-    v.append(chart("donutChart", M, ROW2_Y, HALF, ROW2_H,
-                   "Fixed licence cost by platform",
-                   ("dim_platform", "platform_name"), [(FACT, "Fixed Cost")]))
-    v.append(table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Seat utilisation by user",
-                   [("dim_identity", "display_name", "c"),
-                    (FACT, "Licensed Seats", "m"),
                     (FACT, "Total Requests", "m"),
-                    (FACT, "Total AI Cost", "m")]))
+                    (FACT, "Avg Latency (ms)", "m"),
+                    (FACT, "Cost per 1K Tokens", "m")]))
+    v += rail([PLAT_RAIL, ("dim_model", "provider", "Provider"),
+               ("dim_model", "model_name", "Model"), DATE_RAIL])
+    p.append(page("PageTokens", "2 - Engineering Tokenomics", v))
+
+    # ------------------------ 3. Licence Seats, Waste & Utilisation (old 3+9)
+    v = [banner(M, M, W - 2 * M, HEAD_H, "Licence Seats, Waste & Utilisation",
+                "Idle and low-use licensed seats, the spend they represent, and the "
+                "action to take on each")]
+    v += kpi_row([("Idle Licensed Users", "Idle Licensed Seats"),
+                  ("Low-Use Licensed Seats", "Low-Use Seats (1-20/28d)"),
+                  ("Seat Utilisation %", "Seat Utilisation"),
+                  ("Downgrade Candidate Spend (monthly)", "Downgrade Spend / mo"),
+                  ("Unattributed Requests", "Unattributed Requests")])
+    bar = chart("barChart", M, BODY_Y, HALF, ROW1_H,
+                "Requests by licensed user",
+                ("dim_identity", "display_name"), [(FACT, "Total Requests")],
+                colors=["#F5B93B"])
+    bar["filters"] = include_filter("dim_identity", "identity_class", "Human")
+    v.append(with_tooltip(bar,
+        "Scoped to human identities, the only population that holds a paid seat. "
+        "Service principals and agents are excluded because they carry no licence "
+        "- the Foundry gateway backends alone run ~890K requests against ~12K for "
+        "all humans combined, which would swamp the chart. Requests that carry no "
+        "principal claim at all are counted in the Unattributed Requests KPI "
+        "above; they come from resource-grain Azure Monitor metrics, and wiring "
+        "the APIM gateway is what attributes them."))
+    seat_queue = table(M + HALF + G, BODY_Y, HALF, ROW1_H, "Seat action queue",
+                       [("dim_identity", "display_name", "c"),
+                        ("dim_identity", "team", "c"),
+                        (FACT, "Total Requests", "m"),
+                        (FACT, "Fixed Cost", "m"),
+                        (FACT, "Seat Action", "m")])
+    seat_queue["filters"] = include_filter("dim_identity", "identity_class", "Human")
+    v.append(seat_queue)
+    v.append(multi_row_card(M, ROW2_Y, HALF, ROW2_H, "Fixed cost & seats by platform",
+                            [("dim_platform", "platform_name", "c"),
+                             (FACT, "Fixed Cost", "m"),
+                             (FACT, "Licensed Seats", "m"),
+                             (FACT, "Idle Licensed Users", "m")]))
+    v.append(textbox_note(M + HALF + G, ROW2_Y, HALF, ROW2_H,
+                          "How to act on this page", [
+        "1. Reclaim - no activity in 28 days: pull the seat back into the pool.",
+        "2. Review or downgrade - 1 to 20 requests in 28 days: move to a lower tier.",
+        "3. Renegotiate the tier when cost per active user exceeds the seat price.",
+        "The numbers behind each rule live in the Seat Action, Idle Licensed Users "
+        "and Cost per Active User measures - this card is guidance only."]))
     v += rail([("dim_identity", "identity_class", "Identity class"),
                PLAT_RAIL, DATE_RAIL])
-    p.append(page("PageWaste", "3 - Waste & Utilisation", v))
+    p.append(page("PageWaste", "3 - Licence Seats, Waste & Utilisation", v))
 
     # ------------------------------------------------------------ 4. Rate Card
     v = [banner(M, M, W - 2 * M, HEAD_H, "Rate Card",
                 "The single customer-supplied input - swap for your EA/MCA price sheet")]
     v += kpi_row([("Billed Cost", "Billed (real)"),
-                  ("Modelled Cost", "Modelled (rate card)"),
-                  ("Cost Confidence %", "Cost Confidence"),
+                  ("Rate Card Cost", "Modelled (rate card / list)"),
+                  ("Rate Card Coverage %", "Rate Card Coverage"),
                   ("Discounted Cost", "After Discounts"),
                   ("Discount Savings", "Negotiated Savings")])
     v.append(chart("clusteredBarChart", M, BODY_Y, BODY_W, ROW1_H,
-                   "Billed vs modelled by platform",
+                   "Billed vs rate card by platform",
                    ("dim_platform", "platform_name"),
-                   [(FACT, "Billed Cost"), (FACT, "Modelled Cost")],
+                   [(FACT, "Billed Cost"), (FACT, "Rate Card Cost")],
                    legend=True, colors=["#2ACE86", "#F5B93B"]))
-    v.append(table(M, ROW2_Y, BODY_W, ROW2_H, "Rate card - edit these values",
-                   [("dim_rate_card", "platform", "c"),
-                    ("dim_rate_card", "unit_type", "c"),
-                    ("dim_rate_card", "model", "c"),
-                    ("dim_rate_card", "unit_price_usd", "c"),
-                    ("dim_rate_card", "source", "c")]))
+    v.append(with_tooltip(
+        table(M, ROW2_Y, BODY_W, ROW2_H, "Rate card - edit these values",
+              [("dim_rate_card", "platform", "c"),
+               ("dim_rate_card", "unit_type", "c"),
+               ("dim_rate_card", "model", "c"),
+               ("dim_rate_card", "unit_price_usd", "c"),
+               ("dim_rate_card", "source", "c")]),
+        "To input modelled cost, edit dim_rate_card: in the PoC "
+        "AIFinOps.SemanticModel/data/dim_rate_card.csv, in Fabric "
+        "platform/fabric/bronze_out/bronze_ref_rate_card.csv -> silver_rate_card "
+        "-> dim_rate_card. One row per (platform, unit_type, model) with your "
+        "EA/MCA effective price. Azure meters need no row because FOCUS carries "
+        "ListCost."))
     v += rail([("dim_rate_card", "platform", "Platform"),
                ("dim_rate_card", "unit_type", "Unit type"), DATE_RAIL])
     p.append(page("PageRates", "4 - Rate Card", v))
@@ -459,21 +635,33 @@ def build_pages():
     # -------------------------------------------------------- 5. CFO - Finance
     v = [banner(M, M, W - 2 * M, HEAD_H, "CFO - Finance",
                 "Spend, discounts, forecast, budget variance and chargeback by business unit")]
-    v += kpi_row([("Cost MTD", "Spend MTD"),
-                  ("Forecast Cost (EOM)", "Forecast (EOM)"),
-                  ("Monthly Budget", "Monthly Budget"),
-                  ("Budget Variance", "Budget Variance"),
-                  ("MoM Cost Delta %", "MoM Change")])
-    v.append(chart("clusteredColumnChart", M, BODY_Y, BODY_W, ROW1_H,
-                   "Budget vs forecast by business unit",
-                   ("dim_business_unit", "business_unit_name"),
-                   [(FACT, "Monthly Budget"), (FACT, "Forecast Cost (EOM)")],
-                   legend=True, colors=["#4C8DFF", "#F5B93B"]))
+    kpis = kpi_row([("Cost MTD", "Spend MTD"),
+                    ("Forecast Cost (EOM)", "Forecast (EOM)"),
+                    ("Monthly Budget", "Monthly Budget"),
+                    ("Budget Variance", "Budget Variance"),
+                    ("Budget Coverage %", "Budget Coverage")])
+    with_tooltip(kpis[2],
+        "Budgets live in dim_business_unit[monthly_budget_usd], one row per "
+        "business unit. Set them in bronze_ref_business_hierarchy.csv (Fabric) or "
+        "dim_business_unit.csv (PoC). Flip is_mock_budget to FALSE when real "
+        "budgets are loaded so demo figures stop reading as approved plan.")
+    v += kpis
+    v.append(with_tooltip(
+        chart("clusteredColumnChart", M, BODY_Y, BODY_W, ROW1_H,
+              "Budget vs forecast by business unit",
+              ("dim_business_unit", "business_unit_name"),
+              [(FACT, "Monthly Budget"), (FACT, "Forecast Cost (EOM)")],
+              legend=True, colors=["#4C8DFF", "#F5B93B"]),
+        "Forecast is compared against dim_business_unit[monthly_budget_usd]. Demo "
+        "budgets are flagged is_mock_budget = TRUE (see the chargeback table); edit "
+        "bronze_ref_business_hierarchy.csv (Fabric) or dim_business_unit.csv (PoC) "
+        "and set is_mock_budget FALSE once real budgets are loaded."))
     v.append(chart("areaChart", M, ROW2_Y, HALF, ROW2_H, "Spend trend by month",
                    ("dim_date", "year_month"), [(FACT, "Total AI Cost")],
                    order_desc=False, colors=["#12C2A8"]))
     v.append(table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Chargeback by business unit",
                    [("dim_business_unit", "business_unit_name", "c"),
+                    ("dim_business_unit", "is_mock_budget", "c"),
                     (FACT, "Chargeback Cost", "m"),
                     (FACT, "Monthly Budget", "m"),
                     (FACT, "Budget Variance %", "m")]))
@@ -487,95 +675,65 @@ def build_pages():
                   ("Chargeback Coverage %", "Chargeback Coverage"),
                   ("Unallocated Cost", "Unallocated Spend"),
                   ("Active Users", "Active Identities"),
-                  ("Total Requests", "Total Requests")])
+                  ("Cowork Add-on Cost", "Cowork Add-on Cost")])
     v.append(chart("donutChart", M, BODY_Y, HALF, ROW1_H, "Spend by identity class",
                    ("dim_identity", "identity_class"), [(FACT, "Total AI Cost")]))
-    v.append(chart("clusteredBarChart", M + HALF + G, BODY_Y, HALF, ROW1_H,
-                   "Adoption by principal type",
-                   ("dim_identity", "principal_type"), [(FACT, "Total Requests")],
-                   colors=["#9B7CFF"]))
+    v.append(with_tooltip(
+        chart("clusteredBarChart", M + HALF + G, BODY_Y, HALF, ROW1_H,
+              "Adoption by principal type",
+              ("dim_identity", "principal_type"), [(FACT, "Total Requests")],
+              colors=["#9B7CFF"]),
+        "principal_type is the Entra directory object behind the request - User, "
+        "ServicePrincipal, ManagedIdentity or Agent. Unknown is telemetry that "
+        "carries NO principal claim at all (Azure Monitor metrics at resource "
+        "grain, FOCUS invoice lines), not a privilege problem. Wiring the APIM "
+        "gateway (Entra JWT) and Graph with Reports.Read.All / Directory.Read.All "
+        "collapses Unknown to near zero; it can never reach zero while "
+        "invoice-grain rows are in scope."))
     v.append(table(M, ROW2_Y, BODY_W, ROW2_H, "REAL vs MOCK risk register",
                    [("dim_platform", "platform_name", "c"),
                     ("dim_platform", "data_source", "c"),
                     ("dim_platform", "billing_model", "c"),
                     (FACT, "Total AI Cost", "m"),
+                    (FACT, "Cowork Add-on Cost", "m"),
                     (FACT, "Cost Confidence %", "m")]))
     v += rail([("dim_platform", "data_source", "Provenance"),
                ("dim_identity", "identity_class", "Identity class"), DATE_RAIL])
     p.append(page("PageGov", "6 - Governance", v))
 
-    # ---------------------------------------------------------- 7. Engineering
-    v = [banner(M, M, W - 2 * M, HEAD_H, "Engineering",
-                "Token consumption, unit economics by model and gateway latency")]
-    v += kpi_row([("Total Tokens", "Total Tokens"),
-                  ("Total Requests", "Requests"),
-                  ("Avg Latency (ms)", "Avg Latency (ms)"),
-                  ("Premium Requests", "Premium Requests"),
-                  ("Copilot Credits", "Copilot Credits")])
-    v.append(chart("clusteredColumnChart", M, BODY_Y, BODY_W, ROW1_H,
-                   "Tokens and cost by model", ("dim_model", "model_name"),
-                   [(FACT, "Total Tokens"), (FACT, "Total AI Cost")],
-                   legend=True, colors=["#4C8DFF", "#12C2A8"]))
-    v.append(chart("lineChart", M, ROW2_Y, HALF, ROW2_H, "Requests over time",
-                   ("dim_date", "date_key"), [(FACT, "Total Requests")],
-                   order_desc=False, colors=["#FF6E8A"]))
-    v.append(table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Model detail",
-                   [("dim_model", "model_name", "c"),
-                    ("dim_model", "provider", "c"),
-                    (FACT, "Total Tokens", "m"),
-                    (FACT, "Avg Latency (ms)", "m")]))
-    v += rail([("dim_model", "provider", "Provider"), PLAT_RAIL, DATE_RAIL])
-    p.append(page("PageEng", "7 - Engineering", v))
-
-    # ----------------------------------------------------- 8. Application Owner
+    # ----------------------------------------------------- 7. Application Owner
     v = [banner(M, M, W - 2 * M, HEAD_H, "Application Owner",
-                "Spend by application, trend and month-over-month movement")]
+                "Spend by application, how much is attributed to a named workload, "
+                "and month-over-month movement")]
     v += kpi_row([("Total AI Cost", "Total AI Spend"),
                   ("Cost PM", "Previous Month"),
-                  ("MoM Cost Delta %", "MoM Change"),
                   ("Cost (30d run-rate)", "30-day Run-rate"),
-                  ("Variable Cost %", "Variable Share")])
-    v.append(chart("barChart", M, BODY_Y, BODY_W, ROW1_H, "Spend by application",
-                   ("dim_application", "application_name"),
-                   [(FACT, "Total AI Cost")], colors=["#4C8DFF"]))
+                  ("Unattributed Workload Cost", "Unattributed Workload $"),
+                  ("Workload Attribution %", "Workload Attribution")])
+    v.append(with_tooltip(
+        chart("barChart", M, BODY_Y, BODY_W, ROW1_H, "Spend by application",
+              ("dim_application", "application_name"),
+              [(FACT, "Total AI Cost")], colors=["#4C8DFF"]),
+        "Unattributed Workload (APP-UNKNOWN) is spend whose source feed names no "
+        "workload - an Azure meter on a resource absent from "
+        "bronze_ref_app_inventory, or Foundry traffic that did not pass the "
+        "gateway. It is derived in 20_build_star.py; fix it by tagging the "
+        "resource or adding it to the app inventory, not by reassigning the "
+        "dollars."))
     v.append(chart("areaChart", M, ROW2_Y, HALF, ROW2_H, "Application spend trend",
                    ("dim_date", "year_month"), [(FACT, "Total AI Cost")],
                    order_desc=False, colors=["#12C2A8"]))
     v.append(table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Application detail",
                    [("dim_application", "application_name", "c"),
+                    ("dim_application", "application_type", "c"),
                     ("dim_application", "criticality", "c"),
                     (FACT, "Total AI Cost", "m"),
                     (FACT, "MoM Cost Delta %", "m")]))
     v += rail([("dim_application", "application_name", "Application"),
                ("dim_application", "criticality", "Criticality"), DATE_RAIL])
-    p.append(page("PageApp", "8 - Application Owner", v))
+    p.append(page("PageApp", "7 - Application Owner", v))
 
-    # ------------------------------------------------- 9. License Optimization
-    v = [banner(M, M, W - 2 * M, HEAD_H, "License Optimization",
-                "Idle licensed users, reclaimable spend and seat utilisation")]
-    v += kpi_row([("Idle Licensed Users", "Idle Licensed Users"),
-                  ("Idle Seat Waste (monthly)", "Reclaimable / month"),
-                  ("Licensed Seats", "Licensed Seats"),
-                  ("Active Users", "Active Users"),
-                  ("Cost per Active User", "Cost / Active User")])
-    v.append(chart("clusteredBarChart", M, BODY_Y, BODY_W, ROW1_H,
-                   "Seat cost vs activity by user",
-                   ("dim_identity", "display_name"),
-                   [(FACT, "Fixed Cost"), (FACT, "Total Requests")],
-                   legend=True, colors=["#FF6E8A", "#2ACE86"]))
-    v.append(chart("donutChart", M, ROW2_Y, HALF, ROW2_H,
-                   "Licensed seat cost by platform",
-                   ("dim_platform", "platform_name"), [(FACT, "Fixed Cost")]))
-    v.append(table(M + HALF + G, ROW2_Y, HALF, ROW2_H, "Reclaim candidates",
-                   [("dim_identity", "display_name", "c"),
-                    ("dim_identity", "team", "c"),
-                    (FACT, "Total Requests", "m"),
-                    (FACT, "Fixed Cost", "m")]))
-    v += rail([("dim_identity", "identity_class", "Identity class"),
-               ("dim_identity", "team", "Team"), DATE_RAIL])
-    p.append(page("PageLicense", "9 - License Optimization", v))
-
-    # ------------------------------------------- 10. Extractable Data Spectrum
+    # -------------------------------------------- 8. Extractable Data Spectrum
     v = [banner(M, M, W - 2 * M, HEAD_H, "Extractable Data Spectrum",
                 "Every AI cost signal per platform - source API, identity grain, cost fidelity")]
     v += kpi_row([("Extractable Signals", "Signals Catalogued", "dim_data_source"),
@@ -589,17 +747,22 @@ def build_pages():
     v.append(chart("donutChart", M + HALF + G, BODY_Y, HALF, ROW1_H,
                    "Signals by availability", ("dim_data_source", "availability"),
                    [("dim_data_source", "Extractable Signals")]))
-    v.append(table(M, ROW2_Y, BODY_W, ROW2_H, "Signal catalogue",
-                   [("dim_data_source", "platform", "c"),
-                    ("dim_data_source", "signal", "c"),
-                    ("dim_data_source", "source_api", "c"),
-                    ("dim_data_source", "identity_granularity", "c"),
-                    ("dim_data_source", "cost_fidelity", "c"),
-                    ("dim_data_source", "availability", "c")]))
+    v.append(with_tooltip(
+        table(M, ROW2_Y, BODY_W, ROW2_H, "Signal catalogue",
+              [("dim_data_source", "platform", "c"),
+               ("dim_data_source", "signal", "c"),
+               ("dim_data_source", "source_api", "c"),
+               ("dim_data_source", "identity_granularity", "c"),
+               ("dim_data_source", "cost_fidelity", "c"),
+               ("dim_data_source", "availability", "c")]),
+        "The availability scale is honest by design: REAL = this repo reads it "
+        "today; AVAILABLE = a documented surface (API or CSV export) exists but is "
+        "not wired here; MOCK = demo data stands in for a real feed; ROADMAP = "
+        "announced or planned, not yet extractable."))
     v += rail([("dim_data_source", "platform", "Platform"),
                ("dim_data_source", "availability", "Availability"),
                ("dim_data_source", "cost_fidelity", "Cost fidelity")])
-    p.append(page("PageSpectrum", "10 - Extractable Data Spectrum", v))
+    p.append(page("PageSpectrum", "8 - Extractable Data Spectrum", v))
 
     # Fabric drops `ordinal: 0` as a default, and getDefinition returns pages in
     # arbitrary order, so page 1 would be unanchored. Zero-padded section names

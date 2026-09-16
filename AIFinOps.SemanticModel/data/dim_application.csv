@@ -6,4 +6,4 @@ APP-MOBILE,Mobile Shopping Assistant,agent,BU-RETAIL,robin.hale@contoso.com,ENV-
 APP-M365,Microsoft 365 Copilot,copilot,BU-TECH,cio@contoso.com,ENV-PROD,Medium,TRUE
 APP-GHCP,GitHub Copilot,copilot,BU-TECH,cio@contoso.com,ENV-PROD,Medium,TRUE
 APP-STUDIO,Employee Support Agent,agent,BU-TECH,cio@contoso.com,ENV-PROD,Medium,TRUE
-APP-UNKNOWN,Unattributed Workload,unknown,BU-UNALLOC,,ENV-UNK,Unknown,FALSE
+APP-UNKNOWN,Unattributed Workload,unattributed,BU-UNALLOC,,ENV-UNK,Unassigned,FALSE

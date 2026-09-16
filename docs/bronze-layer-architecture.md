@@ -43,13 +43,13 @@
 
 | Aspect | Detail |
 |---|---|
-| **APIs** | Microsoft Graph: `reports/getMicrosoft365CopilotUsageUserDetail(period)`; `copilot/users/{id}/aiInteractionHistory` & `copilot/interactionHistory/getAllEnterpriseInteractions` (aiInteraction); `subscribedSkus`; `users?$select=assignedLicenses`; directory `users` (identity/dimensions). |
+| **APIs** | Microsoft Graph **`copilotReportRoot`** (under the `/copilot` segment): `getMicrosoft365CopilotUsageUserDetail(period)`, `getMicrosoft365CopilotUserCountSummary`, `getMicrosoft365CopilotUserCountTrend` (the older `reportRoot` beta path is superseded); `copilot/interactionHistory/getAllEnterpriseInteractions` (aiInteraction); `subscribedSkus`; `users?$select=assignedLicenses`; directory `users` (identity/dimensions). |
 | **Telemetry** | Per-user **last-activity DATES per app** (Teams, Word, Excel, Outlook, PowerPoint, OneNote, Loop, Copilot chat). Interaction-level via aiInteraction (appClass, interactionType, from, body, sessionId, timestamps). |
 | **Cost data** | **None from Graph.** M365 Copilot is a **flat per-seat license (~$30/user/mo)**. Cost = seat count × rate (from license/EA data), not telemetry. **Copilot Credits** (new PAYG for agents/Cowork) surface via Power Platform / billing meters, not Graph usage report. |
 | **Usage data** | Adoption/activity dates, enabled-app breadth; interaction counts (aiInteraction). Not per-prompt cost. |
 | **Identity** | **UPN / Entra object id** (strong, human). |
 | **Dimensions** | Department, job title, office location, manager (Entra profile) → BU/hierarchy. |
-| **Limitations** | Usage report returns **dates, not counts/tokens**; privacy delays; aiInteraction needs elevated consent; no dollar figures; Credits/Cowork/Autopilot are separate feeds. |
+| **Limitations** | Usage report returns **dates, not counts/tokens** (why `[M365 Prompts]` is blank by design); privacy delays; aiInteraction needs elevated consent; no dollar figures. The **Cowork** add-on is billed in **Copilot Credits** ($0.01; there is no "Cowork unit"), captured via the M365 admin center Cost Management / Cowork usage report (UI/CSV, no API) as a separate feed from the seat. |
 
 ### 1.2 Copilot Studio
 
@@ -67,9 +67,9 @@
 
 | Aspect | Detail |
 |---|---|
-| **APIs** | `GET /orgs/{org}/copilot/billing/seats` (seat assignments + last activity); `GET /orgs/{org}/copilot/metrics` (aggregate usage); `GET /organizations/{org}/settings/billing/usage` (premium requests / overage $, filter product=copilot). |
-| **Telemetry** | Per-seat `last_activity_at` + `last_activity_editor`; org metrics (active users, acceptances, chats) by day/editor/language/model; premium-request quantities. |
-| **Cost data** | **Seats** (Business $19 / Enterprise $39 per user/mo) **+ premium-request overage** ($0.04 × model multiplier; e.g. code review ≈ 13×) beyond monthly allowance. |
+| **APIs** | `GET /orgs/{org}/copilot/billing/seats` (seat assignments + last activity); Copilot **metrics report-download** endpoints `GET /enterprises/{e}/copilot/metrics/reports/...` (header `X-GitHub-Api-Version: 2026-03-10`); `GET /organizations/{org}/settings/billing/ai_credit/usage` (**current** GitHub AI Credit usage $). |
+| **Telemetry** | Per-seat `last_activity_at` + `last_activity_editor`; org metrics (active users, acceptances, chats) by day/editor/language/model; AI-credit usage quantities. |
+| **Cost data** | **Seats** (Business $19 / Enterprise $39 per user/mo) **+ usage in GitHub AI Credits** ($0.01/credit; Business 1,900 / Enterprise 3,900 per user/mo, pooled, no carry-over). **Premium requests are legacy** (superseded by AI Credits); code completions are **not** billed. |
 | **Usage data** | Premium requests by model/feature; acceptance/engagement metrics. |
 | **Identity** | **`github_login`** (needs mapping to UPN in Silver). |
 | **Dimensions** | Plan type, editor, language, model, repository (in usage). |
@@ -79,7 +79,7 @@
 
 | Aspect | Detail |
 |---|---|
-| **APIs** | **Cost:** `Microsoft.Consumption/usageDetails` (or Cost Management Query API). **Usage:** `microsoft.insights/metrics` on the resource. **Logs:** Diagnostic settings → Log Analytics (request/response, `AzureDiagnostics`). |
+| **APIs** | **Cost:** Cost Management **FOCUS export** (current dataset `1.2-preview`; tolerates 1.0) preferred over `Microsoft.Consumption/usageDetails`. **Usage:** `microsoft.insights/metrics` on the resource (resource-grain, no identity). **Per-user tokens:** APIM AI Gateway → Log Analytics. **Logs:** Diagnostic settings → Log Analytics (`AzureDiagnostics`). |
 | **Telemetry** | Prompt/completion/total tokens, requests, latency, TPM/RPM, error codes, model/deployment name, streaming. |
 | **Cost data** | **Real $** from Azure Cost Management (per meter, per resource, per day) — the authoritative cost source in the whole platform. |
 | **Usage data** | Tokens (input/output/cached), requests, latency, throttles by deployment. |
@@ -158,8 +158,28 @@
 - **Source:** Power Platform admin billing / Azure Cost Management meter
 - **Permissions:** Power Platform admin + Cost Management Reader
 - **Columns:** usage_date, consumer_id, consumer_type, meter_id, meter_name,
-  credits_consumed, unit_price_usd, cost_usd, capability (Cowork/Autopilot/agent)
-- **Descriptions:** **variable** M365 Copilot spend (Credits) incl. Cowork/Autopilot.
+  credits_consumed, unit_price_usd, cost_usd, capability
+- **Descriptions:** **variable** M365 Copilot Credit spend. The **Cowork** add-on is
+  a separate feed (`bronze_m365_cowork_usage`, above); both meter in Copilot Credits.
+
+### bronze_m365_cowork_usage  *(NEW — implemented MOCK)*
+- **PK:** `report_date + user_id`
+- **Grain:** one row per Cowork user per day
+- **Refresh:** daily (data from 1 Apr 2026)
+- **Source:** M365 admin center → Copilot → Cost Management / Cowork usage report
+  (**UI + CSV export, no API**)
+- **Permissions:** M365 admin (Copilot Cost Management); usage-based billing must be
+  enabled and access granted by a **spending policy** (not a licence assignment)
+- **Columns:** report_date, user_id, user_principal_name, display_name, service,
+  spending_policy_name, total_tasks, scheduled_tasks, user_initiated_tasks,
+  credits_consumed, last_activity_date
+- **Descriptions:** the Microsoft 365 Copilot **Cowork** add-on (GA June 2026), a
+  *consumptive* add-on on top of the seat. The billing unit is the **Copilot Credit at
+  $0.01** — there is **no "Cowork unit"**. Conforms to `silver_usage_m365_cowork` as
+  `unit_type = copilot_credit`; cost is modelled from the rate card. **Double-count:** on
+  the Azure bill these credits appear under one service labelled `Microsoft Copilot
+  Studio`, so silver's Azure conform excludes that service. Realised in
+  `platform/fabric/gen_bronze_data.py::gen_m365_cowork()`.
 
 ### bronze_studio_credits
 - **PK:** `usage_date + agent_id + action_type`
@@ -231,6 +251,25 @@
   processed_prompt_tokens, generated_tokens, total_tokens, requests, latency_ms,
   throttled_count
 - **Descriptions:** token/request/latency usage for Foundry/AOAI (cost via join to $ meter).
+
+### bronze_foundry_gateway  *(NEW — implemented MOCK)*
+- **PK:** `time_generated + client_id + oid + model_name`
+- **Grain:** per request × identity (Entra `oid` or app client id)
+- **Refresh:** near real-time
+- **Source:** APIM AI Gateway → Log Analytics (`ApiManagementGatewayLogs`)
+- **Permissions:** Log Analytics Reader; APIM must emit the Entra JWT (`oid` / client id)
+  plus the forwarded `cc:` / `bu:` claims
+- **Columns:** time_generated, oid, client_id, app_id, upn_or_app_name,
+  business_unit_claim, cost_center_claim, model_name, model_version, deployment_region,
+  prompt_tokens, completion_tokens, cached_prompt_tokens, total_tokens, requests,
+  total_latency_ms, status_code, is_error
+- **Descriptions:** the **only** per-user Foundry token attribution path. Silver
+  **prefers** it over `bronze_azure_ai_metrics` (resource-grain, identity = `unknown`) and
+  falls back when absent — never both, so tokens can't double-count. Its client-id →
+  application ownership map resolves a real `application_key` instead of `APP-UNKNOWN`,
+  which is what shrinks "Unattributed Workload" and "Unattributed Identity". Realised in
+  `platform/fabric/gen_bronze_data.py::gen_foundry_gateway()`. (This is the implemented
+  form of the *Phase 2* `bronze_azure_ai_logs` sketch below.)
 
 ### bronze_azure_ai_logs  *(Phase 2)*
 - **PK:** `request_id`
@@ -330,14 +369,16 @@
 
 ## 3. Missing collectors (gap analysis)
 
-Current mock model has: `bronze_m365_usage`, `bronze_ghc_seats`,
-`bronze_ghc_premium_usage`, `bronze_studio_credits`, `bronze_azure_cost`.
+Current mock model now includes the Cowork add-on feed `bronze_m365_cowork_usage` and the
+per-user Foundry feed `bronze_foundry_gateway` alongside the base
+`bronze_m365_copilot_seats`, `bronze_ghc_seats`, `bronze_ghc_premium_usage`,
+`bronze_studio_credits` and `bronze_azure_cost` feeds.
 
 | Missing collector | Needed? | Why | Phase |
 |---|---|---|---|
 | **M365 Copilot Credits** | ✅ Yes | The only **variable** M365 spend; without it, agent/PAYG cost is invisible | MVP |
-| **Copilot Cowork telemetry** | ✅ Yes | New agentic workload; consumes Credits; unattributed otherwise | Phase 2 (folds into Credits) |
-| **Copilot Autopilot telemetry** | ✅ Yes | Same — autonomous agent actions bill Credits | Phase 2 (folds into Credits) |
+| **Copilot Cowork usage** | ✅ **Implemented** | Consumptive add-on (Copilot Credits); `bronze_m365_cowork_usage` → `silver_usage_m365_cowork` | Done (MOCK) |
+| **Per-user Foundry gateway** | ✅ **Implemented** | The only per-user Foundry token attribution path; `bronze_foundry_gateway`, preferred over resource-grain metrics | Done (MOCK) |
 | **Fabric Capacity telemetry** | ✅ Yes | The platform **bills itself** (Copilot-in-Fabric = CU); needed for true TCO | MVP (cost) / Phase 2 (CU detail) |
 | **Azure ML telemetry** | ✅ Yes | Custom-model compute is real AI spend | Phase 2 (MVP if AML in scope) |
 | **Application inventory** | ✅ Yes | No attribution to app/BU without it | **MVP (blocker)** |
@@ -345,10 +386,14 @@ Current mock model has: `bronze_m365_usage`, `bronze_ghc_seats`,
 | **Agent inventory** | ✅ Yes | Non-human spend can't reach a BU without it | MVP |
 | **Identity map** | ✅ Yes | `github_login`↔UPN↔SP resolution — the core IP | **MVP (blocker)** |
 
-**Key insight:** Cowork, Autopilot, and M365 Credits are **not separate APIs** — they
-are **capabilities that consume Copilot Credits**, captured by one
-`bronze_m365_copilot_credits` collector with a `capability` column. Don't build three
-collectors; build one and dimension it.
+**Key insight:** Cowork and M365 Copilot Credits both **consume Copilot Credits** — the
+$0.01 usage-based currency shared with Copilot Studio and Work IQ; there is **no separate
+"Cowork unit" or "Autopilot" billing unit**. In this implementation the seat-vs-add-on
+split follows the two distinct M365 admin-center surfaces: `bronze_m365_copilot_credits`
+for the general credit export and `bronze_m365_cowork_usage` for the Cowork usage report,
+both conforming to `unit_type = copilot_credit`. On the Azure bill all of these credits
+appear under **one** service labelled `Microsoft Copilot Studio`, so ingesting both the
+credit export and the Azure/FOCUS row double-counts — silver excludes that Azure service.
 
 ---
 
@@ -358,12 +403,14 @@ collectors; build one and dimension it.
 |---|---|---|---|---|---|
 | bronze_m365_copilot_usage | Seat utilization / idle | Graph usage report | date+UPN | user/day | last_activity_date, per-app activity |
 | bronze_m365_copilot_seats | Fixed seat basis | Graph subscribedSkus | date+UPN+SKU | user/SKU/day | sku_part_number, assigned_date |
-| bronze_m365_copilot_credits | Variable M365 (Cowork/Autopilot) | PPAC/Cost Mgmt | date+consumer+meter | consumer/day | capability, credits_consumed, cost_usd |
+| bronze_m365_copilot_credits | Variable M365 (Copilot Credits) | PPAC/Cost Mgmt | date+consumer+meter | consumer/day | capability, credits_consumed, cost_usd |
+| bronze_m365_cowork_usage | Cowork add-on (Copilot Credits) | M365 admin center (UI/CSV) | date+user | user/day | total_tasks, credits_consumed |
 | bronze_studio_credits | Studio variable credits | PPAC/Cost Mgmt | date+agent+action | agent/action/day | action_type, credits_consumed, cost_usd |
 | bronze_ghc_seats | GitHub fixed seat + idle | GH billing/seats | date+login | seat/day | last_activity_at, plan_type |
-| bronze_ghc_premium_usage | GitHub variable overage | GH billing/usage | date+login+sku | user/day | quantity, model_multiplier, net_amount |
+| bronze_ghc_premium_usage | GitHub variable overage (LEGACY premium req; AI Credits current) | GH billing/usage | date+login+sku | user/day | quantity, model_multiplier, net_amount |
 | bronze_azure_ai_cost | Foundry/AOAI real $ | Cost Management | date+resource+meter | resource/day | meter_name, cost_usd, tags_json |
-| bronze_azure_ai_metrics | Token/request usage | Azure Monitor | time+resource+deploy | deploy/hour | total_tokens, requests, latency_ms |
+| bronze_azure_ai_metrics | Token/request usage (resource-grain, no identity) | Azure Monitor | time+resource+deploy | deploy/hour | total_tokens, requests, latency_ms |
+| bronze_foundry_gateway | Per-user Foundry tokens (preferred over metrics) | APIM AI Gateway → Log Analytics | time+client_id+oid+model | request | prompt_tokens, completion_tokens, oid/client_id |
 | bronze_fabric_capacity_cost | Platform self-cost $ | Cost Management | date+capacity+meter | capacity/day | sku, cost_usd |
 | bronze_ref_identity_map | Identity resolution | Entra + map | identity_key | principal | upn, github_login, is_human |
 | bronze_ref_app_inventory | App/BU attribution | CMDB/tags | application_key | app | owner_business_unit_key |
@@ -398,7 +445,11 @@ collectors; build one and dimension it.
 ### Silver/Gold normalization (forward reference)
 - **Silver** conforms: `silver_identity` (resolve login↔UPN↔SP via identity_map),
   `silver_usage_unified` (all feeds → one daily grain, every unit → $ via rate_card,
-  `cost_type` fixed/variable), `silver_cost_allocated` (attribute to app/BU via
-  app/agent inventory; untagged → `BU-UNALLOC`).
-- **Gold** = the existing star: `fact_ai_usage` + `dim_platform/identity/model/
-  application/business_unit/cost_center/date/environment/rate_card`.
+  `cost_type` fixed/variable, plus per-row `list_cost_usd` / `has_rate_card` for the
+  list/rate-card comparison), `silver_usage_m365_cowork` (the Cowork add-on as
+  `copilot_credit`), `silver_cost_allocated` (attribute to app/BU via app/agent inventory;
+  untagged → `BU-UNALLOC`). Foundry conforms from `bronze_foundry_gateway` when present,
+  else `bronze_azure_ai_metrics`.
+- **Gold** = the existing star: `fact_ai_usage` (now carrying `list_cost_usd` /
+  `has_rate_card`) + `dim_platform` (now carrying `addon_unit` / `addon_billing_model`) +
+  `dim_identity/model/application/business_unit/cost_center/date/environment/rate_card`.
