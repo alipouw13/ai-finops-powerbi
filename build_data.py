@@ -43,7 +43,10 @@ for r in json.loads((DATA / "ApimModelRate_CL.json").read_text()):
 rate_card += [
     {"rate_key": "M365Copilot|seat_day|", "platform": "M365Copilot", "unit_type": "seat_day",
      "model": "", "unit_price_usd": 30.0/30, "effective_from": "2026-01-01", "currency": "USD",
-     "source": "LIST PRICE", "note": "$30/user/mo enterprise annual commitment. Use your contract rate."},
+     "source": "LIST PRICE", "note": "$30/user/mo enterprise annual commitment (=$1.00/day). Verify at microsoft.com/microsoft-365-copilot; the price is not exposed by any API. Use your contract rate."},
+    {"rate_key": "M365Copilot|copilot_credit|", "platform": "M365Copilot", "unit_type": "copilot_credit",
+     "model": "", "unit_price_usd": 0.01, "effective_from": "2026-01-01", "currency": "USD",
+     "source": "LIST PRICE", "note": "Copilot Credits pay-as-you-go, $0.01/credit. Cowork consumes a variable number of credits per task (model, context, runtime and tools) - there is no published per-task price. Capacity packs and P3 pre-purchase draw down first."},
     {"rate_key": "CopilotStudio|copilot_credit|", "platform": "CopilotStudio", "unit_type": "copilot_credit",
      "model": "", "unit_price_usd": 0.008, "effective_from": "2026-01-01", "currency": "USD",
      "source": "LIST PRICE", "note": "25,000-credit pack $200/mo = $0.008. PAYG = $0.01."},
@@ -52,7 +55,7 @@ rate_card += [
      "source": "LIST PRICE", "note": "Copilot Enterprise $39/user/mo. Use your volume tier."},
     {"rate_key": "GitHubCopilot|premium_request|", "platform": "GitHubCopilot", "unit_type": "premium_request",
      "model": "", "unit_price_usd": 0.04, "effective_from": "2026-01-01", "currency": "USD",
-     "source": "LIST PRICE", "note": "Overage rate. Billed amount comes from netAmount when available."},
+     "source": "LIST PRICE (LEGACY)", "note": "LEGACY. Premium requests are superseded - GitHub now bills usage in GitHub AI Credits at $0.01/credit (Business 1,900/user/mo, Enterprise 3,900/user/mo, pooled, no carry-over; docs.github.com/en/copilot/concepts/billing-and-usage/organizations-and-enterprises/billing). Kept for historical rows; verify your plan before quoting. Billed amount comes from netAmount when available."},
     {"rate_key": "M365Copilot|prompt|", "platform": "M365Copilot", "unit_type": "prompt",
      "model": "", "unit_price_usd": 0.0, "effective_from": "2026-01-01", "currency": "USD",
      "source": "N/A", "note": "M365 Copilot prompts are NOT billable. Usage signal only."},
@@ -74,6 +77,19 @@ def price(platform, unit_type, model=""):
         if r["platform"] == platform and r["unit_type"] == unit_type and r["model"] == model:
             return r["unit_price_usd"]
     return 0.0
+
+
+def rate_lookup(platform, unit_type, model=""):
+    """Rate-card price + whether one genuinely exists. Tokens are model-specific;
+    every other unit is keyed with model="" (mirror of how price() is called)."""
+    for r in rate_card:
+        if r["platform"] == platform and r["unit_type"] == unit_type and r["model"] == model:
+            return r["unit_price_usd"], True
+    if model:
+        for r in rate_card:
+            if r["platform"] == platform and r["unit_type"] == unit_type and r["model"] == "":
+                return r["unit_price_usd"], True
+    return 0.0, False
 
 # ---------------------------------------------------------- identity + org
 own = {o["ClientId"]: o for o in json.loads((DATA / "ApimClientOwnership_CL.json").read_text())}
@@ -118,19 +134,20 @@ write("dim_cost_center", cost_centers,
 # ------------------------------------------------------------- dim_platform
 write("dim_platform", [
  {"platform_key":"Foundry","platform_name":"Azure AI Foundry","billing_model":"Consumption (tokens)",
-  "native_unit":"token","has_token_telemetry":"TRUE","has_native_cost":"TRUE",
+  "native_unit":"token","addon_unit":"","addon_billing_model":"","has_token_telemetry":"TRUE","has_native_cost":"TRUE",
   "is_variable_cost":"TRUE","data_source":"REAL - APIM gateway / Log Analytics"},
  {"platform_key":"GitHubCopilot","platform_name":"GitHub Copilot Enterprise","billing_model":"Seats + premium requests",
-  "native_unit":"premium_request","has_token_telemetry":"FALSE","has_native_cost":"TRUE",
+  "native_unit":"premium_request","addon_unit":"","addon_billing_model":"","has_token_telemetry":"FALSE","has_native_cost":"TRUE",
   "is_variable_cost":"TRUE","data_source":"MOCK - needs classic PAT (manage_billing:copilot)"},
  {"platform_key":"CopilotStudio","platform_name":"Microsoft Copilot Studio","billing_model":"Copilot Credits",
-  "native_unit":"copilot_credit","has_token_telemetry":"FALSE","has_native_cost":"FALSE",
+  "native_unit":"copilot_credit","addon_unit":"","addon_billing_model":"","has_token_telemetry":"FALSE","has_native_cost":"FALSE",
   "is_variable_cost":"TRUE","data_source":"MOCK - needs Dataverse SP + env URL"},
  {"platform_key":"M365Copilot","platform_name":"Microsoft 365 Copilot","billing_model":"Per-seat licence",
-  "native_unit":"seat_day","has_token_telemetry":"FALSE","has_native_cost":"FALSE",
+  "native_unit":"seat_day","addon_unit":"copilot_credit","addon_billing_model":"Usage-based (Copilot Credits) - Cowork",
+  "has_token_telemetry":"FALSE","has_native_cost":"FALSE",
   "is_variable_cost":"FALSE","data_source":"MOCK - needs Graph app (Reports.Read.All)"},
-], ["platform_key","platform_name","billing_model","native_unit","has_token_telemetry",
-    "has_native_cost","is_variable_cost","data_source"])
+], ["platform_key","platform_name","billing_model","native_unit","addon_unit","addon_billing_model",
+    "has_token_telemetry","has_native_cost","is_variable_cost","data_source"])
 
 # ------------------------------------------------------- FACT: Foundry (REAL)
 gw = json.loads((DATA / "foundry_gateway_raw.json").read_text())
@@ -227,10 +244,74 @@ for day in days:
                 "cost_usd": round(n * price("GitHubCopilot","premium_request"), 6),
                 "cost_is_estimated": "FALSE", "is_error": "False", "latency_ms": 0})
 
+# M365 Copilot Cowork: usage-based Copilot Credits ($0.01 each) billed on top of the seat.
+# Attributed to the humans holding M365 seats - a few heavy users, a long tail, and the two
+# idle seat-holders (lee.novak, kim.arroyo) consuming nothing, consistent with their idle seats.
+COWORK_PROFILE = {
+    # upn            (lo, hi)   weekday_prob  weekend_prob
+    "robin.hale":     ((300, 800), 0.75, 0.15),
+    "sam.chen":       ((250, 700), 0.70, 0.10),
+    "aisha.rahman":   ((120, 400), 0.65, 0.10),
+    "marco.silva":    ((100, 350), 0.60, 0.08),
+    "jenny.oyelaran": ((60, 260),  0.55, 0.05),
+    "dev.patel":      ((20, 120),  0.35, 0.03),
+}
+# M365 Copilot Cowork: usage-based Copilot Credits ($0.01 each) billed on top of the seat.
+# Attributed to the humans holding M365 seats - a few heavy users, a long tail, and the two
+# idle seat-holders (lee.novak, kim.arroyo) consuming nothing, consistent with their idle seats.
+# Stamped model_key="Cowork" so the credit feed's other capabilities never sweep into it.
+if "Cowork" not in seen_m:
+    seen_m.add("Cowork")
+    models.append({"model_key": "Cowork", "model_name": "Cowork", "model_version": "",
+                   "provider": "Microsoft 365 Copilot", "modality": "capability"})
+cowork_price = price("M365Copilot", "copilot_credit")
+for day in days:
+    weekday = day.weekday() < 5
+    for upn, _n, _t, _bu, cc in MOCK_PEOPLE:
+        prof = COWORK_PROFILE.get(upn)
+        if not prof:
+            continue  # idle seat-holders consume no Cowork
+        (lo, hi), wp, we = prof
+        if random.random() >= (wp if weekday else we):
+            continue
+        credits = random.randint(lo, hi)
+        facts.append({"usage_date": day.isoformat(), "platform_key": "M365Copilot",
+            "identity_key": upn, "model_key": "Cowork", "cost_center_key": cc,
+            "unit_type": "copilot_credit", "quantity": credits, "input_tokens": 0,
+            "output_tokens": 0, "cached_tokens": 0, "requests": 0,
+            "cost_usd": round(credits * cowork_price, 6), "cost_is_estimated": "TRUE",
+            "is_error": "False", "latency_ms": 0})
+
+# list_cost_usd = quantity x rate-card price when one exists (has_rate_card TRUE); otherwise
+# fall back to cost_usd (never a misleading zero) with has_rate_card FALSE. Token rows are
+# priced from their per-component model rates (input/output/cached), the same rows cost_usd was
+# derived from, so Foundry is rate-card-covered; only models with no rate row fall back.
+for f in facts:
+    if f["unit_type"] == "token":
+        pi, fi = rate_lookup(f["platform_key"], "input_token", f.get("model_key", ""))
+        po, fo = rate_lookup(f["platform_key"], "output_token", f.get("model_key", ""))
+        pc, fc = rate_lookup(f["platform_key"], "cached_token", f.get("model_key", ""))
+        if fi or fo or fc:
+            f["list_cost_usd"] = round(float(f["input_tokens"]) * pi
+                                       + float(f["output_tokens"]) * po
+                                       + float(f["cached_tokens"]) * pc, 8)
+            f["has_rate_card"] = "TRUE"
+        else:
+            f["list_cost_usd"] = f["cost_usd"]
+            f["has_rate_card"] = "FALSE"
+        continue
+    p, found = rate_lookup(f["platform_key"], f["unit_type"], f.get("model_key", ""))
+    if found:
+        f["list_cost_usd"] = round(float(f["quantity"]) * p, 8)
+        f["has_rate_card"] = "TRUE"
+    else:
+        f["list_cost_usd"] = f["cost_usd"]
+        f["has_rate_card"] = "FALSE"
+
 write("fact_ai_usage", facts,
       ["usage_date","platform_key","identity_key","model_key","cost_center_key","unit_type",
-       "quantity","input_tokens","output_tokens","cached_tokens","requests","cost_usd",
-       "cost_is_estimated","is_error","latency_ms"])
+       "quantity","input_tokens","output_tokens","cached_tokens","requests","cost_usd","list_cost_usd",
+       "cost_is_estimated","has_rate_card","is_error","latency_ms"])
 write("dim_model", models, ["model_key","model_name","model_version","provider","modality"])
 
 # ---------------------------------------------------------------- dim_date

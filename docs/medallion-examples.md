@@ -37,6 +37,19 @@ To make lineage visible, everything below follows **one cast of characters**:
   "caller_object_id":"0999cfae-085e-464f-a49d-f8851e3e5195", "streamType":"non-stream" }
 ```
 
+`bronze_foundry_gateway` (APIM AI Gateway → Log Analytics — the **only** per-user Foundry token attribution path)
+```json
+{ "time_generated":"2026-08-07T00:00:00Z", "oid":"", "client_id":"checkout-service",
+  "app_id":"checkout-service", "upn_or_app_name":"checkout-service",
+  "business_unit_claim":"Retail", "cost_center_claim":"CC-1000",
+  "model_name":"gpt-4.1", "model_version":"2025-04-14", "deployment_region":"eastus2",
+  "prompt_tokens":184000, "completion_tokens":42000, "cached_prompt_tokens":3100,
+  "requests":920, "status_code":200, "is_error":"False" }
+```
+Silver **prefers** this feed over resource-grain `bronze_azure_ai_metrics` (which carries
+no identity → `unknown`) and falls back when it is absent — never both, so tokens can't
+double-count.
+
 `bronze_azure_cost_usage` (Cost Management — the $ authority)
 ```json
 { "billingPeriod":"2026-08", "date":"2026-08-07", "meterCategory":"Azure OpenAI",
@@ -69,6 +82,17 @@ Report Refresh Date,Report Period,User Principal Name,Display Name,Last Activity
   "assignedDateTime":"2026-02-01T00:00:00Z" }
 ```
 
+`bronze_m365_cowork_usage` (Cowork add-on — M365 admin center Cost Management / Cowork usage report, UI/CSV only, **no API**)
+```json
+{ "report_date":"2026-08-07", "user_id":"…", "user_principal_name":"priya.nair@contoso.com",
+  "service":"Cowork", "spending_policy_name":"Cowork - Engineering",
+  "total_tasks":14, "scheduled_tasks":4, "user_initiated_tasks":10,
+  "credits_consumed":820, "last_activity_date":"2026-08-07" }
+```
+The billing unit is the **Copilot Credit at $0.01** — there is no "Cowork unit". On the
+Azure bill these credits hide inside one service labelled `Microsoft Copilot Studio`, so
+silver's Azure conform excludes that service to avoid double-counting.
+
 ### GitHub Copilot
 
 `bronze_ghc_seats` (per assigned user — the idle-seat source)
@@ -89,11 +113,15 @@ Report Refresh Date,Report Period,User Principal Name,Display Name,Last Activity
   "copilot_ide_chat":{"total_chats":2140} }
 ```
 
-`bronze_ghc_billing_usage` (enhanced billing — premium-request overage $)
+`bronze_ghc_billing_usage` (enhanced billing — GitHub AI Credit usage; premium requests are **legacy**)
 ```json
 { "date":"2026-08-07", "product":"copilot", "sku":"copilot_premium_request",
   "quantity":320, "unitType":"request", "netAmount":12.80, "repositoryName":"contoso/payments" }
 ```
+The current billing unit is the **GitHub AI Credit** ($0.01; Business 1,900 / Enterprise
+3,900 per user/month, pooled, no carry-over) via
+`GET /organizations/{org}/settings/billing/ai_credit/usage`; the premium-request line above
+is kept only for historical rows. Code completions are not billed.
 
 ### Copilot Studio
 
@@ -171,6 +199,12 @@ usage_date,identity_key,application_key,licensed,active,seat_cost_usd
 2026-08-07,samoketch…,APP-M365,TRUE,FALSE,1.00      ← idle seat: licensed, not active
 ```
 
+`silver_usage_m365_cowork`  (Cowork add-on → `unit_type = copilot_credit`, cost modelled at $0.01/credit)
+```csv
+usage_date,identity_key,platform_key,unit_type,quantity,requests,cost_usd,cost_is_estimated
+2026-08-07,a11f…,M365Copilot,copilot_credit,820,14,8.20,TRUE
+```
+
 `silver_usage_ghc`
 ```csv
 usage_date,identity_key,application_key,licensed,last_activity_at,acceptances,seat_cost_usd,premium_req_cost_usd
@@ -184,14 +218,17 @@ usage_date,identity_key,application_key,sessions,messages_consumed,resolution_ra
 2026-08-07,b7f2…,APP-HRBOT,540,1290,0.71,3.23,FALSE
 ```
 
-`silver_usage_unified`  — **all four unioned to one daily grain** (nulls where a source can't reach)
+`silver_usage_unified`  — **all five unioned to one daily grain** (m365, m365_cowork, ghc, studio, foundry; nulls where a source can't reach)
 ```csv
-usage_date,platform_key,identity_key,model_key,application_key,unit_type,quantity,input_tokens,output_tokens,requests,cost_usd,cost_is_estimated
-2026-08-07,Foundry,0999cfae…,gpt-4o,APP-CHECKOUT,token,226000,184000,42000,920,0.46,FALSE
-2026-08-07,M365Copilot,a11f…,,APP-M365,seat_day,1,0,0,0,1.00,FALSE
-2026-08-07,GitHubCopilot,a11f…,,APP-GHC,seat_day,1,0,0,0,1.28,FALSE
-2026-08-07,CopilotStudio,b7f2…,,APP-HRBOT,message,1290,0,0,540,3.23,FALSE
+usage_date,platform_key,identity_key,model_key,application_key,unit_type,quantity,input_tokens,output_tokens,requests,cost_usd,list_cost_usd,cost_is_estimated,has_rate_card
+2026-08-07,Foundry,0999cfae…,gpt-4o,APP-CHECKOUT,token,226000,184000,42000,920,0.46,0.46,FALSE,TRUE
+2026-08-07,M365Copilot,a11f…,,APP-M365,seat_day,1,0,0,0,1.00,1.00,FALSE,TRUE
+2026-08-07,M365Copilot,a11f…,,APP-M365,copilot_credit,820,0,0,14,8.20,8.20,TRUE,TRUE
+2026-08-07,GitHubCopilot,a11f…,,APP-GHC,seat_day,1,0,0,0,1.28,1.28,FALSE,TRUE
+2026-08-07,CopilotStudio,b7f2…,,APP-HRBOT,copilot_credit,1290,0,0,540,3.23,3.23,FALSE,TRUE
 ```
+`has_rate_card` is TRUE where a genuine list/rate-card price backed the row; when no rate
+exists, `list_cost_usd` falls back to `cost_usd` and `has_rate_card` is FALSE.
 
 `silver_cost_reconciliation`  (modelled vs billed → drives Cost Confidence %)
 ```csv
@@ -205,12 +242,17 @@ usage_date,platform_key,modelled_cost,billed_cost,variance_pct
 
 `fact_ai_usage`  (grain: date × platform × identity × model × application × environment × BU × cost center)
 ```csv
-usage_date,platform_key,identity_key,model_key,cost_center_key,unit_type,quantity,input_tokens,output_tokens,cached_tokens,requests,cost_usd,cost_is_estimated,is_error,latency_ms,application_key,environment_key,business_unit_key
-2026-08-07,Foundry,0999cfae-085e-464f-a49d-f8851e3e5195,gpt-4o,CC-1000,token,226000,184000,42000,3100,920,0.46,FALSE,False,842,APP-CHECKOUT,ENV-PROD,BU-RETAIL
-2026-08-07,M365Copilot,a11f…,,CC-3000,seat_day,1,0,0,0,0,1.00,FALSE,False,0,APP-M365,ENV-PROD,BU-TECH
-2026-08-07,GitHubCopilot,a11f…,,CC-3000,seat_day,1,0,0,0,0,1.28,FALSE,False,0,APP-GHC,ENV-PROD,BU-TECH
-2026-08-07,CopilotStudio,b7f2…,,CC-4000,message,1290,0,0,0,540,3.23,FALSE,False,0,APP-HRBOT,ENV-PROD,BU-HR
+usage_date,platform_key,identity_key,model_key,cost_center_key,unit_type,quantity,input_tokens,output_tokens,cached_tokens,requests,cost_usd,list_cost_usd,cost_is_estimated,has_rate_card,is_error,latency_ms,application_key,environment_key,business_unit_key
+2026-08-07,Foundry,0999cfae-085e-464f-a49d-f8851e3e5195,gpt-4o,CC-1000,token,226000,184000,42000,3100,920,0.46,0.46,FALSE,TRUE,False,842,APP-CHECKOUT,ENV-PROD,BU-RETAIL
+2026-08-07,M365Copilot,a11f…,,CC-3000,seat_day,1,0,0,0,0,1.00,1.00,FALSE,TRUE,False,0,APP-M365,ENV-PROD,BU-TECH
+2026-08-07,M365Copilot,a11f…,,CC-3000,copilot_credit,820,0,0,0,14,8.20,8.20,TRUE,TRUE,False,0,APP-M365,ENV-PROD,BU-TECH
+2026-08-07,GitHubCopilot,a11f…,,CC-3000,seat_day,1,0,0,0,0,1.28,1.28,FALSE,TRUE,False,0,APP-GHC,ENV-PROD,BU-TECH
+2026-08-07,CopilotStudio,b7f2…,,CC-4000,copilot_credit,1290,0,0,0,540,3.23,3.23,FALSE,TRUE,False,0,APP-HRBOT,ENV-PROD,BU-HR
 ```
+`list_cost_usd` is the list / rate-card cost (Azure rows take FOCUS `ListCost`; other
+platforms price from `dim_rate_card`), falling back to `cost_usd` when no rate exists;
+`has_rate_card` records whether a genuine rate backed the row. The `copilot_credit` row on
+`M365Copilot` is the **Cowork** add-on — consumptive, so it lands in Variable, not Fixed, cost.
 
 ### Dimension rows (exact current columns)
 
@@ -223,10 +265,12 @@ b7f2…,HR Helpdesk Bot,Agent,,,HR Ops,HR,CC-4000,Agent,FALSE,BU-HR
 
 `dim_platform`
 ```csv
-platform_key,platform_name,billing_model,native_unit,has_token_telemetry,has_native_cost,is_variable_cost,data_source,enterprise_discount_pct
-Foundry,Azure AI Foundry,Consumption (tokens),token,TRUE,TRUE,TRUE,REAL - APIM gateway / Log Analytics,0.15
-M365Copilot,Microsoft 365 Copilot,Per-seat licence,seat_day,FALSE,FALSE,FALSE,MOCK - needs Graph app (Reports.Read.All),0.0
+platform_key,platform_name,billing_model,native_unit,addon_unit,addon_billing_model,has_token_telemetry,has_native_cost,is_variable_cost,data_source,enterprise_discount_pct
+Foundry,Azure AI Foundry,Consumption (tokens),token,,,TRUE,TRUE,TRUE,REAL - APIM gateway / Log Analytics,0.15
+M365Copilot,Microsoft 365 Copilot,Per-seat licence,seat_day,copilot_credit,Usage-based (Copilot Credits) - Cowork,FALSE,FALSE,FALSE,MOCK - needs Graph app (Reports.Read.All),0.0
 ```
+Only Microsoft 365 Copilot carries an `addon_unit` today (the Cowork Copilot-Credit
+add-on); every other platform gets empty strings, never null.
 
 `dim_application`
 ```csv

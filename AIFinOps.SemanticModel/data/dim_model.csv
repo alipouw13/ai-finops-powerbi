@@ -3,3 +3,4 @@ gpt-4.1-mini,gpt-4.1-mini,2025-04-14,Azure OpenAI,text
 nonexistent-model,nonexistent-model,2025-04-14,Azure OpenAI,text
 gpt-4.1,gpt-4.1,2025-04-14,Azure OpenAI,text
 claude-sonnet-4.5,claude-sonnet-4.5,,GitHub Copilot,text
+Cowork,Cowork,,Microsoft 365 Copilot,capability

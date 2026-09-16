@@ -95,10 +95,28 @@ table fact_ai_usage
 		summarizeBy: sum
 		sourceColumn: cost_usd
 
+	/// What this row costs at list / rate-card price: quantity x dim_rate_card[unit_price_usd],
+	/// or for token rows the per-component input/output/cached model rates. When no rate-card row
+	/// exists (has_rate_card = FALSE) it falls back to cost_usd, so [Rate Card Cost] is never zero.
+	column list_cost_usd
+		dataType: double
+		formatString: \$#,0.0000
+		isHidden
+		summarizeBy: sum
+		sourceColumn: list_cost_usd
+
 	column cost_is_estimated
 		dataType: boolean
 		summarizeBy: none
 		sourceColumn: cost_is_estimated
+
+	/// TRUE when a genuine list/rate-card price was found for this (platform, unit_type, model);
+	/// token rows are priced from their per-component input/output/cached model rates.
+	/// FALSE (a model or unit with no rate-card row) means list_cost_usd is the cost_usd fallback.
+	column has_rate_card
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: has_rate_card
 
 	column is_error
 		dataType: string
@@ -128,7 +146,8 @@ table fact_ai_usage
 	measure 'Cost Confidence %' = DIVIDE([Billed Cost] + 0, [Total AI Cost])
 		formatString: 0.0%
 
-	/// Licence cost. Does not vary with usage.
+	/// Licence cost (seat_day only). Does not vary with usage. M365 Cowork (copilot_credit) is a
+	/// consumptive add-on and is deliberately excluded here - it sits inside Variable Cost.
 	measure 'Fixed Cost' = ```
 			CALCULATE([Total AI Cost], fact_ai_usage[unit_type] IN { "seat_day" })
 			```
@@ -166,6 +185,8 @@ table fact_ai_usage
 			```
 		formatString: \$#,0.0000
 
+	/// Copilot Credits consumed. Spans both Copilot Studio and M365 Copilot Cowork - the same
+	/// $0.01 usage-based currency across both surfaces.
 	measure 'Copilot Credits' = ```
 			CALCULATE(SUM(fact_ai_usage[quantity]), fact_ai_usage[unit_type] = "copilot_credit")
 			```
@@ -204,7 +225,7 @@ table fact_ai_usage
 			FILTER(
 			VALUES(dim_identity[identity_key]),
 			CALCULATE([Licensed Seats], Win) > 0
-			&& CALCULATE([M365 Prompts] + [Premium Requests] + [Total Requests], Win) = 0
+			&& CALCULATE([Total Requests], Win) = 0
 			)
 			)
 			```
@@ -305,6 +326,106 @@ table fact_ai_usage
 
 	measure 'Budget Variance %' = DIVIDE([Forecast Cost (EOM)] - [Monthly Budget], [Monthly Budget])
 		formatString: +0.0%;-0.0%;0.0%
+
+	/// M365 Copilot Cowork usage in Copilot Credits ($0.01 each). Consumptive add-on over the seat.
+	measure 'Cowork Credits' = ```
+			CALCULATE(SUM(fact_ai_usage[quantity]), fact_ai_usage[unit_type] = "copilot_credit", dim_platform[platform_key] = "M365Copilot", dim_model[model_name] = "Cowork")
+			```
+		formatString: #,0
+
+	/// Cowork add-on spend. The credit count is metered, but the dollars are modelled from the
+	/// $0.01 Copilot Credit list price (cost_is_estimated = TRUE). Extra spend on top of the M365 seat.
+	measure 'Cowork Add-on Cost' = ```
+			CALCULATE([Total AI Cost], fact_ai_usage[unit_type] = "copilot_credit", dim_platform[platform_key] = "M365Copilot", dim_model[model_name] = "Cowork")
+			```
+		formatString: \$#,0.00
+
+	/// Spend at list / rate-card price across every platform (fact_ai_usage[list_cost_usd]).
+	measure 'Rate Card Cost' = SUM(fact_ai_usage[list_cost_usd])
+		formatString: \$#,0.00
+
+	/// Share of spend whose row carries a genuine rate-card price (has_rate_card = TRUE).
+	measure 'Rate Card Coverage %' = ```
+			DIVIDE(CALCULATE([Total AI Cost], fact_ai_usage[has_rate_card] = TRUE), [Total AI Cost])
+			```
+		formatString: 0.0%
+
+	/// Active share of licensed seats = (Licensed Seats - Idle Licensed Users) / Licensed Seats.
+	measure 'Seat Utilisation %' = DIVIDE([Licensed Seats] - [Idle Licensed Users], [Licensed Seats])
+		formatString: 0.0%
+
+	/// Licensed identities with 1-20 requests in the trailing 28 days. Idle (0) is counted separately,
+	/// so Low-Use and Idle Licensed Users never double count.
+	/// The trailing + 0 makes a genuine zero read as 0 on a KPI card instead of an empty tile,
+	/// which is indistinguishable from a broken visual.
+	measure 'Low-Use Licensed Seats' = ```
+			VAR Win = DATESINPERIOD(dim_date[date_key], MAX(dim_date[date_key]), -28, DAY)
+			RETURN
+			COUNTROWS(
+			FILTER(
+			VALUES(dim_identity[identity_key]),
+			CALCULATE([Licensed Seats], Win) > 0
+			&& CALCULATE([Total Requests], Win) >= 1
+			&& CALCULATE([Total Requests], Win) <= 20
+			)
+			) + 0
+			```
+		formatString: #,0
+
+	/// Monthly spend carried by low-use seats, priced at the seat_day rate. Spend *at risk*, not a saving.
+	measure 'Downgrade Candidate Spend (monthly)' = ```
+			[Low-Use Licensed Seats] * 30
+			* CALCULATE(AVERAGE(dim_rate_card[unit_price_usd]), dim_rate_card[unit_type] = "seat_day")
+			```
+		formatString: \$#,0.00
+
+	/// Per-identity recommendation from 28-day activity. Text measure - use on the seat action queue.
+	measure 'Seat Action' = ```
+			VAR Win = DATESINPERIOD(dim_date[date_key], MAX(dim_date[date_key]), -28, DAY)
+			VAR Seats = CALCULATE([Licensed Seats], Win)
+			VAR Act = CALCULATE([Total Requests], Win)
+			RETURN
+			SWITCH(TRUE(),
+			Seats = 0, "No licensed seat",
+			Act = 0, "Reclaim - no activity in 28d",
+			Act <= 20, "Review - low use (<20 req/28d)",
+			"Healthy")
+			```
+
+	/// Requests from telemetry carrying no principal (dim_identity[identity_class] = "Unknown").
+	/// + 0 so a fully-attributed tenant reads 0 on the KPI card rather than rendering blank.
+	measure 'Unattributed Requests' = ```
+			CALCULATE([Total Requests], dim_identity[identity_class] = "Unknown") + 0
+			```
+		formatString: #,0
+
+	measure 'Attributed Requests' = [Total Requests] - [Unattributed Requests]
+		formatString: #,0
+
+	measure 'Unattributed Request %' = DIVIDE([Unattributed Requests], [Total Requests])
+		formatString: 0.0%
+
+	/// Spend on APP-UNKNOWN whose source feed named no workload (derived in 20_build_star.py).
+	measure 'Unattributed Workload Cost' = ```
+			CALCULATE([Total AI Cost], dim_application[application_key] = "APP-UNKNOWN")
+			```
+		formatString: \$#,0.00
+
+	/// Share of spend that resolves to a named workload = 1 - unattributed / total.
+	measure 'Workload Attribution %' = 1 - DIVIDE([Unattributed Workload Cost], [Total AI Cost])
+		formatString: 0.0%
+
+	/// Business units with a monthly budget set (> 0).
+	measure 'Budgeted Business Units' = ```
+			CALCULATE(DISTINCTCOUNT(dim_business_unit[business_unit_key]), dim_business_unit[monthly_budget_usd] > 0)
+			```
+		formatString: #,0
+
+	/// Share of business units that have a budget set.
+	measure 'Budget Coverage %' = ```
+			DIVIDE([Budgeted Business Units], CALCULATE(DISTINCTCOUNT(dim_business_unit[business_unit_key]), ALL(dim_business_unit)))
+			```
+		formatString: 0.0%
 
 	partition fact_ai_usage = entity
 		mode: directLake

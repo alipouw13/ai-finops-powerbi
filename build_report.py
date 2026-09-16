@@ -23,6 +23,10 @@ MEASURES = {
     "Licensed Seats", "Total Requests", "Active Users", "Cost per Active User",
     "Idle Licensed Users", "Idle Seat Waste (monthly)", "Error Rate",
     "Avg Latency (ms)", "Cost PM", "MoM Cost Delta %", "Cost (30d run-rate)",
+    # New measures introduced by CHANGE-SPEC.md; added to the semantic model in
+    # parallel by WS-MODEL, so bind by exact spec name here.
+    "Cowork Add-on Cost", "Rate Card Cost", "Rate Card Coverage %", "Seat Action",
+    "Workload Attribution %",
 }
 
 _alias = {}
@@ -91,7 +95,7 @@ def tbl(x, y, w, h, refs, title):
 
 
 pages = [
-    ("ReportSection1", "1 · Spend Overview", [
+    ("ReportSection1", "1 - Spend Overview", [
         card(16, 16, 240, 120, "Total AI Cost", "Total AI Spend"),
         card(272, 16, 240, 120, "Fixed Cost", "Fixed (licences)"),
         card(528, 16, 240, 120, "Variable Cost", "Variable (consumption)"),
@@ -102,48 +106,52 @@ pages = [
         chart("lineChart", 656, 152, 608, 280,
               "dim_date.date_key", [f"{F}.Total AI Cost"], "Daily spend trend"),
         tbl(16, 448, 1248, 250, [
-            "dim_platform.platform_name", "dim_platform.billing_model",
-            "dim_platform.data_source", f"{F}.Total AI Cost", f"{F}.Cost Confidence %"],
-            "Platform capability matrix — note data_source: REAL vs MOCK"),
+            "dim_platform.platform_name", "dim_platform.native_unit",
+            "dim_platform.addon_unit", f"{F}.Total AI Cost", f"{F}.Cowork Add-on Cost"],
+            "Platform capability matrix — Cowork add-on billed on top of the seat"),
     ]),
-    ("ReportSection2", "2 · Foundry Tokenomics (REAL)", [
-        card(16, 16, 240, 120, "Total Tokens", "Total tokens"),
-        card(272, 16, 240, 120, "Input Tokens", "Input"),
-        card(528, 16, 240, 120, "Output Tokens", "Output"),
-        card(784, 16, 240, 120, "Cache Hit Rate", "Cache hit rate"),
-        card(1040, 16, 224, 120, "Cost per 1K Tokens", "$ / 1K tokens"),
-        chart("clusteredBarChart", 16, 152, 624, 280,
-              "dim_model.model_name", [f"{F}.Total Tokens"], "Tokens by model"),
-        chart("clusteredBarChart", 656, 152, 608, 280,
-              "dim_identity.team", [f"{F}.Total AI Cost"], "Cost by team"),
+    ("ReportSection2", "2 - Engineering Tokenomics", [
+        card(16, 16, 240, 120, "Total Tokens", "Total Tokens"),
+        card(272, 16, 240, 120, "Input Tokens", "Input Tokens"),
+        card(528, 16, 240, 120, "Output Tokens", "Output Tokens"),
+        card(784, 16, 240, 120, "Cache Hit Rate", "Cache Hit Rate"),
+        card(1040, 16, 224, 120, "Cost per 1K Tokens", "$ / 1K Tokens"),
+        chart("clusteredColumnChart", 16, 152, 624, 280,
+              "dim_model.model_name", [f"{F}.Input Tokens", f"{F}.Output Tokens"],
+              "Input vs output tokens by model"),
+        chart("lineChart", 656, 152, 608, 280,
+              "dim_date.date_key", [f"{F}.Total Tokens"], "Token volume over time"),
         tbl(16, 448, 1248, 250, [
-            "dim_model.model_name", f"{F}.Input Tokens", f"{F}.Output Tokens",
-            f"{F}.Cached Tokens", f"{F}.Total Requests", f"{F}.Total AI Cost"],
-            "Per-model detail"),
+            "dim_model.model_name", "dim_model.provider", f"{F}.Total Tokens",
+            f"{F}.Total Requests", f"{F}.Avg Latency (ms)", f"{F}.Cost per 1K Tokens"],
+            "Token economics by model — Foundry vs Azure OpenAI"),
     ]),
-    ("ReportSection3", "3 · Waste & Utilisation", [
-        card(16, 16, 300, 140, "Idle Licensed Users", "Idle licensed users (28d)"),
-        card(332, 16, 300, 140, "Idle Seat Waste (monthly)", "Recoverable / month"),
-        card(648, 16, 300, 140, "Licensed Seats", "Total paid seats"),
-        card(964, 16, 300, 140, "Cost per Active User", "Cost / active user"),
-        tbl(16, 172, 1248, 300, [
-            "dim_identity.display_name", "dim_identity.team", "dim_identity.business_unit",
-            f"{F}.Licensed Seats", f"{F}.M365 Prompts", f"{F}.Premium Requests",
-            f"{F}.Total AI Cost"],
-            "Per-user activity — a paid seat with zero prompts is a reclaim candidate"),
-        chart("clusteredColumnChart", 16, 488, 1248, 210,
-              "dim_cost_center.cost_center_name", [f"{F}.Total AI Cost"],
-              "Spend by cost centre"),
+    ("ReportSection3", "3 - Licence Seats, Waste & Utilisation", [
+        card(16, 16, 240, 120, "Idle Licensed Users", "Idle Licensed Seats"),
+        card(272, 16, 240, 120, "Idle Seat Waste (monthly)", "Recoverable / month"),
+        card(528, 16, 240, 120, "Licensed Seats", "Licensed Seats"),
+        card(784, 16, 240, 120, "Total Requests", "Total Requests"),
+        card(1040, 16, 224, 120, "Fixed Cost", "Fixed (licence) Cost"),
+        chart("barChart", 16, 152, 624, 280,
+              "dim_identity.display_name", [f"{F}.Total Requests"],
+              "Requests by licensed user"),
+        tbl(656, 152, 608, 280, [
+            "dim_identity.display_name", "dim_identity.team",
+            f"{F}.Total Requests", f"{F}.Fixed Cost", f"{F}.Seat Action"],
+            "Seat action queue — reclaim, review or keep"),
+        chart("clusteredColumnChart", 16, 448, 1248, 250,
+              "dim_platform.platform_name", [f"{F}.Fixed Cost", f"{F}.Licensed Seats"],
+              "Fixed cost & seats by platform"),
     ]),
-    ("ReportSection4", "4 · Rate Card (edit me)", [
+    ("ReportSection4", "4 - Rate Card", [
         tbl(16, 16, 1248, 420, [
             "dim_rate_card.platform", "dim_rate_card.unit_type", "dim_rate_card.model",
             "dim_rate_card.unit_price_usd", "dim_rate_card.source", "dim_rate_card.note"],
             "dim_rate_card — the single customer-supplied input"),
         chart("clusteredBarChart", 16, 452, 1248, 246,
               "dim_platform.platform_name",
-              [f"{F}.Billed Cost", f"{F}.Modelled Cost"],
-              "Billed vs modelled by platform"),
+              [f"{F}.Billed Cost", f"{F}.Rate Card Cost"],
+              "Billed vs rate card by platform — every platform has both bars"),
     ]),
 ]
 

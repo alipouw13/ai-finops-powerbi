@@ -3,7 +3,8 @@
 Build a portable AI FinOps data source (SQLite) — the Fabric-free data store.
 
 Loads:
-  * all 14 MOCK Bronze tables from platform/fabric/bronze_out/*.csv
+  * all 16 MOCK Bronze tables from platform/fabric/bronze_out/*.csv
+    (incl. bronze_m365_cowork_usage and bronze_foundry_gateway)
   * an `extractable_data_catalog` table (every extractable field per product,
     from docs/extractable-data-by-product.md) — queryable metadata
 

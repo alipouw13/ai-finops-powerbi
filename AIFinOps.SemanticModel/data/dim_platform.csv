@@ -1,5 +1,5 @@
-platform_key,platform_name,billing_model,native_unit,has_token_telemetry,has_native_cost,is_variable_cost,data_source,enterprise_discount_pct
-Foundry,Azure AI Foundry,Consumption (tokens),token,TRUE,TRUE,TRUE,REAL - APIM gateway / Log Analytics,0.15
-GitHubCopilot,GitHub Copilot Enterprise,Seats + premium requests,premium_request,FALSE,TRUE,TRUE,MOCK - needs classic PAT (manage_billing:copilot),0.05
-CopilotStudio,Microsoft Copilot Studio,Copilot Credits,copilot_credit,FALSE,FALSE,TRUE,MOCK - needs Dataverse SP + env URL,0.20
-M365Copilot,Microsoft 365 Copilot,Per-seat licence,seat_day,FALSE,FALSE,FALSE,MOCK - needs Graph app (Reports.Read.All),0.0
+platform_key,platform_name,billing_model,native_unit,addon_unit,addon_billing_model,has_token_telemetry,has_native_cost,is_variable_cost,data_source,enterprise_discount_pct
+Foundry,Azure AI Foundry,Consumption (tokens),token,,,TRUE,TRUE,TRUE,REAL - APIM gateway / Log Analytics,0.15
+GitHubCopilot,GitHub Copilot Enterprise,Seats + premium requests,premium_request,,,FALSE,TRUE,TRUE,MOCK - needs classic PAT (manage_billing:copilot),0.05
+CopilotStudio,Microsoft Copilot Studio,Copilot Credits,copilot_credit,,,FALSE,FALSE,TRUE,MOCK - needs Dataverse SP + env URL,0.20
+M365Copilot,Microsoft 365 Copilot,Per-seat licence,seat_day,copilot_credit,Usage-based (Copilot Credits) - Cowork,FALSE,FALSE,FALSE,MOCK - needs Graph app (Reports.Read.All),0.0

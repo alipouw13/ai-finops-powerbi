@@ -1,5 +1,5 @@
 platform,signal_category,signal,source_api,grain,identity_granularity,cost_fidelity,retention,availability,notes
-Azure AI Foundry,Tokens,Prompt tokens,APIM AI Gateway -> Log Analytics,Per request,Per user (Entra JWT),Billed (effective rate),Log Analytics 30-730d,REAL,Only path with per-user token attribution
+Azure AI Foundry,Tokens,Prompt tokens,APIM AI Gateway -> Log Analytics,Per request,Per user (Entra JWT),Billed (effective rate),Log Analytics 30-730d,REAL,"Only per-user token attribution path - this repo's APIM gateway pattern, not documented Microsoft cost guidance"
 Azure AI Foundry,Tokens,Completion tokens,APIM AI Gateway -> Log Analytics,Per request,Per user (Entra JWT),Billed (effective rate),Log Analytics 30-730d,REAL,
 Azure AI Foundry,Tokens,Cached prompt tokens,APIM AI Gateway -> Log Analytics,Per request,Per user (Entra JWT),Billed (effective rate),Log Analytics 30-730d,REAL,Cache hit lowers cost - optimization signal
 Azure AI Foundry,Identity,Entra OID / ClientId,APIM AI Gateway -> Log Analytics,Per request,Per principal,n/a,Log Analytics 30-730d,REAL,Distinguishes human vs service principal
@@ -7,26 +7,30 @@ Azure AI Foundry,Identity,Cost centre / BU claim,APIM AI Gateway -> Log Analytic
 Azure AI Foundry,Performance,Latency ms,APIM AI Gateway -> Log Analytics,Per request,Per user,n/a,Log Analytics 30-730d,REAL,
 Azure AI Foundry,Performance,Status code / IsError,APIM AI Gateway -> Log Analytics,Per request,Per user,n/a,Log Analytics 30-730d,REAL,
 Azure AI Foundry,Model,Model name / version / region,APIM AI Gateway -> Log Analytics,Per request,Per user,n/a,Log Analytics 30-730d,REAL,
-Azure OpenAI,Tokens,Processed/Generated tokens,Azure Monitor metrics,Per resource/deployment,NONE,Modelled,93 days,AVAILABLE,Azure Monitor has NO identity dimension
-Azure OpenAI,Cost,Actual spend USD,Cost Management export,Per resource/day,NONE,Billed,MTD (replaces),AVAILABLE,Export replaces month-to-date - append downstream
+Azure OpenAI,Tokens,Processed/Generated tokens,Azure Monitor metrics (Microsoft.CognitiveServices/accounts),Per resource/deployment,NONE,Modelled,93 days,AVAILABLE,"Metrics ProcessedPromptTokens, GeneratedTokens, TokenTransaction, TotalTokenCalls. Resource grain, no identity. Azure Monitor is NOT authoritative for cost - use Cost Management (~5h lag)."
+Azure OpenAI,Cost,Actual spend USD (FOCUS),Cost Management FOCUS 1.2-preview export,Per resource/day,NONE,Billed,Persisted export,AVAILABLE,"FOCUS 1.2-preview is current (not 1.0). 1.0->1.2 renames: x_InvoiceId->InvoiceId, x_PricingCurrency->PricingCurrency, x_SkuMeterName->SkuMeter. Carries ListCost for rate-card comparison."
 Azure OpenAI,Throughput,PTU utilisation,Azure Monitor metrics,Per deployment,NONE,n/a,93 days,AVAILABLE,Provisioned throughput sizing signal
 APIM AI Gateway,Governance,Subscription key / product,APIM diagnostics,Per request,Per app/product,n/a,Log Analytics,AVAILABLE,Policy enforcement point
 APIM AI Gateway,Governance,Rate-limit / quota events,APIM policy logs,Per request,Per product,n/a,Log Analytics,AVAILABLE,Token-per-minute throttle telemetry
 APIM AI Gateway,Optimization,Semantic cache hit,APIM policy logs,Per request,Per app,Billed savings,Log Analytics,AVAILABLE,GenAI gateway semantic caching
-M365 Copilot,Usage,Per-app last activity date,Graph getMicrosoft365CopilotUsageUserDetail,Per user per app,Per user (UPN),n/a,180 days,AVAILABLE,Connector wired (extract_m365_graph.py); Graph beta only. Needs Reports.Read.All + concealed-names OFF.
-M365 Copilot,Usage,Active users by app (Teams/Word/etc),Graph usage report,Per user per app,Per user,n/a,180 days,AVAILABLE,Same beta usage report as above. No tokens - usage signal only.
+M365 Copilot,Usage,Per-user per-app last activity,Graph getMicrosoft365CopilotUsageUserDetail (copilotReportRoot),Per user per app,Per user (UPN),n/a,180 days,AVAILABLE,copilotReportRoot (/copilot segment); reportRoot beta superseded. Prompt counts NOT exposed - last-activity dates only (why [M365 Prompts] is blank). Reports.Read.All. Not in US Gov / 21Vianet.
+M365 Copilot,Usage,Active users / trend,Graph getMicrosoft365CopilotUserCountSummary / ...UserCountTrend,Per tenant,Per user,n/a,180 days,AVAILABLE,copilotReportRoot summary/trend resources. No tokens - usage signal only.
 M365 Copilot,Licensing,Assigned seats,Graph subscribedSkus/assignedLicenses,Per user,Per user,Fixed (seat),Live,REAL,Live via platform/fabric/extract_m365_graph.py. Fixed cost - does not vary with usage.
 M365 Copilot,Governance,Interaction audit,Purview audit log,Per interaction,Per user,n/a,90-365 days,MOCK,Prompt/response governance
 M365 Copilot,Cost,Seat cost USD,Contract / EA (manual),Per user/month,Per user,Billed,n/a,MOCK,No price API anywhere in Graph. seats(REAL) x list price(dim_rate_card) = modelled cost.
-GitHub Copilot,Usage,Active/engaged users,REST /copilot/metrics,Org/team/day,Aggregate,n/a,28 days rolling,MOCK,Metrics API is aggregate not per-user
-GitHub Copilot,Usage,Suggestions/acceptances by lang,REST /copilot/metrics,Org/team/day,Aggregate,n/a,28 days,MOCK,Acceptance rate = value signal
-GitHub Copilot,Usage,Chat turns,REST /copilot/metrics,Org/team/day,Aggregate,n/a,28 days,MOCK,
+M365 Copilot,Cowork,Cowork tasks (Total/Scheduled/User-initiated),M365 admin center -> Copilot -> Cowork usage report,Per user,Per user,n/a,From 1 Apr 2026,AVAILABLE,"UI + CSV export, no API. Task counts, Active days, Last activity date. Cowork is billed as Microsoft Copilot Studio credits - do not also count the Azure line."
+M365 Copilot,Cowork,Copilot Credit consumption,M365 admin center -> Copilot -> Cost Management (credit export),Per tenant/day,NONE,Billed (credits),Async CSV,AVAILABLE,"Consumption tab + async CSV export, expressed in credits not USD. Cowork/Studio/Work IQ bill through one Copilot Credits service labelled 'Microsoft Copilot Studio' - ingesting this AND the Azure/FOCUS row double-counts."
+M365 Copilot,Cowork,Consumption dashboard,Viva Insights Consumption Dashboard,Aggregate,NONE,n/a,Reference,AVAILABLE,"Reference only. Capacity-pack draw-down is invisible in Azure Cost Management, so an Azure-only model under-counts prepaid consumption."
+GitHub Copilot,Usage,Active/engaged users,REST /enterprises/{e}/copilot/metrics/reports/... (v2026-03-10),Org/team/day,Aggregate,n/a,28 days rolling,MOCK,Metrics moved to report-download endpoints (X-GitHub-Api-Version: 2026-03-10). Aggregate not per-user.
+GitHub Copilot,Usage,Suggestions/acceptances by lang,REST /enterprises/{e}/copilot/metrics/reports/... (v2026-03-10),Org/team/day,Aggregate,n/a,28 days,MOCK,Acceptance rate = value signal. Code completions are NOT billed.
+GitHub Copilot,Usage,Chat turns,REST /enterprises/{e}/copilot/metrics/reports/... (v2026-03-10),Org/team/day,Aggregate,n/a,28 days,MOCK,
 GitHub Copilot,Licensing,Seat assignee / last activity,REST /copilot/billing/seats,Per seat,Per github_login,Fixed (seat),Live,MOCK,Idle-seat detection source
-GitHub Copilot,Cost,Premium request netAmount USD,REST billing/usage,Per line item,Per login,Billed,Live,MOCK,Needs Enterprise Cloud + admin:enterprise PAT
+GitHub Copilot,Cost,AI Credit usage USD,REST /organizations/{org}/settings/billing/ai_credit/usage,Per org/user,Per login,Billed,Live,MOCK,"CURRENT billing unit: GitHub AI Credits at $0.01/credit (Business 1,900/user/mo, Enterprise 3,900/user/mo, pooled, no carry-over)."
+GitHub Copilot,Cost,Premium request netAmount USD (LEGACY),REST billing/usage,Per line item,Per login,Billed,Live,MOCK,LEGACY - superseded by AI Credits. Kept for historical rows. Needs Enterprise Cloud + admin:enterprise PAT.
 GitHub Copilot,Identity,github_login -> Entra map,SCIM / manual,Per user,Per user,n/a,Live,MOCK,Required to join to dim_identity
-Copilot Studio,Usage,AI event / credit consumed,Dataverse msdyn_aievent,Per event,Per environment,Billed (net),Dataverse,MOCK,msdyn_creditconsumed already net of zero-rating
-Copilot Studio,Usage,Billing type / meter,Dataverse msdyn_aievent,Per event,Per environment,Billed,Dataverse,MOCK,Exclude bring-your-own-model to avoid double count
-Copilot Studio,Capacity,Message/credit balance,Power Platform admin,Per environment,n/a,Billed,Live,MOCK,25k credit pack vs PAYG
+Copilot Studio,Capacity,Credit capacity / consumption,Power Platform admin center -> Licensing -> Products -> Copilot Studio,Per environment,Per environment,Billed,Daily 3mo / monthly 12mo,AVAILABLE,"DOCUMENTED Microsoft surface for Copilot Credit capacity, environments and consumption; downloadable session data. UI/CSV, no API."
+Copilot Studio,Usage,AI event / credit consumed,Dataverse msdyn_aievent,Per event,Per environment,Billed (net),Dataverse,MOCK,COMMUNITY/UNSUPPORTED: Microsoft does not document msdyn_aievent as billing telemetry; no guidance maps its rows to Copilot Credits. Prefer PPAC capacity (documented).
+Copilot Studio,Usage,Billing type / meter,Dataverse msdyn_aievent,Per event,Per environment,Billed,Dataverse,MOCK,COMMUNITY/UNSUPPORTED (see above). Exclude bring-your-own-model to avoid double count.
 Copilot Studio,Cost,Credit cost USD,Rate card (manual),Per credit,n/a,Modelled,n/a,MOCK,0.1/1.5/10 credits per 1k tokens by tier
 Future - Azure AI Search,Optimization,Query/index vector usage,Azure Monitor,Per service,NONE,Modelled,93 days,ROADMAP,RAG grounding cost
 Future - Bot/Agent Service,Usage,Agent invocation cost,Custom telemetry,Per invocation,Per agent,Varies,Custom,ROADMAP,Autonomous agent spend (no human)

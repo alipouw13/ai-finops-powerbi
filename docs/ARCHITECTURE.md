@@ -25,7 +25,11 @@ grain (USD + `unit_type`); gold = the semantic star.
 ## 2. Cost is the only conformed measure; `unit_type` is a dimension
 - **Rationale.** Only Foundry exposes tokens. A literal cross-platform
   "tokenomics" view is impossible; USD with a `unit_type` (`token · copilot_credit
-  · premium_request · seat_day · prompt`) is the only reconciliation.
+  · premium_request · seat_day · prompt`) is the only reconciliation. Microsoft 365
+  Copilot **Cowork** rides this design unchanged: its usage is billed in **Copilot
+  Credits** (there is no "Cowork unit"), so it conforms as `copilot_credit` on
+  `platform_key = M365Copilot` — a *consumptive* add-on inside `Variable Cost`, not a
+  second seat SKU — surfaced by the `Cowork Credits` / `Cowork Add-on Cost` measures.
 - **Tradeoffs.** Loses a single physical activity unit; gains a coherent total.
 - **Value.** A defensible headline number Finance can reconcile to invoices.
 - **Effort.** Already implemented (`fact_ai_usage`).
@@ -46,7 +50,14 @@ through identity.
 ## 4. Universal identity model
 `identity_class ∈ {Human, ServicePrincipal, ManagedIdentity, Agent, Application}`
 with `is_human`. Foundry attribution *requires* the APIM gateway because Azure
-Monitor token metrics have no identity dimension at all.
+Monitor token metrics have no identity dimension at all. Silver now realises this:
+it **prefers** the per-identity `bronze_foundry_gateway` feed (APIM AI Gateway →
+Log Analytics) over the resource-grain `bronze_azure_ai_metrics`, falling back only
+when the gateway feed is absent — never reading both, the same anti-double-count
+pattern as FOCUS-over-`usageDetails`. What remains unattributable lands honestly on
+the `Unattributed Identity` (`Unknown`) member, surfaced by `Unattributed Requests`
+/ `Unattributed Request %`; it can never reach zero while invoice-grain rows are in
+scope.
 
 - **Rationale.** Agents and service principals now drive material AI spend with no
   human in the loop; per-user assumptions silently misattribute cost.
@@ -70,7 +81,12 @@ unallocated spend pro-rata. Budget lives on `dim_business_unit` (MOCK).
 ## 6. Rate card and provenance as first-class data
 Every price lives only in `dim_rate_card` (disconnected input). Real-vs-mock is
 `dim_platform.data_source` + `fact.cost_is_estimated`, surfaced as `Cost
-Confidence %` on page 1.
+Confidence %` on page 1. List/rate-card cost is carried per row on
+`fact_ai_usage[list_cost_usd]` with a `[has_rate_card]` flag — Azure rows take the
+list price straight from FOCUS `ListCost`, every other platform prices from
+`dim_rate_card`, and rows a rate card never priced fall back to `cost_usd` (flagged
+`has_rate_card = FALSE`) rather than showing a misleading \$0. Page 4 compares
+`Billed Cost` vs `Rate Card Cost` per platform on that basis.
 
 - **Rationale.** Nobody pays list; a FinOps programme loses credibility the first
   time modelled dollars are mistaken for billed ones.
@@ -78,12 +94,16 @@ Confidence %` on page 1.
 - **Effort.** S (done).
 
 ## 7. Persona reporting
-Five pages (CFO, Governance, Engineering, App Owner, License Optimization) over the
-same model — see `build_personas.py`. Report pages are additive/idempotent so the
+The report is 8 pages. `build_report.py` builds pages 1–4 (Spend Overview,
+Engineering Tokenomics, Licence Seats/Waste & Utilisation, Rate Card);
+`build_personas.py` appends 4 persona pages — **CFO Finance, Governance,
+Application Owner, Extractable Data Spectrum** — over the same model. The old
+standalone *Engineering* and *License Optimization* persona pages are removed;
+their content folds into pages 2 and 3. Report pages are additive/idempotent so the
 model and pages 1–4 are never at risk.
 
 ## 8. Azure Cost Management FOCUS export via ADLS shortcut
-Azure billed spend now lands as Cost Management **FOCUS 1.0** Parquet exports in a
+Azure billed spend now lands as Cost Management **FOCUS** Parquet exports in a
 customer-owned ADLS Gen2 account, surfaced to Fabric through a OneLake shortcut:
 Cost Management export → `stfinopscost848055/costexports/focus` →
 `Files/azure_costmgmt_focus` in lakehouse `LH_tokenomics_bronze_real`.
@@ -95,14 +115,19 @@ Verified implementation:
 | Azure scope | Tenant `840a80c0-e4a5-47be-8a1d-7ecfa61e839c`, subscription `a699796c-ab5c-48bf-8bd7-adb31e225f11`, resource group `rg-finops-costexport` in `eastus2` |
 | Storage | ADLS Gen2 account `stfinopscost848055` (`StorageV2`, `Standard_LRS`, hierarchical namespace enabled), container `costexports`, root folder `focus` |
 | Exports | `finops-focus-daily` Active Daily MonthToDate; `finops-focus-bf-202606`, `finops-focus-bf-202607`, `finops-focus-bf-202608` Inactive Custom monthly backfills |
-| Export contract | Cost Management api-version `2023-07-01-preview`; `definition.type = FocusCost`; `dataVersion = 1.0`; Parquet; `partitionData = true`; `granularity = Daily` |
+| Export contract | Cost Management api-version `2023-07-01-preview`; `definition.type = FocusCost`; `dataVersion = 1.0` (as deployed; the ingest also tolerates the current **1.2-preview** dataset — see note below); Parquet; `partitionData = true`; `granularity = Daily` |
 | Fabric | Workspace `AI-tokenomics`; cloud connection `finops-costexports-adls` (`AzureDataLakeStorage`, `server` + `path`, account-key auth); OneLake shortcut `Files/azure_costmgmt_focus` in lakehouse `LH_tokenomics_bronze_real` |
 
-- **Rationale.** FOCUS 1.0 is the FinOps Foundation's open cost specification:
+- **Rationale.** FOCUS is the FinOps Foundation's open cost specification:
   vendor-neutral column names that let the same silver logic later absorb AWS/GCP
   exports. It also carries `BilledCost`, `EffectiveCost`, `ListCost`, and
   `ContractedCost`, which is the actual/discounted/list split the CFO persona
-  needs. That replaces the old modelled discount assumption for the Azure slice.
+  needs (and `ListCost` now feeds `fact_ai_usage[list_cost_usd]` / `Rate Card
+  Cost`). That replaces the old modelled discount assumption for the Azure slice.
+  The export was deployed at `dataVersion = 1.0`, but Microsoft's current dataset is
+  **`1.2-preview`**, which renames `x_InvoiceId → InvoiceId`, `x_PricingCurrency →
+  PricingCurrency` and `x_SkuMeterName → SkuMeter`; `10_conform_usage.py` now picks
+  each FOCUS column by presence (`focus_col`), so it reads either version.
 - **Tradeoffs.** OneLake shortcuts are zero-copy: no duplicated storage bill and
   no second retention policy to govern. The customer keeps the export data in
   their own subscription and controls retention/access there. The cost is an
@@ -152,7 +177,7 @@ Operational gotchas:
 | Item | Value | Effort |
 |---|---|---|
 | Live connectors for remaining mock platforms | Azure/Foundry billed cost is REAL; M365 Copilot, GitHub Copilot, and Copilot Studio still need live feeds | M each |
-| DirectLake gold + scheduled bronze ingest | live cost, no refresh | M |
+| DirectLake gold + scheduled bronze ingest | live cost; no refresh for new *rows* (a **schema** change reframes — see the deploy findings in the root and medallion READMEs) | M |
 | AutoML forecast replacing straight-line | tighter budget calls | M |
 | Anomaly detection (cost spikes) + alerts | proactive FinOps | M |
 | Fabric Copilot Q&A + RAG insight layer | NL self-serve | see `ai-insight-layer.md` |

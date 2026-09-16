@@ -50,11 +50,14 @@ DISCOUNT_PCT = {
 }
 platform = read("dim_platform.csv")
 for r in platform:
+    r.setdefault("addon_unit", "")
+    r.setdefault("addon_billing_model", "")
     r.setdefault("enterprise_discount_pct", "")
     if not r["enterprise_discount_pct"]:
         r["enterprise_discount_pct"] = DISCOUNT_PCT.get(r["platform_key"], "0.0")
 write("dim_platform.csv",
       ["platform_key", "platform_name", "billing_model", "native_unit",
+       "addon_unit", "addon_billing_model",
        "has_token_telemetry", "has_native_cost", "is_variable_cost", "data_source",
        "enterprise_discount_pct"],
       platform)
@@ -101,7 +104,7 @@ APPS = {
     "APP-M365":     ("Microsoft 365 Copilot",     "copilot",   "BU-TECH",      "cio@contoso.com",         "ENV-PROD", "Medium", "TRUE"),
     "APP-GHCP":     ("GitHub Copilot",            "copilot",   "BU-TECH",      "cio@contoso.com",         "ENV-PROD", "Medium", "TRUE"),
     "APP-STUDIO":   ("Employee Support Agent",    "agent",     "BU-TECH",      "cio@contoso.com",         "ENV-PROD", "Medium", "TRUE"),
-    "APP-UNKNOWN":  ("Unattributed Workload",     "unknown",   "BU-UNALLOC",   "",                        "ENV-UNK",  "Unknown","FALSE"),
+    "APP-UNKNOWN":  ("Unattributed Workload",     "unattributed","BU-UNALLOC",   "",                        "ENV-UNK",  "Unassigned","FALSE"),
 }
 write("dim_application.csv",
       ["application_key", "application_name", "application_type",

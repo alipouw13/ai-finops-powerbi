@@ -41,4 +41,7 @@ the **evidence rows**. Handles: business-unit ranking, idle licenses, cost by mo
 application / platform, fixed-vs-variable, and "where can we reduce spend".
 
 This is the demo to run when Fabric licensing is blocked: it makes the AI story tangible
-without a capacity, and everything lines up with the Power BI persona pages.
+without a capacity. It keeps these five original persona tabs; the Power BI report has
+since consolidated to 8 pages (Engineering folds into *Engineering Tokenomics*, License
+Optimization into *Licence Seats, Waste & Utilisation*), but both are backed by the same
+Gold model and measures.
