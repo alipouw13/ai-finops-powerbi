@@ -274,21 +274,34 @@ write_gold(dim_cc, "dim_cost_center")
 # change. Hardcoding "REAL - Azure Monitor metrics" here previously relabelled
 # synthetic spend as real, which is precisely what this accelerator exists to
 # avoid.
+# Which Azure billing feed is actually in play. This mirrors the preference
+# silver applies (FOCUS wins when present), so the Governance page can never
+# name a source that did not produce the numbers on screen.
+def _azure_feed():
+    try:
+        read_bronze("bronze_azure_cost_focus")
+        return ("bronze_azure_cost_focus",
+                "Cost Management FOCUS 1.0 export via OneLake shortcut")
+    except Exception:                                             # noqa: BLE001
+        return ("bronze_azure_cost", "Consumption usageDetails")
+
+AZURE_TBL, AZURE_NOTE = _azure_feed()
+
 PLATFORM_SOURCE_TABLE = {
     "Foundry": "bronze_azure_ai_metrics",
     "M365Copilot": "bronze_m365_copilot_seats",
     "GitHubCopilot": "bronze_ghc_seats",
     "CopilotStudio": "bronze_studio_credits",
-    "AzureAI": "bronze_azure_cost",
-    "AzureInfra": "bronze_azure_cost",
+    "AzureAI": AZURE_TBL,
+    "AzureInfra": AZURE_TBL,
 }
 PLATFORM_NOTE = {
     "Foundry": "Azure Monitor metrics",
     "M365Copilot": "Graph seats; cost always modelled from the rate card",
     "GitHubCopilot": "GitHub billing API (needs classic PAT)",
     "CopilotStudio": "Dataverse msdyn_aievent - connected, tenant has zero consumption",
-    "AzureAI": "Consumption usageDetails - invoiced AI service spend",
-    "AzureInfra": "Consumption usageDetails - invoiced supporting infrastructure",
+    "AzureAI": f"{AZURE_NOTE} - invoiced AI service spend",
+    "AzureInfra": f"{AZURE_NOTE} - invoiced supporting infrastructure",
 }
 
 

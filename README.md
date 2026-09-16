@@ -73,6 +73,46 @@ regression: the Azure resources carry no owning-BU tag, so real spend routes to
 `BU-UNALLOC`. An unattributable majority of real AI spend is precisely what this
 accelerator exists to make visible.
 
+### Azure cost now comes from a FOCUS 1.0 export, not `usageDetails`
+
+The Azure billing feed has been replaced. Cost Management writes a **FOCUS 1.0**
+Parquet export into an ADLS Gen2 account in the customer's own subscription; a
+OneLake shortcut surfaces it in `bronze_real` with **zero copy**, and
+`03_ingest_azure_costmgmt_focus.py` materialises it as the Delta table
+`bronze_azure_cost_focus`. Silver prefers that table over the legacy
+`usageDetails` extract whenever it exists, and falls back otherwise — only one of
+the two is ever read, so Azure cost cannot double-count across them.
+
+Why FOCUS rather than more `usageDetails`:
+
+| | |
+|---|---|
+| **Four cost measures, not one** | `BilledCost`, `EffectiveCost`, `ListCost`, `ContractedCost` arrive as separate columns, so list-vs-contracted is data instead of an assumption. `silver_azure_cost_detail` keeps all four. |
+| **Vendor-neutral** | FOCUS is the FinOps Foundation's open spec, so an AWS or GCP export conforms through the same silver branch. |
+| **The spec classifies the workload** | `ServiceCategory` drives the `AzureAI` / `AzureInfra` split, replacing string-matching on ARM resource ids. |
+| **Zero copy** | Storage stays in the customer's subscription; they keep retention and control of the raw extract. |
+
+Verified live: **79,426 FOCUS rows / \$7,048.73** billed Azure spend over
+2026-06-01 → 2026-09-17, flowing into `fact_ai_usage` (81,172 rows, \$12,818.69)
+and reconciling exactly — `AzureInfra` \$6,342.24 + `AzureAI` \$706.49 =
+\$7,048.73, at 100% cost confidence on both.
+
+Stand it up with `platform/deploy/create_cost_export.py` (Azure side) and
+`platform/deploy/create_onelake_shortcut.py` (Fabric side); both support
+`--dry-run`.
+
+### A third silent-failure bug, same family as the two above
+
+**De-duplicating FOCUS on a composed row key silently deletes cost.** Keying on
+resource + meter + charge period looks obviously correct and is not: FOCUS
+legitimately emits many rows sharing those values (different pricing tiers, tags
+and SKU details). Measured on this data it dropped **~75% of rows and 30% of the
+cost** — \$7,048.73 down to \$4,919.71 — with no error and a plausible-looking
+total. Export overlap is real and must be resolved at **period** level instead:
+newest run wins per `(export, period)`, then one export wins wholesale per month.
+That is what `03_ingest_azure_costmgmt_focus.py` does, in bronze, before silver
+sees a row.
+
 ---
 
 ## Quick start

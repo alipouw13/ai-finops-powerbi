@@ -573,7 +573,91 @@ write_silver(silver_foundry, "silver_usage_foundry")
 # Merging them would overstate AI platform spend; dropping the second would
 # understate the true cost of running these workloads.
 silver_azure = None
-if has_bronze("bronze_azure_cost"):
+# FOCUS 1.0 is preferred over the legacy per-meter extract when present. It is
+# the same invoice, but richer: billed / effective / list / contracted cost as
+# separate measures, commitment-discount attribution, region, sub-account and
+# tags — and it is a vendor-neutral spec, so an AWS/GCP export would conform
+# through this same branch. bronze_azure_cost_focus is already de-duplicated by
+# bronze/03_ingest_azure_costmgmt_focus.py (period-level, newest run wins), so
+# the generic dedupe()/grain_guard() pair is deliberately NOT applied here:
+# their natural key would collapse legitimately distinct FOCUS charge lines.
+if has_bronze("bronze_azure_cost_focus"):
+    fo = bronze("bronze_azure_cost_focus")
+
+    # FOCUS states the workload class directly, so the service taxonomy comes
+    # from the spec rather than from string-matching ARM resource ids.
+    svc_cat = F.coalesce(F.col("ServiceCategory"), F.lit(""))
+    svc_name = F.lower(F.coalesce(F.col("ServiceName"), F.lit("")))
+    is_ai = ((svc_cat == "AI and Machine Learning")
+             | svc_name.contains("openai")
+             | svc_name.contains("cognitive")
+             | svc_name.contains("machine learning"))
+
+    # Tags arrive as a JSON string; an application tag is the only honest way to
+    # attribute a billing row to an app. No tag -> empty -> APP-UNKNOWN in gold.
+    tags = F.coalesce(F.col("Tags"), F.lit(""))
+    app_from_tag = F.coalesce(
+        F.get_json_object(tags, "$.application"),
+        F.get_json_object(tags, "$.Application"),
+        F.get_json_object(tags, "$.app"),
+        F.get_json_object(tags, "$.App"),
+        F.lit(""))
+
+    billed_usd = F.coalesce(F.col("x_BilledCostInUsd"), F.col("BilledCost")).cast("double")
+
+    silver_azure = conform(fo
+        .withColumn("usage_date", F.to_date("ChargePeriodStart"))
+        .withColumn("platform_key", F.when(is_ai, F.lit("AzureAI"))
+                                     .otherwise(F.lit("AzureInfra")))
+        # Billing data is resource-scoped, never user-scoped. Claiming an
+        # identity here would be an invention; 'unknown' routes to the
+        # Unattributed member, which is the honest answer and is exactly the
+        # attribution gap this accelerator is meant to make visible.
+        .withColumn("identity_key", F.lit("unknown"))
+        # Meter names are not models; using them here would pollute dim_model
+        # with hundreds of billing SKUs.
+        .withColumn("model_key", F.lit(""))
+        .withColumn("cost_center_key", F.coalesce(F.col("x_CostCenter"), F.lit("")))
+        .withColumn("unit_type", F.lit("azure_meter"))
+        .withColumn("quantity", F.col("ConsumedQuantity").cast("double"))
+        .withColumn("cost_usd", billed_usd)
+        .withColumn("cost_is_estimated", F.lit(False))
+        .withColumn("application_key", app_from_tag)
+        .withColumn("_data_class", F.lit("REAL")))
+    write_silver(silver_azure, "silver_usage_azure")
+
+    # The unified fact can only carry one cost column. FOCUS's other three cost
+    # measures are the whole point of the spec (list vs contracted vs effective
+    # is the discount story), so they get their own curated detail table instead
+    # of being thrown away at the conform() boundary.
+    write_silver(fo
+        .withColumn("usage_date", F.to_date("ChargePeriodStart"))
+        .withColumn("platform_key", F.when(is_ai, F.lit("AzureAI"))
+                                     .otherwise(F.lit("AzureInfra")))
+        .select(
+            "usage_date", "platform_key",
+            F.coalesce(F.col("SubAccountName"), F.lit("")).alias("subscription_name"),
+            F.coalesce(F.col("x_ResourceGroupName"), F.lit("")).alias("resource_group"),
+            F.coalesce(F.col("ResourceName"), F.lit("")).alias("resource_name"),
+            F.coalesce(F.col("ResourceType"), F.lit("")).alias("resource_type"),
+            F.coalesce(F.col("ServiceName"), F.lit("")).alias("service_name"),
+            F.coalesce(F.col("ServiceCategory"), F.lit("")).alias("service_category"),
+            F.coalesce(F.col("RegionName"), F.lit("")).alias("region_name"),
+            F.coalesce(F.col("x_SkuMeterName"), F.lit("")).alias("meter_name"),
+            F.coalesce(F.col("PricingCategory"), F.lit("")).alias("pricing_category"),
+            F.coalesce(F.col("CommitmentDiscountType"), F.lit("")).alias("commitment_type"),
+            F.col("ConsumedQuantity").cast("double").alias("consumed_quantity"),
+            F.coalesce(F.col("ConsumedUnit"), F.lit("")).alias("consumed_unit"),
+            billed_usd.alias("billed_usd"),
+            F.coalesce(F.col("x_EffectiveCostInUsd"), F.col("EffectiveCost")).cast("double").alias("effective_usd"),
+            F.coalesce(F.col("x_ListCostInUsd"), F.col("ListCost")).cast("double").alias("list_usd"),
+            F.coalesce(F.col("x_ContractedCostInUsd"), F.col("ContractedCost")).cast("double").alias("contracted_usd"),
+            app_from_tag.alias("application_key"),
+            F.lit("REAL").alias("_data_class"),
+        ), "silver_azure_cost_detail")
+
+elif has_bronze("bronze_azure_cost"):
+    # Legacy fallback: the pre-FOCUS per-meter extract.
     az = bronze("bronze_azure_cost")
     az = dedupe(az, "bronze_azure_cost")
     az = grain_guard(az, "azure_cost", "usage_date", ["resource_id"], "cost_usd")
@@ -585,10 +669,6 @@ if has_bronze("bronze_azure_cost"):
     silver_azure = conform(az
         .withColumn("platform_key", F.when(is_ai, F.lit("AzureAI"))
                                      .otherwise(F.lit("AzureInfra")))
-        # Billing data is resource-scoped, never user-scoped. Claiming an
-        # identity here would be an invention; 'unknown' routes to the
-        # Unattributed member, which is the honest answer and is exactly the
-        # attribution gap this accelerator is meant to make visible.
         .withColumn("identity_key", F.lit("unknown"))
         .withColumn("model_key", F.lit(""))
         .withColumn("cost_center_key", F.coalesce(F.col("cost_center"), F.lit("")))

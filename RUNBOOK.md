@@ -62,6 +62,49 @@ Copilot / semantic-model Q&A but runs 100% locally. Try:
 Steps 1–4 run today with no license. Step 5 is the handoff to whoever owns the
 Fabric workspace — see `docs/bronze-layer-architecture.md`.
 
+## Real Azure billed cost (FOCUS 1.0 export)
+
+Azure cost comes from a Cost Management **FOCUS 1.0** Parquet export, surfaced in
+Fabric through a zero-copy OneLake shortcut. Two stdlib-only scripts stand it up
+(`az login` for auth; both support `--dry-run` and `--steps`):
+
+```bash
+# 1. Azure side: resource group, ADLS Gen2 account, container, FOCUS exports + runs
+python3 platform/deploy/create_cost_export.py
+
+# 2. Fabric side: ADLS cloud connection + OneLake shortcut into bronze_real
+python3 platform/deploy/create_onelake_shortcut.py
+
+# 3. In Fabric, run the medallion notebooks in order, then refresh the model:
+#      03_bronze_azure_focus  ->  bronze_azure_cost_focus
+#      10_silver_conform      ->  silver_usage_azure + silver_azure_cost_detail
+#      20_gold_star           ->  fact_ai_usage + dim_*
+```
+
+| Piece | Value |
+|---|---|
+| Dataset | FOCUS 1.0 (FinOps Foundation open spec), Parquet, daily granularity |
+| Landing | `focus/{exportName}/{dateRange}/{runId}/part_0_0001.parquet` + `manifest.json` |
+| Files shortcut | `Files/azure_costmgmt_focus` in `bronze_real` — storage stays in the customer's subscription |
+| Bronze table | `bronze_azure_cost_focus` — a Files shortcut is not queryable as a table |
+| Table shortcut | `Tables/dbo/bronze_azure_cost_focus` in the silver lakehouse |
+| Provenance | `cost_is_estimated = false` — billed invoice cost, never rate-card modelled |
+
+**Verified end to end:** 79,426 FOCUS rows / **$7,048.73** billed Azure spend →
+`fact_ai_usage` 81,172 rows / $12,818.69, reconciling exactly (`AzureInfra`
+$6,342.24 + `AzureAI` $706.49) at 100% cost confidence on both platforms.
+
+Two non-obvious constraints the scripts handle:
+
+- Cost Management **refuses to create an export when shared-key auth is disabled**
+  on the destination storage account (HTTP 400). Tenants with a Modify policy that
+  forces `allowSharedKeyAccess=false` need a policy exemption first.
+- A Custom-timeframe export's `from`/`to` must sit **inside one calendar month**, so
+  historical backfill is one export per month.
+
+> **De-duplicate at period level, never row level** — see
+> `platform/medallion/README.md`. A row-key dedupe silently drops ~30% of the cost.
+
 ## Also runnable
 - **Power BI Desktop:** open `AIFinOps.pbip` (10 persona report pages, no Fabric needed).
   Run `python platform/validate/validate_pbip.py --fix-data-folder` first.

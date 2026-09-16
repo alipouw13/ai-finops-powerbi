@@ -82,19 +82,76 @@ Five pages (CFO, Governance, Engineering, App Owner, License Optimization) over 
 same model — see `build_personas.py`. Report pages are additive/idempotent so the
 model and pages 1–4 are never at risk.
 
+## 8. Azure Cost Management FOCUS export via ADLS shortcut
+Azure billed spend now lands as Cost Management **FOCUS 1.0** Parquet exports in a
+customer-owned ADLS Gen2 account, surfaced to Fabric through a OneLake shortcut:
+Cost Management export → `stfinopscost848055/costexports/focus` →
+`Files/azure_costmgmt_focus` in lakehouse `LH_tokenomics_bronze_real`.
+
+Verified implementation:
+
+| Surface | Detail |
+|---|---|
+| Azure scope | Tenant `840a80c0-e4a5-47be-8a1d-7ecfa61e839c`, subscription `a699796c-ab5c-48bf-8bd7-adb31e225f11`, resource group `rg-finops-costexport` in `eastus2` |
+| Storage | ADLS Gen2 account `stfinopscost848055` (`StorageV2`, `Standard_LRS`, hierarchical namespace enabled), container `costexports`, root folder `focus` |
+| Exports | `finops-focus-daily` Active Daily MonthToDate; `finops-focus-bf-202606`, `finops-focus-bf-202607`, `finops-focus-bf-202608` Inactive Custom monthly backfills |
+| Export contract | Cost Management api-version `2023-07-01-preview`; `definition.type = FocusCost`; `dataVersion = 1.0`; Parquet; `partitionData = true`; `granularity = Daily` |
+| Fabric | Workspace `AI-tokenomics`; cloud connection `finops-costexports-adls` (`AzureDataLakeStorage`, `server` + `path`, account-key auth); OneLake shortcut `Files/azure_costmgmt_focus` in lakehouse `LH_tokenomics_bronze_real` |
+
+- **Rationale.** FOCUS 1.0 is the FinOps Foundation's open cost specification:
+  vendor-neutral column names that let the same silver logic later absorb AWS/GCP
+  exports. It also carries `BilledCost`, `EffectiveCost`, `ListCost`, and
+  `ContractedCost`, which is the actual/discounted/list split the CFO persona
+  needs. That replaces the old modelled discount assumption for the Azure slice.
+- **Tradeoffs.** OneLake shortcuts are zero-copy: no duplicated storage bill and
+  no second retention policy to govern. The customer keeps the export data in
+  their own subscription and controls retention/access there. The cost is an
+  external dependency: if the ADLS account, connection, or shortcut breaks, bronze
+  cannot read new Azure cost rows. The export is append-per-run, not a mutable
+  single object, so overlap must be resolved at **period** level — never on a
+  composed row key, which silently deletes genuine charges (see the gotchas).
+- **Value.** Azure/Foundry resource cost is now REAL/billed, not mock. Verified end
+  to end: **79,426 FOCUS rows / $7,048.73** billed spend over 2026-06-01 →
+  2026-09-17, flowing into `fact_ai_usage` (81,172 rows, $12,818.69) and
+  reconciling exactly — `AzureInfra` $6,342.24 + `AzureAI` $706.49 = $7,048.73, at
+  100% cost confidence on both platforms. Real AI/analytics spend included
+  Microsoft.Fabric, Azure AI Search, Azure Machine Learning, Azure AI Services,
+  Databricks and Cosmos DB. M365 Copilot, GitHub Copilot and Copilot Studio remain
+  MOCK until their live feeds are wired.
+- **Downstream shape.** `03_ingest_azure_costmgmt_focus.py` materialises the
+  shortcut into the Delta table `bronze_azure_cost_focus` (a Files shortcut is not
+  queryable as a table), which is re-exposed to the silver lakehouse as a OneLake
+  **table** shortcut. Silver emits `silver_usage_azure` (conformed,
+  `unit_type = azure_meter`) plus `silver_azure_cost_detail`, which keeps FOCUS's
+  billed/effective/list/contracted measures that the single-cost fact cannot carry.
+  FOCUS is preferred over the legacy `bronze_azure_cost` extract, with fallback, so
+  Azure cost never double-counts across the two feeds.
+- **Effort.** M (done) for Azure export, policy exemption, ADLS container, Fabric
+  cloud connection, OneLake shortcut, and verified parquet reads.
+
+Operational gotchas:
+
+| Gotcha | Impact | Fix |
+|---|---|---|
+| Management-group policy assignment `MCAPSGovDeployPolicies` silently forces `publicNetworkAccess=Disabled` and `allowSharedKeyAccess=false` on storage writes via a Modify effect | Cost Management export creation fails with HTTP 400: `"Key-based authentication is currently disabled on this storage account."`; the storage PATCH may return HTTP 200 and still be reverted | Create a policy exemption (`Waiver`) scoped to the resource group, then PATCH the storage account to `publicNetworkAccess=Enabled` and `allowSharedKeyAccess=true`. While public data plane access is disabled, create the blob container through the ARM management plane, not the data plane. |
+| Custom timeframe `from` and `to` must be inside the same calendar month | Multi-month backfills fail with HTTP 400: `"'From' and 'To' dates should be within same month."` | Use one inactive Custom export per backfill month (`finops-focus-bf-202606`, `finops-focus-bf-202607`, `finops-focus-bf-202608`). |
+| De-duplicating FOCUS on a composed row key (resource + meter + charge period) | Silently deletes genuine charges: measured at **~75% of rows and 30% of the cost** ($7,048.73 → $4,919.71), with no error and a plausible-looking total | Resolve overlap at period level in bronze: newest `runId` wins per `(export, dateRange)`, then one export wins wholesale per charge month (the closed-month backfill beats the rolling MonthToDate feed). |
+
 ## Target-state diagram
 ```
- Foundry/AOAI ─┐
- APIM Gateway ─┤   Fabric: Bronze ─► Silver ─► Gold ─► Power BI semantic model ─► Persona reports
- M365 Copilot ─┤   (Delta, OneLake)          (star)         (import today /            + Fabric Copilot Q&A
- GitHub Copilot┤                                             DirectLake later)          + RAG insight layer
- Copilot Studio┘
+ Foundry/AOAI usage ─┐
+ APIM Gateway ───────┤
+ Azure Cost Mgmt ─► ADLS Gen2 ─► OneLake shortcut ─┐
+ M365 Copilot ───────┤                             │
+ GitHub Copilot ─────┤   Fabric: Bronze ─► Silver ─┴► Gold ─► Power BI semantic model ─► Persona reports
+ Copilot Studio ─────┘   (Delta, OneLake)             (star)       (import today /            + Fabric Copilot Q&A
+                                                                    DirectLake later)          + RAG insight layer
 ```
 
 ## Roadmap (not yet built)
 | Item | Value | Effort |
 |---|---|---|
-| Live connectors for the 3 mock platforms | REAL coverage | M each |
+| Live connectors for remaining mock platforms | Azure/Foundry billed cost is REAL; M365 Copilot, GitHub Copilot, and Copilot Studio still need live feeds | M each |
 | DirectLake gold + scheduled bronze ingest | live cost, no refresh | M |
 | AutoML forecast replacing straight-line | tighter budget calls | M |
 | Anomaly detection (cost spikes) + alerts | proactive FinOps | M |

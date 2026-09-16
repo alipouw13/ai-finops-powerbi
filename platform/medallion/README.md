@@ -86,6 +86,71 @@ because both failures otherwise surface late and cryptically:
    value 'APP-UNKNOWN' and this is not allowed for columns on the one side of a
    relationship`. Every visual touching that dimension fails at once.
 
+## Azure billed cost: FOCUS export via OneLake shortcut
+
+Azure Cost Management writes a **FOCUS 1.0** Parquet export into an ADLS Gen2
+account in the customer's own subscription. Fabric reads it through a OneLake
+shortcut — no copy — and `bronze/03_ingest_azure_costmgmt_focus.py` materialises
+it as the Delta table `bronze_azure_cost_focus`:
+
+```
+Files/azure_costmgmt_focus/focus/{exportName}/{dateRange}/{runId}/part_0_0001.parquet
+                                                                  + manifest.json
+        │  (shortcut: zero copy, storage stays in the customer subscription)
+        ▼
+bronze_real.dbo.bronze_azure_cost_focus        (Delta, de-duplicated, 100 FOCUS cols + lineage)
+        │  (OneLake table shortcut into the silver lakehouse)
+        ▼
+silver.dbo.silver_usage_azure                  (conformed, unit_type=azure_meter)
+silver.dbo.silver_azure_cost_detail            (billed / effective / list / contracted)
+```
+
+A **Files** shortcut is not queryable as a table — the SQL endpoint, Direct Lake
+and every downstream notebook need Delta — so the shortcut stays the append-only
+system of record and the table is the conformed current view. The table is then
+re-exposed to the silver lakehouse as a **OneLake table shortcut** at
+`Tables/dbo/bronze_azure_cost_focus`, so silver reads bronze without copying.
+
+`manifest.json` is the validation record: `dataRowCount`, `runInfo.runId` and
+`exportConfig` confirm the run you ingested is the run Cost Management produced.
+
+### De-duplicate at period level, never row level
+
+This is the third member of the silent-failure family documented in the root
+README, and the most expensive one.
+
+Overlap is real: each run lands in a **new** `runId` folder, and the recurring
+MonthToDate export re-emits the whole current month every day. The obvious fix —
+key a dedupe on resource + meter + charge period — is **wrong**. FOCUS legitimately
+emits many rows sharing those values (different pricing tiers, tags, SKU details),
+so the key collapses genuine charges. Measured on this dataset it deleted **~75% of
+rows and 30% of the cost** (\$7,048.73 → \$4,919.71) and returned a plausible total
+with no error.
+
+Bronze resolves it structurally instead, before silver sees a row:
+
+1. newest `runId` wins per `(exportName, dateRange)`;
+2. where a monthly backfill and the rolling MonthToDate export both cover a month,
+   one export wins **wholesale** — the closed-month backfill is the complete
+   snapshot.
+
+Because bronze hands silver clean rows, the generic `dedupe()` / `grain_guard()`
+pair is deliberately **not** applied to this feed; their natural key would
+re-introduce exactly the collapse described above.
+
+### AI vs infrastructure comes from the spec
+
+`ServiceCategory` drives the split, replacing string-matching on ARM resource ids:
+`AzureAI` for Cognitive Services / AI Foundry / ML, `AzureInfra` for the storage,
+search, database and network tier those workloads run on.
+
+`bronze_azure_cost_focus` is preferred over the legacy `bronze_azure_cost`
+extract whenever it exists, with the old path kept as a fallback. Only one is ever
+read, so Azure cost cannot double-count across the two.
+
+Verified live: 79,426 rows / \$7,048.73 → `fact_ai_usage` 81,172 rows /
+\$12,818.69, reconciling exactly (`AzureInfra` \$6,342.24 + `AzureAI` \$706.49).
+
 ## Two Fabric constraints worth knowing
 
 1. **Schema-enabled lakehouses cannot use the Load Table REST API.** A lakehouse
