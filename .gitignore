@@ -3,6 +3,3 @@ __pycache__/
 .venv/
 *.pbix
 .pbi/
-
-# demo build artifact (regenerate with build_demo_db.py)
-platform/demo/*.db

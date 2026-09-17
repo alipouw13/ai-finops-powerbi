@@ -9,8 +9,9 @@ the AI insight layer — in under a minute.
 git clone https://github.com/natesanshreyas/ai-finops-powerbi.git
 cd ai-finops-powerbi
 
-# 1. Build the portable data store (Bronze + Gold + extractable-data catalog)
-python3 platform/data-store/build_store.py        # -> platform/data-store/finops.db
+# 1. Build the portable data store (raw extracts → Silver → Gold)
+python3 platform/fabric/gen_bronze_data.py     # -> platform/fabric/bronze_out/*.csv
+python3 platform/data-store/build_store.py     # -> platform/data-store/finops.db
 
 # 2. Launch the persona dashboards + AI layer
 python3 platform/localhost/app.py                 # -> http://localhost:8080
@@ -47,13 +48,17 @@ Copilot / semantic-model Q&A but runs 100% locally. Try:
 | Step | Layer | Artifact |
 |------|-------|----------|
 | 1. Extract | Source telemetry | `docs/extractable-data-by-product.md`, `extractable_data_catalog` |
-| 2. Bronze  | Raw per-platform tables | `platform/fabric/gen_bronze_data.py` → `bronze_out/*.csv` |
-| 3. Store   | Portable data source | `platform/data-store/build_store.py` → `finops.db` |
-| 4. Gold + BI + AI | Semantic model + dashboards + Q&A | `AIFinOps.SemanticModel/`, `platform/localhost/app.py` |
-| 5. **Fabric push** | Land Bronze in a Lakehouse | `platform/fabric/load_bronze.py` (run once a Power BI license is assigned) |
+| 2. Raw/Bronze | Source-faithful extracts (FOCUS, APIM, M365, Dataverse, GitHub) | `platform/fabric/gen_bronze_data.py` → `bronze_out/*.csv` |
+| 3. Silver + Gold | Conform, allocate billed cost onto identities, emit the star | `platform/data-store/build_store.py` → `finops.db` |
+| 4. BI + AI | Semantic model + dashboards + Q&A | `AIFinOps.SemanticModel/`, `platform/localhost/app.py` |
+| 5. **Fabric push** | Land Bronze in a Lakehouse, then run the notebooks | `platform/fabric/load_bronze.py`, `platform/medallion/` |
 
 Steps 1–4 run today with no license. Step 5 is the handoff to whoever owns the
 Fabric workspace — see `docs/bronze-layer-architecture.md`.
+
+The step-3 build **fails loudly** if allocated cost does not equal the billed invoice,
+if the Gold column contract drifts from the semantic model, or if any fact row has no
+matching dimension row.
 
 ## Also runnable
 - **Power BI Desktop:** open `AIFinOps.pbip` (10 persona report pages, no Fabric needed).

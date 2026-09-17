@@ -28,7 +28,8 @@ PORT = int(os.environ.get("PORT", "8080"))
 
 # Seat-based (license) platforms vs consumption platforms
 SEAT_PLATFORMS = ("M365Copilot", "GitHubCopilot")
-ACTIVITY_UNITS = ("prompt", "premium_request", "token", "copilot_credit", "message")
+ACTIVITY_UNITS = ("prompt", "premium_request", "token", "copilot_credit", "message",
+                  "active_day")
 
 
 # --------------------------------------------------------------------------- #

@@ -70,11 +70,21 @@ OpenTelemetry GenAI semantic conventions: `gen_ai.request.model`, `gen_ai.respon
 span latency, prompt/response (if logging enabled). Feeds: **application**-level attribution,
 agent traces. *(AVAILABLE — requires app instrumentation.)*
 
-### 1d. **Cost authority** — Azure Cost Management / Consumption `UsageDetails`
-Grain: per **meter × resource × day**. Fields: `meterId`, `meterName`, `meterCategory`,
-`quantity`, `effectivePrice`, `costInBillingCurrency`, `resourceId`, `resourceGroup`,
-`tags`, `billingPeriod`. **This is the authoritative actual $** for Foundry/AOAI/PAYG.
-Feeds: CFO actuals, discounted (EA/MCA price sheet), chargeback by tag/resource.
+### 1d. **Cost authority** — Cost Management export, **FOCUS 1.0r2**
+Grain: one **provider charge line** (typically meter × resource × day). Fields:
+`BilledCost`, `EffectiveCost`, `ListCost`, `ConsumedQuantity`/`ConsumedUnit`,
+`PricingQuantity`/`PricingUnit`, `ResourceId`, `SubAccountId`, `Tags`,
+`x_ResourceGroupName`, `x_SkuMeterName`, `x_SkuDetails`, `ChargePeriodStart`.
+**This is the authoritative actual $** for Foundry/AOAI, Copilot Studio PAYG, and
+Fabric capacity — one contract for all of them. Feeds: CFO actuals, realised discount
+(`ListCost − BilledCost`), chargeback by tag/resource.
+
+> Use the [FOCUS schema](https://learn.microsoft.com/en-us/azure/cost-management-billing/dataset-schema/cost-usage-details-focus),
+> not the [legacy EA `UsageDetails` shape](https://learn.microsoft.com/en-us/azure/cost-management-billing/dataset-schema/cost-usage-details-ea).
+> The EA equivalents of the fields above are `Date`, `Quantity`, `EffectivePrice`,
+> `CostInBillingCurrency`, `SubscriptionId`, and `MeterId` — do not mix the two.
+> The charge line carries **no identity**: pair it with the APIM gateway feed (1a) and
+> allocate by token share to attribute real dollars to a person or service.
 
 ---
 

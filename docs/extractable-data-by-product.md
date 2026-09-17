@@ -71,10 +71,13 @@ Foundry/Azure OpenAI · Copilot Cowork/Autopilot · Azure ML · Microsoft Fabric
 | requests | Call count | Monitor | hour |
 | latency_ms | Response time | Monitor | hour |
 | throttled_count | 429s | Monitor | hour |
-| meter_name / quantity / cost_usd | Real $ | Cost Management `usageDetails` | day/meter |
-| tags_json | app / bu / env tags | Cost Mgmt | resource |
-| caller / api_subscription_id | Who called (via APIM) | Log Analytics | request |
-| request_id / status_code | Per-request detail | Diagnostic logs | request |
+| BilledCost / EffectiveCost | Authoritative billed $ | Cost Management FOCUS 1.0r2 | charge line |
+| ConsumedQuantity / PricingQuantity | Billed tokens and 1K-token blocks | Cost Management FOCUS 1.0r2 | charge line |
+| ListCost | List vs billed = realised discount | Cost Management FOCUS 1.0r2 | charge line |
+| Tags | app / bu / env tags | Cost Management FOCUS 1.0r2 | resource |
+| ClientId / Oid | Who called (the only identity path) | APIM → Log Analytics | request |
+| PromptTokens / CompletionTokens / CachedPromptTokens | Per-request token split | APIM → Log Analytics | request |
+| RequestId / StatusCode / IsError | Per-request detail | APIM → Log Analytics | request |
 
 ## 5 · Copilot Cowork / Autopilot
 | Field | What it is | Source | Grain |

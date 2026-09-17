@@ -1,7 +1,7 @@
-business_unit_key,business_unit_name,division,monthly_budget_usd,executive_owner,_ingested_at,_source_system,_source_api,_watermark,_batch_id,_data_class
-BU-RETAIL,Retail,Commercial,28000,cfo-retail@contoso.com,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
-BU-DISCOVERY,Discovery,Commercial,12000,cfo-discovery@contoso.com,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
-BU-PLATFORM,Platform,Engineering,18000,cto@contoso.com,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
-BU-TECH,Technology,Engineering,45000,cio@contoso.com,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
-BU-INSURANCE,Insurance,Financial Services,22000,cfo-insurance@contoso.com,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
-BU-UNALLOC,Unallocated,Unallocated,0,,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
+business_unit_key,business_unit_name,division,monthly_budget_usd,executive_owner,is_mock_budget,_ingested_at,_source_system,_source_api,_watermark,_batch_id,_data_class
+BU-RETAIL,Retail,Commercial,28000,cfo-retail@contoso.com,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
+BU-DISCOVERY,Discovery,Commercial,12000,cfo-discovery@contoso.com,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
+BU-PLATFORM,Platform,Engineering,18000,cto@contoso.com,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
+BU-TECH,Technology,Engineering,45000,cio@contoso.com,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
+BU-INSURANCE,Insurance,Financial Services,22000,cfo-insurance@contoso.com,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK
+BU-UNALLOC,Unallocated,Unallocated,0,,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,finance-master-data / entra-department-rollup,2026-09-04,batch-2026-09-04,MOCK

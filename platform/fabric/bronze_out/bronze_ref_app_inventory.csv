@@ -1,9 +1,9 @@
-application_key,application_name,application_type,owner_upn,owner_business_unit_key,environment,criticality,_ingested_at,_source_system,_source_api,_watermark,_batch_id,_data_class
-APP-CHECKOUT,Checkout Assistant,api,robin.hale@contoso.com,BU-RETAIL,ENV-PROD,High,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-SEARCH,Product Search API,api,sam.chen@contoso.com,BU-DISCOVERY,ENV-PROD,High,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-DSNB,Data Science Notebooks,notebook,jenny.oyelaran@contoso.com,BU-PLATFORM,ENV-DEV,Low,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-MOBILE,Mobile Shopping Assistant,agent,robin.hale@contoso.com,BU-RETAIL,ENV-TEST,Medium,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-M365,Microsoft 365 Copilot,copilot,cio@contoso.com,BU-TECH,ENV-PROD,Medium,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-GHCP,GitHub Copilot,copilot,cio@contoso.com,BU-TECH,ENV-PROD,Medium,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-STUDIO,Employee Support Agent,agent,cio@contoso.com,BU-TECH,ENV-PROD,Medium,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-UNKNOWN,Unattributed Workload,unknown,,BU-UNALLOC,ENV-UNK,Unknown,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+application_key,application_name,application_type,owner_upn,owner_business_unit_key,default_environment_key,criticality,gateway_app_name,gateway_client_id,azure_resource_name,is_mock,_ingested_at,_source_system,_source_api,_watermark,_batch_id,_data_class
+APP-CHECKOUT,Checkout Assistant,api,robin.hale@contoso.com,BU-RETAIL,ENV-PROD,High,checkout-service,0999cfae-085e-464f-a49d-f8851e3e5195,aoai-checkout-prod,FALSE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-SEARCH,Product Search API,api,sam.chen@contoso.com,BU-DISCOVERY,ENV-PROD,High,search-api,dd6d3503-88f1-4fc9-a4d0-1a79c3aaf364,aoai-search-prod,FALSE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-DSNB,Data Science Notebooks,notebook,jenny.oyelaran@contoso.com,BU-PLATFORM,ENV-DEV,Low,ds-notebooks,62a2cc36-edb8-4520-b7fe-05433a160c32,aoai-datascience-dev,FALSE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-MOBILE,Mobile Shopping Assistant,agent,robin.hale@contoso.com,BU-RETAIL,ENV-TEST,Medium,mobile-assistant,7bec6f27-dc94-4d6d-b89a-3969513bc71e,aoai-mobile-test,FALSE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-M365,Microsoft 365 Copilot,copilot,cio@contoso.com,BU-TECH,ENV-PROD,Medium,,,,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-GHCP,GitHub Copilot,copilot,cio@contoso.com,BU-TECH,ENV-PROD,Medium,,,,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-STUDIO,Employee Support Agent,agent,cio@contoso.com,BU-TECH,ENV-PROD,Medium,,,,TRUE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-UNKNOWN,Unattributed Workload,unknown,,BU-UNALLOC,ENV-UNK,Unknown,,,,FALSE,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK

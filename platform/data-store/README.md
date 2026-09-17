@@ -1,56 +1,83 @@
 # AI FinOps Data Store (`finops.db`)
 
-A **portable, Fabric-free** SQLite database that holds the entire AI FinOps data
-set in one file. This is the interchange format: it runs anywhere today (no
-Fabric license, no Power BI, no cloud), and a teammate can lift it straight into
-a Fabric Lakehouse or Azure SQL when the tenant is unblocked.
+A **portable, Fabric-free** SQLite database that holds the entire medallion in one
+file: raw extracts, conformed silver, and the gold star. It runs anywhere today (no
+Fabric licence, no Power BI, no cloud, no dependencies), and a teammate can lift it
+straight into a Fabric Lakehouse or Azure SQL when the tenant is unblocked.
+
+`build_store.py` is not a loader — it is **the pipeline**, and the runnable twin of the
+Spark notebooks in [`platform/medallion/`](../medallion/). Same table names, same
+column names, same logic, different engine. That is what makes the design reviewable
+and verifiable without a capacity.
 
 > All fact/usage/cost rows are **MOCK** (tagged `_data_class=MOCK` with lineage
-> columns). The *schema, grains, and field catalog* are real and production-shaped.
-
-## What's inside
-
-`build_store.py` loads two things into `finops.db`:
-
-1. **14 Bronze tables** — the raw per-platform telemetry from
-   `platform/fabric/bronze_out/*.csv` (~2,584 rows).
-2. **`extractable_data_catalog`** — a 74-row queryable metadata table listing
-   every extractable field for all 7 products (product, category, field,
-   description, source API, grain). This is the machine-readable companion to
-   `docs/extractable-data-by-product.md`.
-
-| Table | Rows | What it is |
-|---|---|---|
-| `bronze_azure_ai_cost` | 360 | Foundry/AOAI real $ by day/meter |
-| `bronze_azure_ai_metrics` | 180 | AOAI tokens/requests/latency |
-| `bronze_fabric_capacity_cost` | 60 | Fabric CU + capacity $ |
-| `bronze_ghc_seats` | 480 | GitHub Copilot seat assignments + last activity |
-| `bronze_ghc_premium_usage` | 112 | GHC premium-request overage |
-| `bronze_m365_copilot_seats` | 480 | M365 Copilot licenses |
-| `bronze_m365_copilot_usage` | 480 | M365 per-app last activity |
-| `bronze_m365_copilot_credits` | 140 | Cowork/Autopilot Copilot Credits |
-| `bronze_studio_credits` | 252 | Copilot Studio credits by agent/action |
-| `bronze_ref_*` (5 tables) | 40 | Identity map, app/BU hierarchy, agents, rate card |
-| `extractable_data_catalog` | 74 | Every extractable field per product |
+> columns). The *schemas, grains, contracts and transformations* are production-shaped.
 
 ## Run it
 
 ```bash
-# (re)generate the Bronze CSVs first if needed
+# 1. (re)generate the raw extracts
 python3 platform/fabric/gen_bronze_data.py
 
-# build the database
+# 2. run bronze -> silver -> gold
 python3 platform/data-store/build_store.py
 
-# ad-hoc query
+# 3. ad-hoc SQL
 python3 platform/data-store/build_store.py --query \
-  "SELECT product, COUNT(*) fields FROM extractable_data_catalog GROUP BY product ORDER BY 2 DESC"
+  "SELECT platform_key, ROUND(SUM(cost_usd),2) FROM fact_ai_usage GROUP BY 1 ORDER BY 2 DESC"
 ```
+
+The build prints a reconciliation and **fails** if allocated cost does not equal the
+billed invoice, if the gold column contract drifts from the semantic model, or if any
+fact row has no matching dimension row.
+
+## BRONZE — raw, source-faithful extracts
+
+Column names, casing, types and null behaviour match what the real API hands over.
+
+| Table | Rows | Source contract |
+|---|---|---|
+| `bronze_focus_cost` | 1,147 | Cost Management export, **FOCUS 1.0r2** — 96 provider columns. Covers Azure OpenAI, the Copilot Studio PAYG credit meter, and Fabric capacity |
+| `bronze_apim_gateway_requests` | 4,750 | APIM AI gateway → Log Analytics, one row per model request, **every value a string** |
+| `bronze_apim_client_ownership` | 4 | Log Analytics `ApimClientOwnership_CL` client registry |
+| `bronze_dataverse_msdyn_aievent` | 862 | Dataverse `msdyn_aievents` (OData), `msdyn_creditconsumed` already net of zero-rating |
+| `bronze_m365_copilot_usage` | 480 | Graph `getMicrosoft365CopilotUsageUserDetail` — last-activity **dates**, not counts |
+| `bronze_m365_copilot_seats` | 480 | Graph `subscribedSkus` + `assignedLicenses` |
+| `bronze_m365_copilot_credits` | 140 | M365 Copilot Credits billing (Cowork/Autopilot) |
+| `bronze_ghc_seats` | 480 | `GET /orgs/{org}/copilot/billing/seats` |
+| `bronze_ghc_premium_usage` | 112 | GitHub enhanced billing usage API (`netAmount` = billed overage) |
+| `bronze_ref_*` (5 tables) | 40 | Customer master data: identity map, app inventory, business hierarchy, agent inventory, rate card |
+
+## SILVER — typed, conformed, identity-resolved, cost-allocated
+
+**The provider's bill is the only source of dollars.** FOCUS has cost but no identity;
+the gateway and Dataverse have identity but no cost. Silver splits the billed amount by
+each identity's share of the billed unit, so the star ties to the invoice.
+
+| Table | Rows | What it does |
+|---|---|---|
+| `silver_cost_charge` | 1,147 | Types FOCUS, decodes `Tags`/`x_SkuDetails`, maps service → platform, exposes billed vs list |
+| `silver_gateway_request` | 4,750 | Casts LA strings (`""`/`"None"` → 0), resolves caller → identity and backend → application |
+| `silver_studio_event` | 862 | Types credits, resolves `_msdyn_botid_value` → agent + owning BU |
+| `silver_foundry_allocation` | 1,017 | Splits billed AOAI cost by token share **per direction** (input/output/cached price differently) |
+| `silver_studio_allocation` | 84 | Splits the billed PAYG credit meter across agents by credit share |
+| `silver_usage_conformed` | 2,843 | One daily grain across all platforms, with `cost_is_estimated` and `cost_method` |
+
+## GOLD — the star the semantic model binds to
+
+| Table | Rows |
+|---|---|
+| `fact_ai_usage` | 2,843 |
+| `dim_identity` | 16 (people, service principals, agents, and the unattributed caller) |
+| `dim_application` | 8 |
+| `dim_date` | 60 |
+| `dim_rate_card` | 11 |
+| `dim_business_unit` / `dim_model` / `dim_platform` / `dim_cost_center` / `dim_environment` | 6 / 5 / 4 / 4 / 4 |
+| `extractable_data_catalog` | 52 — every extractable field per product, named after the raw source field |
 
 ## Handoff to Fabric
 
-The teammate standing up Fabric can:
-1. Open `finops.db` (any SQLite client) or the source CSVs in `bronze_out/`.
-2. Load each Bronze table into a Lakehouse (`platform/fabric/load_bronze.py`
-   does exactly this once a Power BI license is assigned).
-3. Build Silver/Gold on top per `docs/bronze-layer-architecture.md`.
+The Bronze CSVs in `platform/fabric/bronze_out/` are what
+[`load_bronze.py`](../fabric/load_bronze.py) pushes into a Lakehouse; the notebooks in
+[`platform/medallion/`](../medallion/) then rebuild silver and gold there with the same
+logic this file runs locally.

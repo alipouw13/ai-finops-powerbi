@@ -15,86 +15,114 @@ Flow: **Bronze** = one raw table per API/report feed (source-faithful) →
 
 ## BRONZE — raw landing (one table per source feed, source fidelity preserved)
 
-Every Bronze table also carries ingestion metadata columns:
-`_source`, `_ingested_at`, `_watermark`, `_report_refresh_date`, `_raw_payload` (JSON where applicable).
+Every Bronze table also carries lineage columns:
+`_ingested_at`, `_source_system`, `_source_api`, `_watermark`, `_batch_id`, `_data_class`.
 🔒 = governed/PII sub-zone (restricted access + retention policy).
+**✅ = built and running** (`platform/fabric/gen_bronze_data.py` → `bronze_out/*.csv`,
+landed by `platform/medallion/bronze/*.py`). Everything else is a design target.
 
-### Azure AI Foundry / Azure OpenAI
+### Cost — one contract for every Azure-billed service
 | Bronze table | Source | Grain | Notable raw columns |
 |---|---|---|---|
-| `bronze_aoai_metrics` | Azure Monitor metrics | deployment × minute | metric_name, timestamp, deployment, model, value, aggregation |
-| `bronze_aoai_requestresponse` 🔒 | Diagnostic log `RequestResponse` | per API call | TimeGenerated, OperationName, DurationMs, ResultSignature, CallerIPAddress, modelDeploymentName, modelName, apiVersion, streamType, caller_object_id |
-| `bronze_aoai_audit` | Diagnostic log `Audit` | per event | TimeGenerated, OperationName, identity, result |
-| `bronze_aoai_traces` 🔒 | App Insights GenAI spans | per span | operation, gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens, latency, (prompt/response if logged) |
-| `bronze_azure_cost_usage` | Cost Management `UsageDetails` | meter × resource × day | meterId, meterName, meterCategory, quantity, effectivePrice, costInBillingCurrency, resourceId, resourceGroup, tags, billingPeriod |
+| `bronze_focus_cost` ✅ | Cost Management Export — **FOCUS 1.0r2** (96 columns) | provider charge line (typically meter × resource × day) | BilledCost, EffectiveCost, ListCost, ConsumedQuantity, ConsumedUnit, PricingQuantity, PricingUnit, ResourceId, SubAccountId, Tags, x_ResourceGroupName, x_SkuMeterId, x_SkuMeterName, x_SkuDetails |
 | `bronze_azure_price_sheet` | Cost Mgmt price sheet / retail prices | meter | meterId, unitPrice, unitOfMeasure, tierMinimumUnits, currency |
+
+Azure OpenAI, the Copilot Studio PAYG credit meter, Fabric capacity and (when in scope)
+Azure ML all arrive on this one export, separated by `ServiceName`. Do not build a
+cost collector per service.
+
+### Azure AI Foundry / Azure OpenAI — attribution
+| Bronze table | Source | Grain | Notable raw columns |
+|---|---|---|---|
+| `bronze_apim_gateway_requests` ✅ | APIM AI gateway → Log Analytics | per model request | ClientId, Oid, Appid, BackendId, BusinessUnitClaim, CostCenterClaim, PromptTokens, CompletionTokens, CachedPromptTokens, ModelName, ModelVersion, IsError, StatusCode, TotalLatencyMs, TimeGenerated *(all as strings)* |
+| `bronze_apim_client_ownership` ✅ | Log Analytics `ApimClientOwnership_CL` | client | ClientId, AppName, BusinessUnit, CostCenter, Team, TenantId |
+| `bronze_aoai_requestresponse` 🔒 | Diagnostic log `RequestResponse` | per API call | TimeGenerated, OperationName, DurationMs, ResultSignature, CallerIPAddress, modelDeploymentName, modelName, apiVersion, streamType, caller_object_id |
+| `bronze_aoai_traces` 🔒 | App Insights GenAI spans | per span | operation, gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens, latency |
+
+Azure Monitor token metrics are deliberately **not** collected: they carry no identity
+dimension, so they duplicate the gateway's token counts without its attribution.
 
 ### Microsoft 365 Copilot
 | Bronze table | Source | Grain | Notable raw columns |
 |---|---|---|---|
-| `bronze_m365_copilot_usage` | `getMicrosoft365CopilotUsageUserDetail` | user × refresh day | UPN, Display Name, Last Activity Date, + per-app last-activity (Teams/Word/Excel/PowerPoint/Outlook/OneNote/Loop/Chat) |
-| `bronze_m365_copilot_interactions` 🔒 | `getAllEnterpriseInteractions` (aiInteraction) | per prompt/response | id, appClass, conversationType, interactionType, from, createdDateTime, sessionId, requestId, body, attachments, contexts, mentions, locale |
-| `bronze_m365_subscribed_skus` | Graph `/subscribedSkus` | sku | skuId, skuPartNumber, prepaidUnits(enabled/suspended), consumedUnits |
-| `bronze_m365_user_licenses` | Graph `/users?$select=assignedLicenses` | user × license | userId, UPN, skuId, assignedDateTime |
+| `bronze_m365_copilot_usage` ✅ | `getMicrosoft365CopilotUsageUserDetail` | user × refresh day | `Report Refresh Date`, `User Principal Name`, `Display Name`, `Last Activity Date`, + per-app last-activity (Teams/Word/Excel/PowerPoint/Outlook/OneNote/Loop/Chat) |
+| `bronze_m365_copilot_seats` ✅ | Graph `/subscribedSkus` + `/users?$select=assignedLicenses` | user × SKU × day | snapshotDate, userPrincipalName, skuId, skuPartNumber, servicePlanName, capabilityStatus, assignedDateTime, prepaidUnitsEnabled, consumedUnits |
+| `bronze_m365_copilot_credits` ✅ | M365 / Power Platform Copilot Credits billing | consumer × day | usageDate, consumerId, consumerType, capability, creditsConsumed, unitPriceUsd, costUsd |
+| `bronze_m365_copilot_interactions` 🔒 | `getAllEnterpriseInteractions` (aiInteraction) | per prompt/response | id, appClass, conversationType, interactionType, from, createdDateTime, sessionId, body, contexts, locale |
 | `bronze_m365_purview_audit` 🔒 | Purview Unified Audit Log | per event | CreationTime, UserId, Operation, AppHost, AccessedResources, ClientIP |
 
 ### GitHub Copilot
 | Bronze table | Source | Grain | Notable raw columns |
 |---|---|---|---|
-| `bronze_ghc_seats` | `/orgs/{org}/copilot/billing/seats` | assigned user | assignee.login, assignee.id, created_at, last_activity_at, last_activity_editor, pending_cancellation_date, plan_type |
-| `bronze_ghc_billing` | `/orgs/{org}/copilot/billing` | org × cycle | total, active_this_cycle, inactive_this_cycle, pending_invitation, pending_cancellation, seat_management_setting, plan_type |
-| `bronze_ghc_usage_metrics` | `/copilot/metrics` + report exports | day (× lang/editor/model) | date, total_active_users, total_engaged_users, code suggestions/acceptances, lines suggested/accepted, chats, model usage per mode |
-| `bronze_ghc_billing_usage` | Enhanced billing usage API | line item × day | date, product, sku, quantity, unitType, netAmount, grossAmount, discountAmount, repositoryName |
-| `bronze_ghc_user_teams` | user-teams report | user × team × day | date, login, team (for team-level joins) |
+| `bronze_ghc_seats` ✅ | `/orgs/{org}/copilot/billing/seats` | assigned user × snapshot | assignee_login, assignee_id, assignee_type, assigning_team, created_at, last_activity_at, last_activity_editor, pending_cancellation_date, plan_type |
+| `bronze_ghc_premium_usage` ✅ | Enhanced billing usage API | line item × day | date, product, sku, model, modelMultiplier, quantity, unitType, grossAmount, discountAmount, netAmount, repositoryName, username |
+| `bronze_ghc_usage_metrics` | `/copilot/metrics` | day (× lang/editor/model) | total_active_users, total_engaged_users, suggestions/acceptances, chats (needs ≥5 active users) |
+| `bronze_ghc_user_teams` | user-teams report | user × team × day | date, login, team |
 
 ### Copilot Studio
 | Bronze table | Source | Grain | Notable raw columns |
 |---|---|---|---|
-| `bronze_studio_transcripts` 🔒 | Dataverse `conversationtranscript` | conversation | conversationtranscriptid, botid, conversationid, content(JSON activities), createdon, schematype |
-| `bronze_studio_analytics` | Monitor / Dataverse analytics | agent × day | sessions, engagementRate, resolutionRate, escalationRate, abandonRate, csat, topicsTriggered, outcome |
-| `bronze_studio_capacity` | Power Platform Admin | env/agent × day | messagesConsumed, generativeAnswers, aiBuilderCredits, environmentId |
-| `bronze_studio_cost_usage` | Cost Management (PAYG meter) | meter × day | meterName, quantity, cost, resourceId |
-| `bronze_studio_appinsights` | App Insights (optional) | event | conversationId, activityId, botId, latency, dependency calls |
+| `bronze_dataverse_msdyn_aievent` ✅ | Dataverse `msdyn_aievents` (OData, per environment) | billed event | msdyn_aieventid, msdyn_eventtimestamp, msdyn_eventtype, msdyn_billingtype, **msdyn_creditconsumed**, msdyn_ismeteredevent, _msdyn_botid_value (+ OData FormattedValue), _msdyn_environmentid_value, msdyn_channel, msdyn_outcome |
+| `bronze_studio_transcripts` 🔒 | Dataverse `conversationtranscript` | conversation | conversationtranscriptid, botid, conversationid, content(JSON activities), createdon |
+| `bronze_studio_analytics` | Monitor / Dataverse analytics | agent × day | sessions, engagementRate, resolutionRate, escalationRate, csat, outcome |
 
-### Reference / master data (customer inputs — mostly MOCK today)
+Studio **dollars** come from the PAYG meter on `bronze_focus_cost`; this feed supplies
+the credits that say which agent burned them.
+
+### Reference / master data (customer inputs — MOCK today)
 | Bronze table | Source | Notable columns |
 |---|---|---|
-| `bronze_entra_users` | Graph `/users`, `/servicePrincipals` | id, UPN, displayName, type, department, manager |
-| `bronze_org_hierarchy` 📝 | customer CSV | business_unit, division, cost_center, executive_owner, monthly_budget |
-| `bronze_app_ownership` 📝 | customer CSV | app, owner_upn, owner_bu, service_principal_id, repo, agent_id, environment |
-| `bronze_rate_card` 📝 | customer CSV / price sheet | platform, unit_type, model, unit_price_usd, effective_from, discount_pct |
+| `bronze_ref_identity_map` ✅ | Graph `/users`, `/servicePrincipals` + manual map | identity_key, upn, github_login, principal_type, is_human, home_business_unit_key, cost_center_key |
+| `bronze_ref_app_inventory` ✅ 📝 | CMDB / resource tags | application_key, application_type, owner_business_unit_key, default_environment_key, gateway_app_name, gateway_client_id, azure_resource_name |
+| `bronze_ref_business_hierarchy` ✅ 📝 | customer CSV | business_unit_key, business_unit_name, division, monthly_budget_usd, executive_owner |
+| `bronze_ref_agent_inventory` ✅ 📝 | Copilot Studio env inventory | agent_key, agent_name, bot_id, environment_id, owner_business_unit_key, cost_center_key |
+| `bronze_ref_rate_card` ✅ 📝 | customer CSV / price sheet | platform, unit_type, model, unit_price_usd, effective_from, source |
 
 ---
 
 ## SILVER — conformed entities (the hard, high-value work)
 
-Silver cleans, dedupes, resolves identity, normalizes taxonomy, and reconciles cost.
-These are the intermediate conformed tables that feed Gold.
+Silver types, cleans, resolves identity, normalizes taxonomy, and **allocates billed
+cost onto identities**. ✅ = built and running in both engines
+(`platform/medallion/silver/10_conform_usage.py` and `platform/data-store/build_store.py`).
+
+**The central rule: the provider's bill is the only source of dollars.** FOCUS carries
+cost but no identity; the gateway and Dataverse carry identity but no cost. Silver
+splits the billed amount by each identity's share of the billed unit, so Gold
+reconciles to the invoice instead of re-deriving spend from a rate card.
 
 | Silver table | Built from (Bronze) | What it does |
 |---|---|---|
-| `silver_identity_resolved` | ghc_seats, m365 users, entra_users, aoai caller ids, studio botid | **Identity graph**: unify github_login ↔ Entra user ↔ UPN ↔ service principal ↔ agent into one `identity_key`; assign `principal_type`, `identity_class`, `is_human`, home BU |
-| `silver_application_map` | app_ownership, tags, repo→app, agent→app | resolve every workload to an `application_key` + owner BU + default environment |
-| `silver_model_map` | aoai deployments, ghc model usage, studio | normalize deployment/model names → canonical `model_key` (family, version, provider, modality) |
-| `silver_org_hierarchy` | org_hierarchy | clean BU / division / cost center / budget / owner |
-| `silver_rate_card` | rate_card, azure_price_sheet | one price per (platform, unit_type, model, date) incl. discount |
-| `silver_usage_foundry` | aoai_metrics, aoai_requestresponse, aoai_cost_usage | per-call/per-day tokens+requests+latency joined to **billed $** from Cost Mgmt |
-| `silver_usage_m365` | m365_copilot_usage, user_licenses, subscribed_skus | per user/day: licensed?, active?, per-app activity; seat cost = seats × price |
-| `silver_usage_ghc` | ghc_seats, ghc_usage_metrics, ghc_billing_usage | per user/day: licensed?, last_activity, acceptance, model; seat + premium-req cost |
-| `silver_usage_studio` | studio_analytics, studio_capacity, studio_cost_usage | per agent/day: sessions, resolution, messages consumed, billed $ |
-| `silver_usage_unified` | the 4 `silver_usage_*` | **union to one grain**: date × platform × identity × application × model × cost; nulls where a source's grain doesn't reach; adds `cost_is_estimated` (modelled vs billed) |
-| `silver_cost_reconciliation` | silver_usage_unified vs Cost Mgmt totals | modelled vs billed variance → drives `Cost Confidence %` |
+| `silver_cost_charge` ✅ | focus_cost | Type the 96 FOCUS columns, decode `Tags` and `x_SkuDetails` JSON → application/BU/env keys, model, token direction; classify `ServiceName` → platform_key; expose billed vs list (the realised discount) |
+| `silver_gateway_request` ✅ | apim_gateway_requests, apim_client_ownership, ref_identity_map, ref_app_inventory | Cast Log Analytics strings (`""`/`"None"` → 0), resolve `ClientId` → identity + class, `BackendId` → application, and BU via identity → client registry → app owner; unresolvable callers become `unknown`/`BU-UNALLOC` rather than vanishing |
+| `silver_studio_event` ✅ | dataverse_msdyn_aievent, ref_agent_inventory | Type credits and resolve `_msdyn_botid_value` → agent + owning BU |
+| `silver_foundry_allocation` ✅ | silver_cost_charge, silver_gateway_request | **Split billed AOAI cost across identities by token share, per direction** (input/output/cached are priced differently) |
+| `silver_studio_allocation` ✅ | silver_cost_charge, silver_studio_event | Split the billed PAYG credit meter across agents by credit share |
+| `silver_usage_conformed` ✅ | the allocations + m365/github feeds | **Union to one daily grain**: date × platform × identity × application × model × unit_type, with `cost_is_estimated` separating invoiced from modelled and `cost_method` recording how each dollar was derived |
+| `silver_identity_resolved` | ghc_seats, m365 users, entra_users, studio botid | Fuller identity graph (currently resolved inline from `ref_identity_map`) |
+| `silver_cost_reconciliation` | silver_usage_conformed vs FOCUS totals | Modelled vs billed variance → drives `Cost Confidence %` *(the build asserts the allocation ties to the invoice today)* |
 
-**Silver grain rule:** `silver_usage_unified` is the coarsest common denominator —
-**daily**. Per-call detail stays in the Foundry table for engineering drill-down;
-everything rolls up to daily for the cross-platform fact.
+**cost_method values:** `focus_token_allocation`, `focus_credit_allocation`,
+`provider_billed` (the feed carries its own dollars: GitHub `netAmount`, M365 credits),
+`rate_card` (nothing is billed — seats), `usage_signal` (activity proof, zero cost).
+
+**Silver grain rule:** `silver_usage_conformed` is the coarsest common denominator —
+**daily**. Per-request detail stays in `silver_gateway_request` for engineering
+drill-down; everything rolls up to daily for the cross-platform fact.
 
 ---
 
 ## GOLD — the star the Power BI model binds to (exact columns)
 
-This is **already built** in the repo (`data/*.csv` + TMDL). Gold = `silver_usage_unified`
-projected into `fact_ai_usage` + conformed dimensions. Direct Lake (prod) or import (demo).
+This is **already built** in the repo (`data/*.csv` + TMDL) and materialized by
+`platform/medallion/gold/20_build_star.py` (Spark) and `build_store.py` (SQLite).
+Gold = `silver_usage_conformed` projected into `fact_ai_usage` + conformed dimensions.
+Direct Lake (prod) or import (demo). Both builds **assert** the column contract and
+that every fact key resolves to a dimension, so drift fails loudly.
+
+Fabric capacity is excluded from `fact_ai_usage` on purpose: it is real FOCUS content
+but platform self-cost, not AI consumption, so it is reported from
+`silver_cost_charge`.
 
 ### `fact_ai_usage` (grain: date × platform × identity × model × application × environment × BU × cost center)
 | Column | Type | Notes |
@@ -107,14 +135,14 @@ projected into `fact_ai_usage` + conformed dimensions. Direct Lake (prod) or imp
 | `application_key` | text FK | → dim_application |
 | `environment_key` | text FK | → dim_environment |
 | `business_unit_key` | text FK | → dim_business_unit |
-| `unit_type` | text | token / seat_day / message / request |
+| `unit_type` | text | token / seat_day / copilot_credit / premium_request / active_day |
 | `quantity` | decimal | native units consumed |
 | `input_tokens` | int | 0 where N/A |
 | `output_tokens` | int | 0 where N/A |
 | `cached_tokens` | int | cache-hit tokens |
 | `requests` | int | request/call count |
-| `cost_usd` | decimal | modelled or billed cost |
-| `cost_is_estimated` | bool | true=modelled, false=billed (Cost Mgmt) |
+| `cost_usd` | decimal | allocated-billed or modelled cost |
+| `cost_is_estimated` | bool | true=modelled (rate card), false=billed (provider invoice) |
 | `is_error` | bool | error flag |
 | `latency_ms` | int | request latency |
 
@@ -144,19 +172,19 @@ counts (Extractable Signals). These are the numbers the 10 report pages display.
 ## One-screen mental model
 
 ```
- SOURCES (APIs/reports)          BRONZE (raw, 1:1)         SILVER (conformed)            GOLD (star → Power BI)
- ─────────────────────           ─────────────────         ──────────────────            ──────────────────────
- AOAI metrics/logs/cost   ─┐     bronze_aoai_*        ─┐    silver_usage_foundry  ─┐
- M365 usage/interactions  ─┤ ──▶ bronze_m365_*        ─┼──▶ silver_usage_m365     ─┤
- GitHub seats/metrics/$   ─┤     bronze_ghc_*         ─┤    silver_usage_ghc       ─┼─▶ silver_usage_unified ─▶ fact_ai_usage
- Copilot Studio dataverse ─┘     bronze_studio_*      ─┘    silver_usage_studio    ─┘        + dim_* (10)     ─▶ 10 report pages
- Entra / org / rate card  ─────▶ bronze_*(reference)  ────▶ silver_identity_resolved,
-                                                            silver_application_map,
-                                                            silver_model_map,
-                                                            silver_rate_card
+ SOURCES (APIs/reports)          BRONZE (raw, 1:1)              SILVER (conformed)          GOLD (star → Power BI)
+ ─────────────────────           ─────────────────              ──────────────────          ──────────────────────
+ Cost Mgmt FOCUS 1.0r2 ────┐     bronze_focus_cost         ─┐   silver_cost_charge ──┐
+   (the only $ authority)  │                                │                        ├─▶ foundry_allocation  ─┐
+ APIM gateway → LA        ─┤ ──▶ bronze_apim_*             ─┼──▶ silver_gateway_request            │           │
+ Dataverse msdyn_aievent  ─┤     bronze_dataverse_*        ─┤   silver_studio_event ─┴─▶ studio_allocation ────┼─▶ silver_usage_conformed ─▶ fact_ai_usage
+ M365 Graph + credits     ─┤     bronze_m365_*             ─┤                                                  │        + dim_* (9)        ─▶ 10 report pages
+ GitHub seats + billing   ─┘     bronze_ghc_*              ─┘                                                  │
+ Entra / org / rate card  ─────▶ bronze_ref_* (5)          ─────▶ (identity, application, agent, BU resolution)┘
 ```
 
-**Bottom line:** Bronze = ~24 raw feed tables (source-faithful, incremental, PII zone for
-content). Silver = ~11 conformed tables (identity + app + model + cost normalization, then
-one unified daily usage table). Gold = **1 fact + 10 dims** — the exact star already in this
-repo, which the 10 Power BI pages and 42 measures consume.
+**Bottom line:** Bronze = one table per source **endpoint**, source-faithful and
+append-only — with a single cost contract (FOCUS) covering every Azure-billed service.
+Silver = 6 conformed tables whose central job is **allocating billed dollars onto
+identities** by token/credit share. Gold = **1 fact + 9 dims** — the exact star already
+in this repo, which the 10 Power BI pages and 42 measures consume.

@@ -217,17 +217,25 @@ AIFinOps.SemanticModel/
   data/*.csv                      ← swap these for live extracts
   synonyms.linguistic.json        Q&A / Fabric Copilot synonyms (standalone, apply-on-demand)
 AIFinOps.Report/report.json       10 pages (4 original + 5 persona + data spectrum)
+platform/fabric/gen_bronze_data.py  generates the MOCK raw extracts (FOCUS, APIM, M365, Dataverse, GitHub)
+platform/fabric/bronze_out/*.csv    those extracts, source-faithful column for column
+platform/fabric/load_bronze.py      pushes the raw extracts into a Fabric Lakehouse
+platform/data-store/build_store.py  runs bronze→silver→gold into finops.db (no Fabric needed)
 platform/medallion/               Fabric bronze/silver/gold notebooks (→ the gold star)
+platform/localhost/app.py         5 persona dashboards + AI insight layer over finops.db
 docs/ARCHITECTURE.md              decision record (rationale/tradeoffs/value/effort)
+docs/bronze-layer-architecture.md raw-layer contracts, per-table specs, collector gap analysis
 docs/extractable-fields.md        per-platform field catalog (M365/GHC/Studio/Foundry) + medallion verdict
 docs/medallion-tables.md          full Bronze/Silver/Gold table inventory + Gold column schemas
-docs/medallion-examples.md        worked example rows for every table, traced Bronze→Silver→Gold
+docs/medallion-examples.md        real example rows for every layer, traced Bronze→Silver→Gold
 docs/ai-insight-layer.md          Fabric Copilot + NL + RAG strategy
 data/                             raw Log Analytics exports (real Foundry)
 ```
 
 ## References
 - [Copilot Credits billing rates](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management)
+- [FOCUS cost and usage details file schema](https://learn.microsoft.com/en-us/azure/cost-management-billing/dataset-schema/cost-usage-details-focus)
+- [EA cost and usage details file schema](https://learn.microsoft.com/en-us/azure/cost-management-billing/dataset-schema/cost-usage-details-ea)
 - [msdyn_AIEvent table reference](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/reference/entities/msdyn_aievent)
 - [Azure OpenAI monitoring data reference](https://learn.microsoft.com/en-us/azure/foundry/openai/monitor-openai-reference)
 - [getMicrosoft365CopilotUsageUserDetail](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/api/admin-settings/reports/copilotreportroot-getmicrosoft365copilotusageuserdetail)

@@ -64,9 +64,9 @@
 
 | Aspect | Detail |
 |---|---|
-| **APIs** | **Cost:** `Microsoft.Consumption/usageDetails` (or Cost Management Query API). **Usage:** `microsoft.insights/metrics` on the resource. **Logs:** Diagnostic settings → Log Analytics (request/response, `AzureDiagnostics`). |
-| **Telemetry** | Prompt/completion/total tokens, requests, latency, TPM/RPM, error codes, model/deployment name, streaming. |
-| **Cost data** | **Real $** from Azure Cost Management (per meter, per resource, per day) — the authoritative cost source in the whole platform. |
+| **APIs** | **Cost:** Cost Management **Export → FOCUS 1.0r2** dataset (not the legacy `usageDetails` shape). **Identity + usage:** APIM AI gateway → Log Analytics. **Logs:** Diagnostic settings → Log Analytics (`AzureDiagnostics`). |
+| **Telemetry** | Prompt/completion/cached/total tokens, requests, latency, TPM/RPM, error codes, model/deployment name, streaming. |
+| **Cost data** | **Real $** from the FOCUS export (per meter, per resource, per day) — the authoritative cost source in the whole platform. Carries no identity, so it is allocated by gateway token share. |
 | **Usage data** | Tokens (input/output/cached), requests, latency, throttles by deployment. |
 | **Identity** | **Resource + (optionally) caller** — typically a **Service Principal / Managed Identity**, or an APIM subscription key. Often **no human**. |
 | **Dimensions** | Subscription, resource group, resource, deployment, model, region, **resource tags** (app/BU/env). |
@@ -105,26 +105,33 @@
 > `_watermark (string)`, `_batch_id (string)`. Omitted from lists below for brevity.
 
 ### bronze_m365_copilot_usage
-- **PK:** `report_date + user_principal_name`
+- **PK:** `Report Refresh Date + User Principal Name`
 - **Grain:** one row per user per report snapshot
 - **Refresh:** daily (period D7)
 - **Source API:** Graph `getMicrosoft365CopilotUsageUserDetail`
 - **Permissions:** `Reports.Read.All` (app)
-- **Columns:** user_principal_name, display_name, report_date, last_activity_date,
-  copilot_chat_last_activity, teams_last_activity, word_last_activity,
-  excel_last_activity, powerpoint_last_activity, outlook_last_activity,
-  onenote_last_activity, loop_last_activity, report_period
-- **Descriptions:** per-app last-activity dates used for **seat utilization / idle** detection.
+- **Columns (the report's own headers, spaces and all):** `Report Refresh Date`,
+  `User Principal Name`, `Display Name`, `Last Activity Date`,
+  `Copilot Chat Last Activity Date`, `Microsoft Teams Copilot Last Activity Date`,
+  `Word Copilot Last Activity Date`, `Excel Copilot Last Activity Date`,
+  `PowerPoint Copilot Last Activity Date`, `Outlook Copilot Last Activity Date`,
+  `OneNote Copilot Last Activity Date`, `Loop Copilot Last Activity Date`,
+  `Report Period`
+- **Descriptions:** per-app last-activity **dates**, never counts or tokens. A blank
+  `Last Activity Date` is the idle-seat signal, and Silver turns a non-blank one into
+  an `active_day` row so a seat with no activity becomes reclaimable.
 
 ### bronze_m365_copilot_seats
-- **PK:** `snapshot_date + user_principal_name + sku_id`
+- **PK:** `snapshotDate + userPrincipalName + skuId`
 - **Grain:** one row per licensed user per SKU per snapshot
 - **Refresh:** daily
 - **Source API:** Graph `subscribedSkus` + `users?$select=assignedLicenses`
 - **Permissions:** `Directory.Read.All` / `User.Read.All`, `Organization.Read.All`
-- **Columns:** snapshot_date, user_principal_name, sku_id, sku_part_number,
-  capability_status, assigned_date, service_plans_enabled
-- **Descriptions:** the **fixed seat cost** basis (who holds a Copilot license).
+- **Columns:** snapshotDate, userId, userPrincipalName, displayName, skuId,
+  skuPartNumber, servicePlanId, servicePlanName, provisioningStatus, appliesTo,
+  capabilityStatus, assignedDateTime, prepaidUnitsEnabled, consumedUnits
+- **Descriptions:** the **fixed seat cost** basis (who holds a Copilot licence).
+  `prepaidUnitsEnabled` vs `consumedUnits` exposes purchased-but-unassigned seats.
 
 ### bronze_m365_copilot_interactions  *(Phase 2)*
 - **PK:** `interaction_id`
@@ -137,24 +144,36 @@
 - **Descriptions:** interaction-level depth for adoption/engagement analytics.
 
 ### bronze_m365_copilot_credits  *(NEW — see §3)*
-- **PK:** `usage_date + consumer_id + meter_id`
+- **PK:** `usageDate + consumerId + meterId`
 - **Grain:** daily credit consumption per consumer (agent/user)
 - **Refresh:** daily
-- **Source:** Power Platform admin billing / Azure Cost Management meter
-- **Permissions:** Power Platform admin + Cost Management Reader
-- **Columns:** usage_date, consumer_id, consumer_type, meter_id, meter_name,
-  credits_consumed, unit_price_usd, cost_usd, capability (Cowork/Autopilot/agent)
+- **Source:** M365 / Power Platform admin billing (Copilot Credits)
+- **Permissions:** Power Platform admin + billing reader
+- **Columns:** usageDate, tenantId, consumerId, consumerType, capability, meterId,
+  meterName, billingType, creditsConsumed, unitPriceUsd, costUsd, currency
 - **Descriptions:** **variable** M365 Copilot spend (Credits) incl. Cowork/Autopilot.
+  The feed carries its own dollars, so Silver uses them directly rather than the
+  rate card.
 
-### bronze_studio_credits
-- **PK:** `usage_date + agent_id + action_type`
-- **Grain:** daily credits per agent per action type
-- **Refresh:** daily
-- **Source:** Power Platform admin center / Cost Management meter
-- **Permissions:** Power Platform admin, Cost Management Reader
-- **Columns:** usage_date, environment_id, agent_id, agent_name, action_type,
-  credit_rate, credits_consumed, cost_usd, session_count
-- **Descriptions:** Copilot Studio **variable credit** consumption by action.
+### bronze_dataverse_msdyn_aievent
+- **PK:** `msdyn_aieventid`
+- **Grain:** one row per billed Copilot Studio event
+- **Refresh:** daily, **per environment** (msdyn_aievent is not tenant-wide)
+- **Source:** Dataverse `msdyn_aievents` (OData)
+- **Permissions:** Dataverse app registration + environment URL
+- **Columns:** @odata.etag, msdyn_aieventid, createdon, msdyn_eventtimestamp,
+  msdyn_eventtype, msdyn_billingtype, msdyn_creditconsumed, msdyn_ismeteredevent,
+  msdyn_conversationid, msdyn_sessionid, _msdyn_botid_value,
+  `_msdyn_botid_value@OData.Community.Display.V1.FormattedValue`,
+  _msdyn_environmentid_value, msdyn_channel, msdyn_outcome, statecode, statuscode,
+  versionnumber
+- **Descriptions:** Copilot Studio **credit consumption per agent**.
+  `msdyn_creditconsumed` is **already net of zero-rating** — use it directly and never
+  recompute credits from an action-rate table. Lookups keep both the `_value` id and
+  the OData formatted-value column. Exclude bring-your-own-model rows so Foundry spend
+  is not counted twice.
+- **Cost note:** this feed carries **no dollars**. The PAYG meter in the FOCUS export
+  does, so Silver allocates that billed amount across agents by credit share.
 
 ### bronze_studio_transcripts  *(Phase 2)*
 - **PK:** `conversation_id`
@@ -172,19 +191,24 @@
 - **Refresh:** daily
 - **Source API:** `GET /orgs/{org}/copilot/billing/seats`
 - **Permissions:** PAT/App `manage_billing:copilot` or `read:org`
-- **Columns:** snapshot_date, assignee_login, assignee_id, created_at,
-  last_activity_at, last_activity_editor, plan_type, pending_cancellation_date
-- **Descriptions:** GitHub Copilot **fixed seat** + idle detection.
+- **Columns:** snapshot_date, assignee_login, assignee_id, assignee_type,
+  assigning_team, created_at, updated_at, last_activity_at, last_activity_editor,
+  pending_cancellation_date, plan_type
+- **Descriptions:** GitHub Copilot **fixed seat** + idle detection. `last_activity_at`
+  requires IDE telemetry to be on, otherwise every seat looks idle. Silver turns a
+  non-blank value into an `active_day` row.
 
 ### bronze_ghc_premium_usage
-- **PK:** `usage_date + login + sku`
+- **PK:** `date + username + sku`
 - **Grain:** daily metered usage per user per SKU
 - **Refresh:** daily
 - **Source API:** `GET /organizations/{org}/settings/billing/usage` (product=copilot)
 - **Permissions:** `manage_billing:copilot` (metrics policy enabled)
-- **Columns:** usage_date, login, sku, unit_type, quantity, model, model_multiplier,
-  gross_amount, discount_amount, net_amount, repository_name
-- **Descriptions:** **variable** premium-request overage $ by model.
+- **Columns:** date, product, sku, model, modelMultiplier, quantity, unitType,
+  pricePerUnit, grossAmount, discountAmount, netAmount, organizationName,
+  repositoryName, username
+- **Descriptions:** **variable** premium-request overage $ by model. `netAmount` is
+  the billed figure, so Silver uses it directly instead of the rate card.
 
 ### bronze_ghc_metrics  *(Phase 2)*
 - **PK:** `metric_date + editor + language + model`
@@ -196,47 +220,95 @@
   language, model, suggestions_count, acceptances_count, chat_count
 - **Descriptions:** engagement/ROI (acceptance rates) — no cost.
 
-### bronze_azure_ai_cost
-- **PK:** `usage_date + resource_id + meter_id`
-- **Grain:** daily cost per resource per meter
+### bronze_focus_cost
+- **Contract:** Microsoft Cost Management **FOCUS 1.0r2** cost and usage details.
+  This is intentionally not the
+  [legacy EA `UsageDetails` shape](https://learn.microsoft.com/azure/cost-management-billing/dataset-schema/cost-usage-details-ea).
+  The source field contract follows the
+  [Microsoft FOCUS schema](https://learn.microsoft.com/azure/cost-management-billing/dataset-schema/cost-usage-details-focus).
+- **Scope:** ONE export covers every Azure-billed AI charge line — Azure OpenAI /
+  Foundry usage, the Copilot Studio pay-as-you-go credit meter, and Fabric capacity.
+  One contract, one collector; the service is a column, not a table.
+- **PK:** no provider-guaranteed row key; dedupe in Silver using charge period,
+  resource, SKU price, charge category, and source batch
+- **Grain:** one provider charge line (typically resource × meter × day for AOAI usage)
 - **Refresh:** daily
-- **Source API:** Cost Management `usageDetails` / Query
+- **Source:** Cost Management Export configured for the FOCUS cost and usage dataset
 - **Permissions:** Cost Management Reader
-- **Columns:** usage_date, subscription_id, resource_group, resource_id, meter_id,
-  meter_name, meter_category, quantity, unit_price, cost_usd, currency, tags_json
-- **Descriptions:** **authoritative real $** for Foundry/AOAI/ML/Fabric (tag-driven attribution).
+- **Columns:** all 96 Microsoft FOCUS 1.0 fields, including `BilledCost`,
+  `EffectiveCost`, `ListCost`, `ConsumedQuantity`, `PricingQuantity`, `ResourceId`,
+  `SkuPriceId`, `SubAccountId`, `Tags`, and Microsoft extension fields such as
+  `x_ResourceGroupName`, `x_SkuMeterId`, `x_SkuMeterName`, and `x_SkuDetails`;
+  Bronze lineage is appended after the source fields.
+- **Descriptions:** **the authoritative dollars for the whole platform.**
+  `SubAccountId` is the Azure subscription, `ConsumedQuantity`/`ConsumedUnit` describe
+  raw usage (tokens, credits, hours), and `PricingQuantity`/`PricingUnit` describe
+  billable units (1K-token blocks). `Tags` drives application/BU attribution, and
+  `ListCost` minus `BilledCost` is the realised discount.
+- **Mock fidelity:** `bronze_focus_cost.csv` uses the exact FOCUS 1.0r2 header order
+  and ISO timestamps with seconds. Empty fields are intentional because many FOCUS
+  columns are conditional or not applicable to ordinary usage rows.
+- **EA comparison:** the linked EA schema uses fields such as `Date`, `Quantity`,
+  `EffectivePrice`, `CostInBillingCurrency`, `SubscriptionId`, and `MeterId`.
+  Do not mix that contract with FOCUS. The corresponding FOCUS concepts are
+  `ChargePeriodStart`, `ConsumedQuantity`, `x_EffectiveUnitPrice`, `BilledCost`,
+  `SubAccountId`, and `x_SkuMeterId`.
+- **Append, never overwrite:** a Cost Management export **replaces** the
+  month-to-date file on every run, so Bronze appends each stamped extract and Silver
+  reads the latest per charge period.
 
-### bronze_azure_ai_metrics
-- **PK:** `metric_time + resource_id + deployment + metric_name`
-- **Grain:** hourly/daily metric per deployment
-- **Refresh:** hourly
-- **Source API:** Azure Monitor `microsoft.insights/metrics`
-- **Permissions:** Monitoring Reader
-- **Columns:** metric_time, resource_id, deployment_name, model_name, metric_name,
-  processed_prompt_tokens, generated_tokens, total_tokens, requests, latency_ms,
-  throttled_count
-- **Descriptions:** token/request/latency usage for Foundry/AOAI (cost via join to $ meter).
+### bronze_apim_gateway_requests
+- **PK:** `RequestId`
+- **Grain:** one row per model request
+- **Refresh:** near real-time (DCR stream) / daily batch
+- **Source:** APIM AI gateway → Data Collection Rule → Log Analytics `ApimAiGateway_CL`
+- **Permissions:** Log Analytics Reader
+- **Columns:** ApiName, Appid, BackendId, BusinessUnitClaim, CachedPromptTokens,
+  ClientId, CompletionTokens, CostCenterClaim, DeploymentRegion, IsError,
+  IsStreaming, ModelName, ModelVersion, Oid, OperationName, PromptTokens, RequestId,
+  StatusCode, TableName, TimeGenerated, TotalLatencyMs, TotalTokens, UpnOrAppName
+- **Descriptions:** the **only per-identity attribution path for Foundry**. Carries no
+  dollars; it supplies the token shares Silver uses to split the FOCUS bill.
+- **Type fidelity:** Log Analytics returns **every field as a string**, including
+  numbers and booleans, and unset values arrive as `""` or the literal `"None"`.
+  Bronze keeps them exactly that way; Silver casts.
+- **Missing `ClientId` is data, not dirt:** a request without the JWT claim still
+  burned billed tokens, so it stays in the extract and surfaces as unallocated spend
+  instead of silently disappearing.
+- **Why Azure Monitor metrics are NOT collected:** `microsoft.insights/metrics` token
+  counts carry **no identity dimension**, so they would only duplicate numbers this
+  feed already provides, without the one column that makes attribution possible.
+
+### bronze_apim_client_ownership
+- **PK:** `ClientId`
+- **Grain:** one row per registered gateway client
+- **Refresh:** on change (current-state snapshot, overwrite)
+- **Source:** Log Analytics `ApimClientOwnership_CL` (customer-maintained)
+- **Permissions:** Log Analytics Reader
+- **Columns:** AppName, BusinessUnit, ClientId, CostCenter, TableName, Team,
+  TenantId, TimeGenerated, Type, _ResourceId
+- **Descriptions:** the client registry. Silver uses it as the **fallback owner** when
+  a caller is absent from the identity map; because it names the business unit rather
+  than keying it, Silver conforms that name to a `business_unit_key`.
 
 ### bronze_azure_ai_logs  *(Phase 2)*
 - **PK:** `request_id`
 - **Grain:** one row per model request
 - **Refresh:** near real-time
-- **Source:** Log Analytics (`AzureDiagnostics` / APIM AI-gateway logs)
+- **Source:** Log Analytics `AzureDiagnostics` (resource-level diagnostic settings)
 - **Permissions:** Log Analytics Reader
 - **Columns:** request_id, timestamp, resource_id, deployment, caller_ip,
   api_subscription_id, prompt_tokens, completion_tokens, total_tokens, status_code,
   duration_ms, user_or_sp_id
-- **Descriptions:** per-request attribution (the **only** path to per-user token cost).
+- **Descriptions:** resource-side request detail. Only worth adding where traffic does
+  **not** flow through the APIM gateway; `bronze_apim_gateway_requests` already gives
+  richer, claim-based attribution for everything that does.
 
 ### bronze_azureml_cost  *(NEW — see §3)*
-- **PK:** `usage_date + resource_id + meter_id`
-- **Grain:** daily cost per AML resource/meter
-- **Refresh:** daily
-- **Source:** Cost Management `usageDetails`
-- **Permissions:** Cost Management Reader
-- **Columns:** usage_date, workspace_id, resource_id, meter_name, compute_target,
-  quantity, cost_usd, tags_json
-- **Descriptions:** AML compute/endpoint **real $**.
+- **Covered by `bronze_focus_cost`.** AML compute, managed endpoints and storage are
+  ordinary Azure charge lines, so they arrive on the same FOCUS export with
+  `ServiceName = 'Azure Machine Learning'`. No separate collector is needed; Silver
+  only needs a service→platform mapping entry.
 
 ### bronze_azureml_usage  *(NEW — see §3, Phase 2)*
 - **PK:** `event_time + workspace_id + entity_id`
@@ -248,7 +320,7 @@
   deployment_id, node_hours, request_count, latency_ms, gpu_utilization, submitted_by
 - **Descriptions:** AML compute/endpoint usage for allocation.
 
-### bronze_fabric_capacity  *(NEW — see §3)*
+### bronze_fabric_capacity  *(NEW — see §3, Phase 2)*
 - **PK:** `usage_date + capacity_id + workspace_id + operation_type`
 - **Grain:** daily CU consumption per workspace/operation
 - **Refresh:** daily
@@ -256,16 +328,9 @@
 - **Permissions:** Fabric Admin / Capacity Admin; Monitoring Reader
 - **Columns:** usage_date, capacity_id, sku, workspace_id, item_id, operation_type,
   workload, cu_seconds, interactive_cu, background_cu, throttled, user_or_sp_id
-- **Descriptions:** Fabric self-cost incl. **Copilot-in-Fabric** CU line.
-
-### bronze_fabric_capacity_cost  *(NEW)*
-- **PK:** `usage_date + capacity_id + meter_id`
-- **Grain:** daily $ per capacity
-- **Refresh:** daily
-- **Source:** Cost Management
-- **Permissions:** Cost Management Reader
-- **Columns:** usage_date, capacity_id, sku, meter_name, quantity, cost_usd, tags_json
-- **Descriptions:** capacity **real $** (CU→$ basis for chargeback of the platform itself).
+- **Descriptions:** Fabric CU **detail** incl. **Copilot-in-Fabric**. The capacity
+  **dollars** already arrive on `bronze_focus_cost`; this feed only adds the CU
+  breakdown needed to charge them back to a workspace.
 
 ### Reference / master-data collectors (non-telemetry, but Bronze-landed)
 
@@ -276,7 +341,7 @@
 - **Source:** Entra `users` + `servicePrincipals` + manual login↔UPN map
 - **Permissions:** `Directory.Read.All`, `Application.Read.All`
 - **Columns:** identity_key, display_name, principal_type, upn, entra_object_id,
-  github_login, is_human, department, manager_upn, account_enabled
+  github_login, is_human, team, business_unit, home_business_unit_key, cost_center_key
 - **Descriptions:** the join key that makes cross-platform identity resolution possible.
 
 ### bronze_ref_app_inventory  *(NEW)*
@@ -284,8 +349,11 @@
 - **Grain:** one row per application/workload
 - **Source:** CMDB / app-ownership registry / Azure resource tags
 - **Columns:** application_key, application_name, application_type, owner_upn,
-  owner_business_unit_key, environment, criticality, cost_center_key
+  owner_business_unit_key, default_environment_key, criticality, gateway_app_name,
+  gateway_client_id, azure_resource_name, is_mock
 - **Descriptions:** maps SPs/resources/tags → owning app & BU (attribution backbone).
+  `azure_resource_name` is what resolves a gateway `BackendId` to an application, and
+  `gateway_client_id` ties the calling principal to the same app.
 
 ### bronze_ref_business_hierarchy  *(NEW)*
 - **PK:** `business_unit_key`
@@ -299,9 +367,11 @@
 - **PK:** `agent_key`
 - **Grain:** one row per agent/bot
 - **Source:** Copilot Studio env inventory + M365 agent registry
-- **Columns:** agent_key, agent_name, platform, environment_id, owner_upn,
-  owner_business_unit_key, purpose, created_on
-- **Descriptions:** attributes non-human agent spend to an owner/BU.
+- **Columns:** agent_key, agent_name, bot_id, platform, environment_id,
+  environment_name, owner_upn, owner_business_unit_key, cost_center_key, purpose,
+  created_on
+- **Descriptions:** attributes non-human agent spend to an owner/BU. `bot_id` is the
+  join to Dataverse `_msdyn_botid_value`; without it, credits cannot reach a BU.
 
 ### bronze_ref_rate_card  *(NEW)*
 - **PK:** `rate_key`
@@ -315,8 +385,10 @@
 
 ## 3. Missing collectors (gap analysis)
 
-Current mock model has: `bronze_m365_usage`, `bronze_ghc_seats`,
-`bronze_ghc_premium_usage`, `bronze_studio_credits`, `bronze_azure_cost`.
+Current mock model has: `bronze_focus_cost`, `bronze_apim_gateway_requests`,
+`bronze_apim_client_ownership`, `bronze_m365_copilot_usage`/`_seats`/`_credits`,
+`bronze_dataverse_msdyn_aievent`, `bronze_ghc_seats`, `bronze_ghc_premium_usage`,
+and the 5 reference feeds.
 
 | Missing collector | Needed? | Why | Phase |
 |---|---|---|---|
@@ -341,33 +413,33 @@ collectors; build one and dimension it.
 
 | Table Name | Purpose | Source | Key | Grain | Critical Fields |
 |---|---|---|---|---|---|
-| bronze_m365_copilot_usage | Seat utilization / idle | Graph usage report | date+UPN | user/day | last_activity_date, per-app activity |
-| bronze_m365_copilot_seats | Fixed seat basis | Graph subscribedSkus | date+UPN+SKU | user/SKU/day | sku_part_number, assigned_date |
-| bronze_m365_copilot_credits | Variable M365 (Cowork/Autopilot) | PPAC/Cost Mgmt | date+consumer+meter | consumer/day | capability, credits_consumed, cost_usd |
-| bronze_studio_credits | Studio variable credits | PPAC/Cost Mgmt | date+agent+action | agent/action/day | action_type, credits_consumed, cost_usd |
+| bronze_focus_cost | **All Azure-billed $** (AOAI, Studio PAYG, Fabric) | Cost Management FOCUS 1.0r2 | charge period+resource+SkuPriceId | charge line | BilledCost, EffectiveCost, ConsumedQuantity, PricingQuantity, Tags |
+| bronze_apim_gateway_requests | Per-identity token attribution | APIM → Log Analytics | RequestId | request | ClientId, Oid, PromptTokens, CompletionTokens, ModelName |
+| bronze_apim_client_ownership | Client registry / fallback owner | Log Analytics | ClientId | client | AppName, BusinessUnit, CostCenter, Team |
+| bronze_m365_copilot_usage | Seat utilization / idle | Graph usage report | refresh date+UPN | user/day | Last Activity Date, per-app activity dates |
+| bronze_m365_copilot_seats | Fixed seat basis | Graph subscribedSkus | date+UPN+SKU | user/SKU/day | skuPartNumber, capabilityStatus, consumedUnits |
+| bronze_m365_copilot_credits | Variable M365 (Cowork/Autopilot) | M365 billing | date+consumer+meter | consumer/day | capability, creditsConsumed, costUsd |
+| bronze_dataverse_msdyn_aievent | Studio credits per agent | Dataverse msdyn_aievents | msdyn_aieventid | event | msdyn_creditconsumed, _msdyn_botid_value, msdyn_billingtype |
 | bronze_ghc_seats | GitHub fixed seat + idle | GH billing/seats | date+login | seat/day | last_activity_at, plan_type |
-| bronze_ghc_premium_usage | GitHub variable overage | GH billing/usage | date+login+sku | user/day | quantity, model_multiplier, net_amount |
-| bronze_azure_ai_cost | Foundry/AOAI real $ | Cost Management | date+resource+meter | resource/day | meter_name, cost_usd, tags_json |
-| bronze_azure_ai_metrics | Token/request usage | Azure Monitor | time+resource+deploy | deploy/hour | total_tokens, requests, latency_ms |
-| bronze_fabric_capacity_cost | Platform self-cost $ | Cost Management | date+capacity+meter | capacity/day | sku, cost_usd |
+| bronze_ghc_premium_usage | GitHub variable overage | GH billing/usage | date+username+sku | user/day | quantity, modelMultiplier, netAmount |
 | bronze_ref_identity_map | Identity resolution | Entra + map | identity_key | principal | upn, github_login, is_human |
-| bronze_ref_app_inventory | App/BU attribution | CMDB/tags | application_key | app | owner_business_unit_key |
+| bronze_ref_app_inventory | App/BU attribution | CMDB/tags | application_key | app | azure_resource_name, gateway_client_id, owner_business_unit_key |
 | bronze_ref_business_hierarchy | Chargeback/budget | Finance MD | business_unit_key | BU | monthly_budget_usd |
-| bronze_ref_agent_inventory | Agent→owner/BU | Studio/M365 | agent_key | agent | owner_business_unit_key |
-| bronze_ref_rate_card | Unit→$ conversion | Price sheet | rate_key | priced unit | unit_price_usd, discount_pct |
+| bronze_ref_agent_inventory | Agent→owner/BU | Studio/M365 | agent_key | agent | bot_id, owner_business_unit_key |
+| bronze_ref_rate_card | Unit→$ where nothing is billed | Price sheet | rate_key | priced unit | unit_price_usd |
 | *(Phase 2)* bronze_m365_copilot_interactions | Engagement depth | Graph aiInteraction | interaction_id | interaction | app_class, interaction_type |
 | *(Phase 2)* bronze_studio_transcripts | Conversation detail | Dataverse | conversation_id | conversation | activities_json, outcome |
 | *(Phase 2)* bronze_ghc_metrics | ROI/acceptance | GH metrics | date+editor+lang+model | agg/day | acceptances_count |
-| *(Phase 2)* bronze_azure_ai_logs | Per-request attribution | Log Analytics | request_id | request | total_tokens, user_or_sp_id |
-| *(Phase 2)* bronze_azureml_cost | AML compute $ | Cost Management | date+resource+meter | resource/day | compute_target, cost_usd |
+| *(Phase 2)* bronze_azure_ai_logs | Non-gateway request detail | Log Analytics | request_id | request | total_tokens, user_or_sp_id |
 | *(Phase 2)* bronze_azureml_usage | AML compute usage | Monitor/logs | time+ws+entity | job/endpoint | node_hours, request_count |
 | *(Phase 2)* bronze_fabric_capacity | CU detail (Copilot-in-Fabric) | Metrics app XMLA | date+capacity+ws+op | op/day | cu_seconds, workload |
 
 ### MVP vs Phase 2 — what to load first
 
 **MVP (load these 14 — proves the whole FinOps story end-to-end):**
-- All 4 platform **cost/seat/usage** feeds: m365 usage+seats+credits, studio credits,
-  ghc seats+premium, azure_ai cost+metrics, fabric_capacity_cost.
+- **One cost contract** (`bronze_focus_cost`) for every Azure-billed service, plus the
+  attribution feeds that contract cannot provide: APIM gateway + ownership, Dataverse
+  events, M365 usage/seats/credits, GitHub seats/premium.
 - **All 5 reference feeds** (identity_map, app_inventory, business_hierarchy,
   agent_inventory, rate_card) — these are **hard blockers** for attribution and
   chargeback; without them Bronze is just disconnected numbers.
@@ -381,9 +453,14 @@ collectors; build one and dimension it.
 - Fabric CU detail (self-chargeback of Copilot-in-Fabric).
 
 ### Silver/Gold normalization (forward reference)
-- **Silver** conforms: `silver_identity` (resolve login↔UPN↔SP via identity_map),
-  `silver_usage_unified` (all feeds → one daily grain, every unit → $ via rate_card,
-  `cost_type` fixed/variable), `silver_cost_allocated` (attribute to app/BU via
-  app/agent inventory; untagged → `BU-UNALLOC`).
+- **Silver** types and conforms: `silver_cost_charge` (typed FOCUS, Tags decoded),
+  `silver_gateway_request` (identity + app resolved, LA strings cast),
+  `silver_studio_event` (Dataverse credits per agent), then the two allocations
+  (`silver_foundry_allocation`, `silver_studio_allocation`) that split **billed**
+  dollars onto identities by token/credit share, and `silver_usage_conformed`
+  (every platform on one daily grain, `cost_is_estimated` separating invoiced from
+  modelled, untagged → `BU-UNALLOC`).
 - **Gold** = the existing star: `fact_ai_usage` + `dim_platform/identity/model/
   application/business_unit/cost_center/date/environment/rate_card`.
+- Implementation: `platform/medallion/` (Spark) and `platform/data-store/build_store.py`
+  (the same logic in SQLite, runnable with no Fabric capacity).
