@@ -39,7 +39,38 @@ python3 build_data.py        # regenerate CSVs
 | **Azure AI Foundry** | `law-apim-finops` → `ApimAiGateway_CL` | ✅ **REAL** — 176 requests, real tokens, real per-user identity |
 | GitHub Copilot Enterprise | — | ⚠️ MOCK — org has **0 Copilot seats**; metrics policy disabled |
 | Copilot Studio | — | ⚠️ MOCK — Dataverse readable, `msdyn_aievents` returned **0 rows** |
-| Microsoft 365 Copilot | — | ⚠️ MOCK — tenant has **no M365 Copilot SKU** |
+| Microsoft 365 Copilot | Bundled synthetic extract | ⚠️ MOCK — live licensing verified separately on 2026-10-23; usage-report authorization remains blocked |
+
+### Live M365 source check — 2026-10-23
+
+A read-only check of the selected demo tenant found **5 enabled Microsoft 365
+Copilot seats, 2 assigned, and 3 unassigned**. The signed-in admin's Copilot
+service plans were successfully provisioned. These are license counts, not
+invoice amounts; Graph does not supply the customer's seat price.
+
+The Graph v1.0 Copilot usage report (`D7`, `v2`) returned HTTP 403,
+`S2SUnauthorized / Invalid permission`, with the existing Azure CLI credentials.
+It requires `Reports.Read.All` on the calling client and a supported reporting
+role for delegated access. A follow-up interactive sign-in did not complete.
+
+Azure Cost Management returned 1,910 month-to-date daily service/meter rows,
+with no further pages and usage dates through October 23. No M365 Copilot,
+Cowork, or Copilot Credit meter was observed in that subscription. Six
+**Microsoft Fabric** `Copilot and AI Capacity Usage CU` rows totaled **$17.64
+USD**; these are not M365 Cowork charges. Missing M365 meters do not establish
+zero consumption or prove that pay-as-you-go is configured.
+
+The bundled CSVs, portable database, and dashboards remain unchanged and MOCK
+for M365. A successful licensing check alone must not relabel synthetic usage
+or modeled seat costs as real.
+
+The deployed Fabric flow was subsequently wired and successfully run on October
+23: two live seat assignments reached the Gold fact, with seat costs still
+estimated. All 1,910 billing rows and explicit source-access statuses passed
+through separate Bronze/Silver/Gold evidence tables. See the
+[deployed pipeline runbook](RUNBOOK.md#deployed-fabric-pipeline). This does not
+change the provenance of the bundled local demo or make the new evidence tables
+automatically visible in Power BI.
 
 The Foundry rows come from the sibling
 [`ai-gateway-apim-finops`](https://github.com/natesanshreyas/ai-gateway-apim-finops) gateway:
@@ -140,9 +171,12 @@ VARIABLE — the only half FinOps can influence
   Foundry tokens · GitHub premium requests · Copilot Studio credits
 ```
 
-M365 Copilot has **zero** variable cost. A user sending 5,000 prompts and one sending zero
-bill identically. Splitting the headline number is what stops the dashboard being a
-restatement of the invoice.
+For ordinary usage included in the M365 Copilot seat license, prompt volume does
+not change the seat fee. **Cowork and other usage-based services are separate**:
+they can consume Copilot Credits and require their own billing/consumption feed.
+Do not infer their charges from prompt counts or from Fabric Copilot capacity
+meters. Splitting fixed seat fees from separately metered consumption is what
+stops the dashboard being a restatement of the invoice.
 
 ### 3. The rate card is customer-specific, and that's a feature
 

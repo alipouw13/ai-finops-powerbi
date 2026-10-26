@@ -1,0 +1,44 @@
+table bridge_persona_platform
+
+	column persona_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: persona_key
+
+	column platform_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: platform_key
+
+	column affinity
+		dataType: string
+		summarizeBy: none
+		sourceColumn: affinity
+
+	column is_primary
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: is_primary
+
+	column bridge_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: bridge_key
+
+
+	/// Share of the selected persona AI spend that lands on the primary tool of that persona.
+	measure 'Spend on Primary Tool %' = DIVIDE(CALCULATE([Total AI Cost], TREATAS(CALCULATETABLE(VALUES(bridge_persona_platform[platform_key]), bridge_persona_platform[is_primary] = 1), dim_platform[platform_key])), [Total AI Cost])
+		formatString: 0.0%
+
+	partition bridge_persona_platform = m
+		mode: import
+		source =
+			let
+				Src = Csv.Document(File.Contents(DataFolder & "bridge_persona_platform.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				Hdr = Table.PromoteHeaders(Src, [PromoteAllScalars=true]),
+				Typed = Table.TransformColumnTypes(Hdr, {{"persona_key", type text}, {"platform_key", type text}, {"affinity", type text}, {"is_primary", Int64.Type}, {"bridge_key", type text}})
+			in
+				Typed

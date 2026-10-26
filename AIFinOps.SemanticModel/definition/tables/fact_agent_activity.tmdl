@@ -1,0 +1,54 @@
+table fact_agent_activity
+
+	column activity_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: activity_date
+
+	column identity_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: identity_key
+
+	column agents_used
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: agents_used
+
+	column sessions
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: sessions
+
+	column is_identity_resolved
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: is_identity_resolved
+
+	column _data_class
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: _data_class
+
+
+	measure 'Agent Active Users' = DISTINCTCOUNT(fact_agent_activity[identity_key])
+		formatString: #,0
+
+	measure 'Agent Sessions' = SUM(fact_agent_activity[sessions])
+		formatString: #,0
+
+	measure 'Agent Users Resolved %' = DIVIDE(SUM(fact_agent_activity[is_identity_resolved]), COUNTROWS(fact_agent_activity))
+		formatString: 0.0%
+
+	partition fact_agent_activity = m
+		mode: import
+		source =
+			let
+				Src = Csv.Document(File.Contents(DataFolder & "fact_agent_activity.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				Hdr = Table.PromoteHeaders(Src, [PromoteAllScalars=true]),
+				Typed = Table.TransformColumnTypes(Hdr, {{"activity_date", type date}, {"identity_key", type text}, {"agents_used", Int64.Type}, {"sessions", Int64.Type}, {"is_identity_resolved", Int64.Type}, {"_data_class", type text}})
+			in
+				Typed

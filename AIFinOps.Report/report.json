@@ -754,6 +754,270 @@
           "filters": "[]"
         }
       ]
+    },
+    {
+      "id": 10,
+      "name": "USER_ALLOC",
+      "displayName": "11 \u00b7 User Cost Allocation",
+      "ordinal": 10,
+      "width": 1280,
+      "height": 720,
+      "displayOption": 1,
+      "config": "{}",
+      "filters": "[]",
+      "visualContainers": [
+        {
+          "x": 16,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc46\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_user_cost_allocation.User Allocated Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"User Allocated Cost\"}, \"Name\": \"fact_user_cost_allocation.User Allocated Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Cost allocated to a user key'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 224,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc47\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 224, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_user_cost_allocation.Directly Attributed Cost %\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"Directly Attributed Cost %\"}, \"Name\": \"fact_user_cost_allocation.Directly Attributed Cost %\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Directly attributed %'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 432,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc48\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 432, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_user_cost_allocation.Owner Allocated Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"Owner Allocated Cost\"}, \"Name\": \"fact_user_cost_allocation.Owner Allocated Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Owner-allocated cost'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 640,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc49\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 640, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_user_cost_allocation.Unallocated User Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"Unallocated User Cost\"}, \"Name\": \"fact_user_cost_allocation.Unallocated User Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Unallocated cost'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 848,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc50\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 848, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_user_cost_allocation.User Allocated Tokens\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"User Allocated Tokens\"}, \"Name\": \"fact_user_cost_allocation.User Allocated Tokens\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Tokens'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 1056,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc51\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 1056, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_user_cost_allocation.Allocated Users\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"Allocated Users\"}, \"Name\": \"fact_user_cost_allocation.Allocated Users\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Users with allocated spend'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 16,
+          "y": 150,
+          "z": 0,
+          "width": 624,
+          "height": 300,
+          "config": "{\"name\": \"vc52\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 150, \"z\": 0, \"width\": 624, \"height\": 300}}], \"singleVisual\": {\"visualType\": \"clusteredBarChart\", \"projections\": {\"Category\": [{\"queryRef\": \"dim_identity.display_name\"}], \"Y\": [{\"queryRef\": \"fact_user_cost_allocation.User Allocated Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"di\", \"Entity\": \"dim_identity\", \"Type\": 0}, {\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"di\"}}, \"Property\": \"display_name\"}, \"Name\": \"dim_identity.display_name\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"User Allocated Cost\"}, \"Name\": \"fact_user_cost_allocation.User Allocated Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Cost by user (DIRECT = caller is human; OWNER = app owner; Unallocated = no owner)'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 656,
+          "y": 150,
+          "z": 0,
+          "width": 608,
+          "height": 300,
+          "config": "{\"name\": \"vc53\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 656, \"y\": 150, \"z\": 0, \"width\": 608, \"height\": 300}}], \"singleVisual\": {\"visualType\": \"clusteredBarChart\", \"projections\": {\"Category\": [{\"queryRef\": \"dim_application.application_name\"}], \"Y\": [{\"queryRef\": \"fact_user_cost_allocation.User Allocated Tokens\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"da\", \"Entity\": \"dim_application\", \"Type\": 0}, {\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"da\"}}, \"Property\": \"application_name\"}, \"Name\": \"dim_application.application_name\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"User Allocated Tokens\"}, \"Name\": \"fact_user_cost_allocation.User Allocated Tokens\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Tokens by application / agent'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 16,
+          "y": 466,
+          "z": 0,
+          "width": 1248,
+          "height": 236,
+          "config": "{\"name\": \"vc54\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 466, \"z\": 0, \"width\": 1248, \"height\": 236}}], \"singleVisual\": {\"visualType\": \"tableEx\", \"projections\": {\"Values\": [{\"queryRef\": \"dim_identity.display_name\"}, {\"queryRef\": \"dim_application.application_name\"}, {\"queryRef\": \"fact_user_cost_allocation.allocation_basis\"}, {\"queryRef\": \"fact_user_cost_allocation.User Allocated Tokens\"}, {\"queryRef\": \"fact_user_cost_allocation.User Allocated Requests\"}, {\"queryRef\": \"fact_user_cost_allocation.User Allocated Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"di\", \"Entity\": \"dim_identity\", \"Type\": 0}, {\"Name\": \"da\", \"Entity\": \"dim_application\", \"Type\": 0}, {\"Name\": \"fuc\", \"Entity\": \"fact_user_cost_allocation\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"di\"}}, \"Property\": \"display_name\"}, \"Name\": \"dim_identity.display_name\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"da\"}}, \"Property\": \"application_name\"}, \"Name\": \"dim_application.application_name\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"allocation_basis\"}, \"Name\": \"fact_user_cost_allocation.allocation_basis\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"User Allocated Tokens\"}, \"Name\": \"fact_user_cost_allocation.User Allocated Tokens\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"User Allocated Requests\"}, \"Name\": \"fact_user_cost_allocation.User Allocated Requests\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fuc\"}}, \"Property\": \"User Allocated Cost\"}, \"Name\": \"fact_user_cost_allocation.User Allocated Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'User x application. Same dollars as Total AI Cost, re-keyed to a person; OWNER is accountability, not proof of who made the calls'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "AGENT365",
+      "displayName": "12 \u00b7 Agent 365 Governance",
+      "ordinal": 11,
+      "width": 1280,
+      "height": 720,
+      "displayOption": 1,
+      "config": "{}",
+      "filters": "[]",
+      "visualContainers": [
+        {
+          "x": 16,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc55\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_agent_inventory.Agents\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Agents\"}, \"Name\": \"fact_agent_inventory.Agents\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Agents in registry'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 224,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc56\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 224, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_agent_inventory.Unowned Tenant Agents\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Unowned Tenant Agents\"}, \"Name\": \"fact_agent_inventory.Unowned Tenant Agents\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Unowned tenant agents'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 432,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc57\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 432, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_agent_inventory.Agents With Entra Identity %\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Agents With Entra Identity %\"}, \"Name\": \"fact_agent_inventory.Agents With Entra Identity %\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'With Entra agent ID'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 640,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc58\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 640, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_agent_inventory.Agents With File or Site Access\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Agents With File or Site Access\"}, \"Name\": \"fact_agent_inventory.Agents With File or Site Access\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Can read files / sites'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 848,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc59\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 848, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_agent_activity.Agent Active Users\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"faa\", \"Entity\": \"fact_agent_activity\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"faa\"}}, \"Property\": \"Agent Active Users\"}, \"Name\": \"fact_agent_activity.Agent Active Users\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Agent users (export)'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 1056,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc60\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 1056, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_agent_activity.Agent Users Resolved %\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"faa\", \"Entity\": \"fact_agent_activity\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"faa\"}}, \"Property\": \"Agent Users Resolved %\"}, \"Name\": \"fact_agent_activity.Agent Users Resolved %\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Users matched to identity'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 16,
+          "y": 150,
+          "z": 0,
+          "width": 408,
+          "height": 300,
+          "config": "{\"name\": \"vc61\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 150, \"z\": 0, \"width\": 408, \"height\": 300}}], \"singleVisual\": {\"visualType\": \"clusteredBarChart\", \"projections\": {\"Category\": [{\"queryRef\": \"dim_agent.owner_class\"}], \"Y\": [{\"queryRef\": \"fact_agent_inventory.Agents\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"dag\", \"Entity\": \"dim_agent\", \"Type\": 0}, {\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"owner_class\"}, \"Name\": \"dim_agent.owner_class\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Agents\"}, \"Name\": \"fact_agent_inventory.Agents\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Agents by ownership (Unowned = governance gap)'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 440,
+          "y": 150,
+          "z": 0,
+          "width": 408,
+          "height": 300,
+          "config": "{\"name\": \"vc62\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 440, \"y\": 150, \"z\": 0, \"width\": 408, \"height\": 300}}], \"singleVisual\": {\"visualType\": \"clusteredBarChart\", \"projections\": {\"Category\": [{\"queryRef\": \"dim_agent.platform\"}], \"Y\": [{\"queryRef\": \"fact_agent_inventory.Agents\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"dag\", \"Entity\": \"dim_agent\", \"Type\": 0}, {\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"platform\"}, \"Name\": \"dim_agent.platform\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Agents\"}, \"Name\": \"fact_agent_inventory.Agents\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Agents by build platform (blank = store / unclassified)'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 864,
+          "y": 150,
+          "z": 0,
+          "width": 400,
+          "height": 300,
+          "config": "{\"name\": \"vc63\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 864, \"y\": 150, \"z\": 0, \"width\": 400, \"height\": 300}}], \"singleVisual\": {\"visualType\": \"clusteredColumnChart\", \"projections\": {\"Category\": [{\"queryRef\": \"dim_agent.status\"}], \"Y\": [{\"queryRef\": \"fact_agent_inventory.Agents\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"dag\", \"Entity\": \"dim_agent\", \"Type\": 0}, {\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"status\"}, \"Name\": \"dim_agent.status\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Agents\"}, \"Name\": \"fact_agent_inventory.Agents\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Agents by status'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 16,
+          "y": 466,
+          "z": 0,
+          "width": 1248,
+          "height": 236,
+          "config": "{\"name\": \"vc64\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 466, \"z\": 0, \"width\": 1248, \"height\": 236}}], \"singleVisual\": {\"visualType\": \"tableEx\", \"projections\": {\"Values\": [{\"queryRef\": \"dim_agent.agent_name\"}, {\"queryRef\": \"dim_agent.publisher\"}, {\"queryRef\": \"dim_agent.publisher_type\"}, {\"queryRef\": \"dim_agent.owner_class\"}, {\"queryRef\": \"dim_agent.owner_upn\"}, {\"queryRef\": \"dim_agent.platform\"}, {\"queryRef\": \"dim_agent.status\"}, {\"queryRef\": \"fact_agent_inventory.Agents With Entra Identity\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"dag\", \"Entity\": \"dim_agent\", \"Type\": 0}, {\"Name\": \"fai\", \"Entity\": \"fact_agent_inventory\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"agent_name\"}, \"Name\": \"dim_agent.agent_name\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"publisher\"}, \"Name\": \"dim_agent.publisher\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"publisher_type\"}, \"Name\": \"dim_agent.publisher_type\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"owner_class\"}, \"Name\": \"dim_agent.owner_class\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"owner_upn\"}, \"Name\": \"dim_agent.owner_upn\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"platform\"}, \"Name\": \"dim_agent.platform\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dag\"}}, \"Property\": \"status\"}, \"Name\": \"dim_agent.status\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fai\"}}, \"Property\": \"Agents With Entra Identity\"}, \"Name\": \"fact_agent_inventory.Agents With Entra Identity\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Agent 365 registry (REAL export). No cost per agent is exposed by Agent 365; cost joins by owner or tag'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "PERSONAS",
+      "displayName": "13 \u00b7 Persona Coverage",
+      "ordinal": 12,
+      "width": 1280,
+      "height": 720,
+      "displayOption": 1,
+      "config": "{}",
+      "filters": "[]",
+      "visualContainers": [
+        {
+          "x": 16,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc65\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_ai_usage.Total AI Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fau\", \"Entity\": \"fact_ai_usage\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fau\"}}, \"Property\": \"Total AI Cost\"}, \"Name\": \"fact_ai_usage.Total AI Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'AI cost (all personas)'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 224,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc66\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 224, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"fact_ai_usage.Active Users\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"fau\", \"Entity\": \"fact_ai_usage\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fau\"}}, \"Property\": \"Active Users\"}, \"Name\": \"fact_ai_usage.Active Users\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Active principals'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 432,
+          "y": 16,
+          "z": 0,
+          "width": 200,
+          "height": 110,
+          "config": "{\"name\": \"vc67\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 432, \"y\": 16, \"z\": 0, \"width\": 200, \"height\": 110}}], \"singleVisual\": {\"visualType\": \"card\", \"projections\": {\"Values\": [{\"queryRef\": \"bridge_persona_platform.Spend on Primary Tool %\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"bpp\", \"Entity\": \"bridge_persona_platform\", \"Type\": 0}], \"Select\": [{\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"bpp\"}}, \"Property\": \"Spend on Primary Tool %\"}, \"Name\": \"bridge_persona_platform.Spend on Primary Tool %\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Spend on primary tool'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 16,
+          "y": 150,
+          "z": 0,
+          "width": 624,
+          "height": 300,
+          "config": "{\"name\": \"vc68\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 150, \"z\": 0, \"width\": 624, \"height\": 300}}], \"singleVisual\": {\"visualType\": \"clusteredBarChart\", \"projections\": {\"Category\": [{\"queryRef\": \"dim_persona.persona_name\"}], \"Y\": [{\"queryRef\": \"fact_ai_usage.Total AI Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"dpe\", \"Entity\": \"dim_persona\", \"Type\": 0}, {\"Name\": \"fau\", \"Entity\": \"fact_ai_usage\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dpe\"}}, \"Property\": \"persona_name\"}, \"Name\": \"dim_persona.persona_name\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fau\"}}, \"Property\": \"Total AI Cost\"}, \"Name\": \"fact_ai_usage.Total AI Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'AI cost by persona (ASSUMED persona mapping)'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 656,
+          "y": 150,
+          "z": 0,
+          "width": 608,
+          "height": 300,
+          "config": "{\"name\": \"vc69\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 656, \"y\": 150, \"z\": 0, \"width\": 608, \"height\": 300}}], \"singleVisual\": {\"visualType\": \"clusteredBarChart\", \"projections\": {\"Category\": [{\"queryRef\": \"dim_persona.persona_name\"}], \"Y\": [{\"queryRef\": \"bridge_persona_platform.Spend on Primary Tool %\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"dpe\", \"Entity\": \"dim_persona\", \"Type\": 0}, {\"Name\": \"bpp\", \"Entity\": \"bridge_persona_platform\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dpe\"}}, \"Property\": \"persona_name\"}, \"Name\": \"dim_persona.persona_name\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"bpp\"}}, \"Property\": \"Spend on Primary Tool %\"}, \"Name\": \"bridge_persona_platform.Spend on Primary Tool %\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Share of persona spend on its primary tool'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        },
+        {
+          "x": 16,
+          "y": 466,
+          "z": 0,
+          "width": 1248,
+          "height": 236,
+          "config": "{\"name\": \"vc70\", \"layouts\": [{\"id\": 0, \"position\": {\"x\": 16, \"y\": 466, \"z\": 0, \"width\": 1248, \"height\": 236}}], \"singleVisual\": {\"visualType\": \"tableEx\", \"projections\": {\"Values\": [{\"queryRef\": \"dim_persona.persona_name\"}, {\"queryRef\": \"dim_platform.platform_name\"}, {\"queryRef\": \"bridge_persona_platform.affinity\"}, {\"queryRef\": \"fact_ai_usage.Total AI Cost\"}]}, \"prototypeQuery\": {\"Version\": 2, \"From\": [{\"Name\": \"dpe\", \"Entity\": \"dim_persona\", \"Type\": 0}, {\"Name\": \"dp\", \"Entity\": \"dim_platform\", \"Type\": 0}, {\"Name\": \"bpp\", \"Entity\": \"bridge_persona_platform\", \"Type\": 0}, {\"Name\": \"fau\", \"Entity\": \"fact_ai_usage\", \"Type\": 0}], \"Select\": [{\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dpe\"}}, \"Property\": \"persona_name\"}, \"Name\": \"dim_persona.persona_name\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"dp\"}}, \"Property\": \"platform_name\"}, \"Name\": \"dim_platform.platform_name\"}, {\"Column\": {\"Expression\": {\"SourceRef\": {\"Source\": \"bpp\"}}, \"Property\": \"affinity\"}, \"Name\": \"bridge_persona_platform.affinity\"}, {\"Measure\": {\"Expression\": {\"SourceRef\": {\"Source\": \"fau\"}}, \"Property\": \"Total AI Cost\"}, \"Name\": \"fact_ai_usage.Total AI Cost\"}]}, \"drillFilterOtherVisuals\": true, \"objects\": {}, \"vcObjects\": {\"title\": [{\"properties\": {\"text\": {\"expr\": {\"Literal\": {\"Value\": \"'Persona to tool affinity (Primary / Secondary) from the stakeholder map; Cowork and Azure ML are not ingested yet'\"}}}, \"show\": {\"expr\": {\"Literal\": {\"Value\": \"true\"}}}}}]}}}",
+          "filters": "[]"
+        }
+      ]
     }
   ],
   "filters": "[]",

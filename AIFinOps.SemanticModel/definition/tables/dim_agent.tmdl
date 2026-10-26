@@ -1,0 +1,95 @@
+table dim_agent
+
+	column agent_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: agent_key
+
+	column agent_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: agent_name
+
+	column status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: status
+
+	column publisher
+		dataType: string
+		summarizeBy: none
+		sourceColumn: publisher
+
+	column publisher_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: publisher_type
+
+	column platform
+		dataType: string
+		summarizeBy: none
+		sourceColumn: platform
+
+	column version
+		dataType: string
+		summarizeBy: none
+		sourceColumn: version
+
+	column owner_upn
+		dataType: string
+		summarizeBy: none
+		sourceColumn: owner_upn
+
+	column owner_class
+		dataType: string
+		summarizeBy: none
+		sourceColumn: owner_class
+
+	column channel
+		dataType: string
+		summarizeBy: none
+		sourceColumn: channel
+
+	column deployment
+		dataType: string
+		summarizeBy: none
+		sourceColumn: deployment
+
+	column entra_agent_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: entra_agent_id
+
+	column environment_id
+		dataType: string
+		summarizeBy: none
+		sourceColumn: environment_id
+
+	column created_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: created_date
+
+	column last_modified_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: last_modified_date
+
+	column data_class
+		dataType: string
+		summarizeBy: none
+		sourceColumn: data_class
+
+
+	partition dim_agent = m
+		mode: import
+		source =
+			let
+				Src = Csv.Document(File.Contents(DataFolder & "dim_agent.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				Hdr = Table.PromoteHeaders(Src, [PromoteAllScalars=true]),
+				Typed = Table.TransformColumnTypes(Hdr, {{"agent_key", type text}, {"agent_name", type text}, {"status", type text}, {"publisher", type text}, {"publisher_type", type text}, {"platform", type text}, {"version", type text}, {"owner_upn", type text}, {"owner_class", type text}, {"channel", type text}, {"deployment", type text}, {"entra_agent_id", type text}, {"environment_id", type text}, {"created_date", type date}, {"last_modified_date", type date}, {"data_class", type text}})
+			in
+				Typed

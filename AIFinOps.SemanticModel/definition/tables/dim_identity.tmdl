@@ -61,12 +61,19 @@ table dim_identity
 		summarizeBy: none
 		sourceColumn: home_business_unit_key
 
+	/// ASSUMED persona (derived from team until an HR/Entra job-profile feed exists).
+	column persona_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: persona_key
+
 	partition dim_identity = m
 		mode: import
 		source =
 			let
 				Src = Csv.Document(File.Contents(DataFolder & "dim_identity.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
 				Hdr = Table.PromoteHeaders(Src, [PromoteAllScalars=true]),
-				Typed = Table.TransformColumnTypes(Hdr, {{"identity_key", type text}, {"display_name", type text}, {"principal_type", type text}, {"upn", type text}, {"github_login", type text}, {"team", type text}, {"business_unit", type text}, {"cost_center_key", type text}, {"identity_class", type text}, {"is_human", type logical}, {"home_business_unit_key", type text}})
+				Typed = Table.TransformColumnTypes(Hdr, {{"identity_key", type text}, {"display_name", type text}, {"principal_type", type text}, {"upn", type text}, {"github_login", type text}, {"team", type text}, {"business_unit", type text}, {"cost_center_key", type text}, {"identity_class", type text}, {"is_human", type logical}, {"home_business_unit_key", type text}, {"persona_key", type text}})
 			in
 				Typed

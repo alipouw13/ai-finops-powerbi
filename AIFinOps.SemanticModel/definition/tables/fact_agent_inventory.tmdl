@@ -1,0 +1,104 @@
+table fact_agent_inventory
+
+	column snapshot_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: snapshot_date
+
+	column agent_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: agent_key
+
+	column owner_identity_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: owner_identity_key
+
+	column agent_count
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: agent_count
+
+	column is_unowned_tenant_agent
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: is_unowned_tenant_agent
+
+	column has_owner
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: has_owner
+
+	column has_entra_identity
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: has_entra_identity
+
+	column can_read_files_or_sites
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: can_read_files_or_sites
+
+	column has_custom_actions
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: has_custom_actions
+
+	column can_use_code_interpreter
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: can_use_code_interpreter
+
+	column is_available
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: is_available
+
+	column _data_class
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: _data_class
+
+
+	/// Point-in-time counts use the latest snapshot in the filter context so repeated exports never double count.
+	measure 'Agents' = CALCULATE(SUM(fact_agent_inventory[agent_count]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	measure 'Unowned Tenant Agents' = CALCULATE(SUM(fact_agent_inventory[is_unowned_tenant_agent]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	measure 'Agents With Owner' = CALCULATE(SUM(fact_agent_inventory[has_owner]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	measure 'Agents With Entra Identity' = CALCULATE(SUM(fact_agent_inventory[has_entra_identity]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	measure 'Agents With Entra Identity %' = DIVIDE([Agents With Entra Identity], [Agents])
+		formatString: 0.0%
+
+	measure 'Agents With File or Site Access' = CALCULATE(SUM(fact_agent_inventory[can_read_files_or_sites]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	measure 'Agents With Custom Actions' = CALCULATE(SUM(fact_agent_inventory[has_custom_actions]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	measure 'Agents With Code Interpreter' = CALCULATE(SUM(fact_agent_inventory[can_use_code_interpreter]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	measure 'Available Agents' = CALCULATE(SUM(fact_agent_inventory[is_available]), fact_agent_inventory[snapshot_date] = MAX(fact_agent_inventory[snapshot_date]))
+		formatString: #,0
+
+	partition fact_agent_inventory = m
+		mode: import
+		source =
+			let
+				Src = Csv.Document(File.Contents(DataFolder & "fact_agent_inventory.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				Hdr = Table.PromoteHeaders(Src, [PromoteAllScalars=true]),
+				Typed = Table.TransformColumnTypes(Hdr, {{"snapshot_date", type date}, {"agent_key", type text}, {"owner_identity_key", type text}, {"agent_count", Int64.Type}, {"is_unowned_tenant_agent", Int64.Type}, {"has_owner", Int64.Type}, {"has_entra_identity", Int64.Type}, {"can_read_files_or_sites", Int64.Type}, {"has_custom_actions", Int64.Type}, {"can_use_code_interpreter", Int64.Type}, {"is_available", Int64.Type}, {"_data_class", type text}})
+			in
+				Typed

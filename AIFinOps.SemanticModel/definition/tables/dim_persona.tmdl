@@ -1,0 +1,33 @@
+table dim_persona
+
+	column persona_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: persona_key
+
+	column persona_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: persona_name
+
+	column persona_order
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: persona_order
+
+	column description
+		dataType: string
+		summarizeBy: none
+		sourceColumn: description
+
+
+	partition dim_persona = m
+		mode: import
+		source =
+			let
+				Src = Csv.Document(File.Contents(DataFolder & "dim_persona.csv"),[Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				Hdr = Table.PromoteHeaders(Src, [PromoteAllScalars=true]),
+				Typed = Table.TransformColumnTypes(Hdr, {{"persona_key", type text}, {"persona_name", type text}, {"persona_order", Int64.Type}, {"description", type text}})
+			in
+				Typed

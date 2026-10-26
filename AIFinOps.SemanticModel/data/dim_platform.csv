@@ -1,5 +1,9 @@
-platform_key,platform_name,billing_model,native_unit,has_token_telemetry,has_native_cost,is_variable_cost,data_source,enterprise_discount_pct
-Foundry,Azure AI Foundry,Consumption (tokens),token,TRUE,TRUE,TRUE,REAL - APIM gateway / Log Analytics,0.15
-GitHubCopilot,GitHub Copilot Enterprise,Seats + premium requests,premium_request,FALSE,TRUE,TRUE,MOCK - needs classic PAT (manage_billing:copilot),0.05
-CopilotStudio,Microsoft Copilot Studio,Copilot Credits,copilot_credit,FALSE,FALSE,TRUE,MOCK - needs Dataverse SP + env URL,0.20
-M365Copilot,Microsoft 365 Copilot,Per-seat licence,seat_day,FALSE,FALSE,FALSE,MOCK - needs Graph app (Reports.Read.All),0.0
+platform_key,platform_name,billing_model,native_unit,has_token_telemetry,has_native_cost,is_variable_cost,data_source,enterprise_discount_pct,addon_unit,addon_billing_model
+M365Copilot,Microsoft 365 Copilot,Per-seat licence,seat_day,FALSE,FALSE,FALSE,MOCK/REAL - Graph seats + Cowork Copilot Credits (add-on modelled from the rate card),0.0,copilot_credit,Usage-based (Copilot Credits) - Cowork
+AzureInfra,Azure AI Supporting Infrastructure,Consumption (Azure meters),azure_meter,FALSE,TRUE,TRUE,REAL - Cost Management FOCUS 1.2-preview export via OneLake shortcut - invoiced supporting infrastructure,0.0,,
+AzureAI,Azure AI Services (invoiced),Consumption (Azure meters),azure_meter,FALSE,TRUE,TRUE,REAL - Cost Management FOCUS 1.2-preview export via OneLake shortcut - invoiced AI service spend,0.0,,
+CopilotStudio,Microsoft Copilot Studio,Copilot Credits,copilot_credit,FALSE,FALSE,TRUE,"MOCK - Dataverse msdyn_aievent - connected, tenant has zero consumption",0.2,,
+GitHubCopilot,GitHub Copilot Enterprise,Seats + premium requests,premium_request,FALSE,TRUE,TRUE,MOCK - GitHub billing API (needs classic PAT),0.05,,
+Foundry,Azure AI Foundry,Consumption (tokens),token,TRUE,TRUE,TRUE,MOCK - APIM AI Gateway / Log Analytics (per-user token attribution),0.15,,
+CopilotCowork,Copilot Cowork / Agents,Metered (not yet confirmed),unmeasured,,,,NOT INGESTED - no meter seen in Cost Management,,,
+AzureML,Azure Machine Learning,Compute (Azure FOCUS),compute_hour,,,,NOT INGESTED - available via Azure FOCUS export,,,

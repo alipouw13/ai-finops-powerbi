@@ -26,6 +26,77 @@ ref table dim_business_unit
 ref table dim_application
 ref table dim_environment
 ref table dim_data_source
+ref table fact_user_cost_allocation
+ref table dim_agent
+ref table fact_agent_inventory
+ref table fact_agent_activity
+ref table dim_persona
+ref table bridge_persona_platform
+
+relationship rel_alloc_date
+	fromColumn: fact_user_cost_allocation.usage_date
+	toColumn: dim_date.date_key
+
+relationship rel_alloc_platform
+	fromColumn: fact_user_cost_allocation.platform_key
+	toColumn: dim_platform.platform_key
+
+relationship rel_alloc_application
+	fromColumn: fact_user_cost_allocation.application_key
+	toColumn: dim_application.application_key
+
+relationship rel_alloc_businessunit
+	fromColumn: fact_user_cost_allocation.business_unit_key
+	toColumn: dim_business_unit.business_unit_key
+
+relationship rel_alloc_costcenter
+	fromColumn: fact_user_cost_allocation.cost_center_key
+	toColumn: dim_cost_center.cost_center_key
+
+relationship rel_alloc_environment
+	fromColumn: fact_user_cost_allocation.environment_key
+	toColumn: dim_environment.environment_key
+
+relationship rel_alloc_user
+	fromColumn: fact_user_cost_allocation.user_identity_key
+	toColumn: dim_identity.identity_key
+
+relationship rel_alloc_source
+	isActive: false
+	fromColumn: fact_user_cost_allocation.source_identity_key
+	toColumn: dim_identity.identity_key
+
+relationship rel_agentinv_date
+	fromColumn: fact_agent_inventory.snapshot_date
+	toColumn: dim_date.date_key
+
+relationship rel_agentinv_agent
+	fromColumn: fact_agent_inventory.agent_key
+	toColumn: dim_agent.agent_key
+
+relationship rel_agentinv_owner
+	fromColumn: fact_agent_inventory.owner_identity_key
+	toColumn: dim_identity.identity_key
+
+relationship rel_agentact_date
+	fromColumn: fact_agent_activity.activity_date
+	toColumn: dim_date.date_key
+
+relationship rel_agentact_identity
+	fromColumn: fact_agent_activity.identity_key
+	toColumn: dim_identity.identity_key
+
+relationship rel_identity_persona
+	fromColumn: dim_identity.persona_key
+	toColumn: dim_persona.persona_key
+
+relationship rel_bridge_persona
+	fromColumn: bridge_persona_platform.persona_key
+	toColumn: dim_persona.persona_key
+
+relationship rel_bridge_platform
+	fromColumn: bridge_persona_platform.platform_key
+	toColumn: dim_platform.platform_key
 
 relationship rel_usage_date
 	fromColumn: fact_ai_usage.usage_date

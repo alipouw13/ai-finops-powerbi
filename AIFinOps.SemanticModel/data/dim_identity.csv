@@ -1,13 +1,719 @@
-identity_key,display_name,principal_type,upn,github_login,team,business_unit,cost_center_key,identity_class,is_human,home_business_unit_key
-0999cfae-085e-464f-a49d-f8851e3e5195,checkout-service,ServicePrincipal,,,Checkout,Retail,CC-1000,ServicePrincipal,FALSE,BU-RETAIL
-dd6d3503-88f1-4fc9-a4d0-1a79c3aaf364,search-api,ServicePrincipal,,,Search,Discovery,CC-2000,ServicePrincipal,FALSE,BU-DISCOVERY
-62a2cc36-edb8-4520-b7fe-05433a160c32,ds-notebooks,ServicePrincipal,,,DataScience,Platform,CC-3000,ServicePrincipal,FALSE,BU-PLATFORM
-7bec6f27-dc94-4d6d-b89a-3969513bc71e,mobile-assistant,ServicePrincipal,,,Mobile,Retail,CC-4000,ServicePrincipal,FALSE,BU-RETAIL
-aisha.rahman,Aisha Rahman,User,aisha.rahman@contoso.com,aisha-rahman,Underwriting,Insurance,CC-1000,Human,TRUE,BU-INSURANCE
-marco.silva,Marco Silva,User,marco.silva@contoso.com,marco-silva,Claims,Insurance,CC-1000,Human,TRUE,BU-INSURANCE
-jenny.oyelaran,Jenny Oyelaran,User,jenny.oyelaran@contoso.com,jenny-oyelaran,Platform,Technology,CC-3000,Human,TRUE,BU-TECH
-dev.patel,Dev Patel,User,dev.patel@contoso.com,dev-patel,Platform,Technology,CC-3000,Human,TRUE,BU-TECH
-sam.chen,Sam Chen,User,sam.chen@contoso.com,sam-chen,Search,Discovery,CC-2000,Human,TRUE,BU-DISCOVERY
-robin.hale,Robin Hale,User,robin.hale@contoso.com,robin-hale,Checkout,Retail,CC-1000,Human,TRUE,BU-RETAIL
-lee.novak,Lee Novak,User,lee.novak@contoso.com,lee-novak,Data,Technology,CC-3000,Human,TRUE,BU-TECH
-kim.arroyo,Kim Arroyo,User,kim.arroyo@contoso.com,kim-arroyo,Actuarial,Insurance,CC-4000,Human,TRUE,BU-INSURANCE
+identity_key,display_name,principal_type,upn,github_login,team,business_unit,cost_center_key,identity_class,is_human,home_business_unit_key,persona_key
+00000001-0000-0000-c000-000000000000,Azure ESTS Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000002-0000-0000-c000-000000000000,Windows Azure Active Directory,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000002-0000-0ff1-ce00-000000000000,Office 365 Exchange Online,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000003-0000-0000-c000-000000000000,Microsoft Graph,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000003-0000-0ff1-ce00-000000000000,Office 365 SharePoint Online,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000004-0000-0ff1-ce00-000000000000,Skype for Business Online,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000005-0000-0000-c000-000000000000,Microsoft Azure Workflow,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000005-0000-0ff1-ce00-000000000000,Viva Engage,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000006-0000-0ff1-ce00-000000000000,Microsoft Office 365 Portal,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000007-0000-0000-c000-000000000000,Dataverse,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000007-0000-0ff1-ce00-000000000000,Microsoft Exchange Online Protection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000009-0000-0000-c000-000000000000,Power BI Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0000000a-0000-0000-c000-000000000000,Microsoft Intune,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0000000c-0000-0000-c000-000000000000,Microsoft App Access Panel,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000012-0000-0000-c000-000000000000,Microsoft Rights Management Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00000014-0000-0000-c000-000000000000,Microsoft.Azure.SyncFabric,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+00edd498-7c0c-4e68-859c-5a55d518c9c0,Teams CMD Services and Data,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+011eb921-040c-42ce-ab61-c39daa1493ab,aoai-apfsidemos-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0130cc9f-7ac5-4026-bd5f-80a08a54e6d9,Azure Data Warehouse Polybase,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+01385440-dd45-4043-a286-07dd496bdf7c,Office 365 Outlook Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+01cb2876-7ebd-4aa4-9cc9-d28bd4d359a9,Device Registration Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+01fc33a7-78ba-4d2f-a4b7-768e336e890e,MS-PIM,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+022907d3-0f1b-48f7-badc-1ba6abab6d66,Azure SQL Database,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+02d2a314-8dbb-47d3-8a77-1677403097de,Microsoft SaaS Hub Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+02d637f4-6bed-46c2-aa72-274c8c5e0782,Microsoft Dataverse Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+02f0a7dc-fd55-4624-8d1b-0b15d2536e64,PowerPlatform-a365outlookcalendarmcp-Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+035f9e1d-4f00-4419-bf50-bf2d87eb4878,Azure Monitor Restricted,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+03d1d8e8-9cbc-4e08-b175-7de1ba2dddb4,foundry-fabric-fsidemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+03e7002f-392f-4ef6-b8de-8aede5991994,ap-fsioai-blob-cosmos-spn,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+04687a56-4fc2-4e36-b274-b862fb649733,MDATPNetworkScanAgent,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0469d4cd-df37-4d93-8a61-f8c75b809164,Policy Administration Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0517ffae-825d-4aff-999e-3f2336b8a20a,M365 App Management Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+05a65629-4c1b-48c1-a78b-804c4abdd4af,Microsoft Cloud App Security,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+067cf55c-59b8-432f-a11d-d904de42e97d,Durable Task Scheduler Dashboard,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+067dd5eb-12d4-42b7-9b46-44f3038e999f,apagentdemo/onlineEndpoints/apagentdemo-basicchat,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0736f41a-0425-4b46-bdb5-1563eff02385,Azure Machine Learning,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+080765e3-9336-4461-b934-310acccb907d,Defender for Storage Advanced Threat Protection Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+08e18876-6177-487e-b8b5-cf950c1e598c,SharePoint Online Web Client Extensibility,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+08e6ef5d-ca46-489c-8a29-fc5d33ab26a4,SqlVmAndArcSqlServersProtection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0947a342-ab4a-43be-93b3-b8243fc161e5,Azure Data Factory,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0999cfae-085e-464f-a49d-f8851e3e5195,checkout-service,ServicePrincipal,,,Checkout,BU-RETAIL,CC-1000,ServicePrincipal,FALSE,BU-RETAIL,PERS-WORKLOAD
+09abbdfd-ed23-44ee-a2d9-a627aa1c90f3,ProjectWorkManagement,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0a5f63c0-b750-4f38-a71c-4fc0d58b89e2,Microsoft Mobile Application Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0af06dc6-e4b5-4f28-818e-e78e62d137a5,Windows 365,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0bf30f3b-4a52-48df-9a82-234910c4a086,Microsoft Graph Change Tracking,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0c4c5cd2-749e-475d-8d47-20bafd81904e,srch-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0c7668b5-3260-4ad0-9f53-34ed54fa19b2,Microsoft Defender for Cloud Servers Scanner Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0cd79364-7a90-4354-9984-6e36c841418d,Access IoT Hub Device Provisioning Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0d38933a-0bbd-41ca-9ebd-28c4b5ba7cb7,M365PurvieweDiscoveryService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0eda3b13-ddc9-4c25-b7dd-2f6ea073d6b7,Microsoft Flow CDS Integration Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0ef94e72-e4fc-4aa0-a8f4-ff27deb3e6eb,Teams NRT DLP Ingestion Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0f698dd4-f011-4d23-a33e-b36416dcb1e6,OfficeClientService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+0fa37baf-7afc-4baf-ab2d-d5bb891d53ef,Microsoft Teams ATP Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+11c174dc-1945-4a9a-a36b-c79a0f246b9b,Azure Monitor System,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+123cd850-d9df-40bd-94d5-c9f07b7fa203,Azure OSSRDBMS Database,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+12743ff8-d3de-49d0-a4ce-6c91a4245ea0,Metrics Monitor API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+12ff570a-8284-47ed-adb3-fcc72b594c36,Consumption Billing,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+132709ba-1394-4eb6-a565-e62a83ca14f9,RedisEnterprise Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1341df96-0b28-43da-ba24-7a6ce39be816,Azure Managed HSM RP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1387301c-59b7-4204-84b8-1b7559500626,ptm-cp-prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+14452459-6fa6-4ec0-bc50-1528a1a06bf0,Intune CMDeviceService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1459b1f6-7a5b-4300-93a2-44b4a651759f,Azure Container Apps Arc - Control Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+14735148-5162-46ef-99a4-c1923d08a2cc,managedenvironments-ar-tenant-connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+14d572ce-faa9-4190-a437-bbd6f77df6a3,foundry-fabric-fsidemo/projects/foundry-fabric-fsidemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+14d82eec-204b-4c2f-b7e8-296a70dab67e,Microsoft Graph Command Line Tools,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+150d54e7-20aa-424b-8be8-f62b8f290fe6,qx564tsnowflakepacint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+16755a43-9cdf-4861-9c51-4b2879c55237,spn-fabricapacheairflowjob,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+167e2ded-f32d-49f5-8a10-308b921bc7ee,OCaaS Worker Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1690c5aa-925a-4d0e-836b-722c795bd0d0,Group Configuration Processor,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+174a130b-f854-4643-b88a-66c970f8f3f4,cosmos-dataplatform-dev-001,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1762e607-063e-431a-a25a-f0f782acb73b,Virtual Connector Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+184909ca-69f1-4368-a6a7-c558ee6eb0bd,Marketplace Caps API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+189cf920-d3d8-4133-9145-23adcc6824fa,IpLicensingService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+18a66f5f-dbdf-4c17-9dd7-1634712a9cbe,Azure Machine Learning Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+18af356b-c4fd-4f52-9899-d09d21397ab7,Office365DirectorySynchronizationService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+192644fe-6aac-4786-8d93-775a056aa1de,MIP Exchange Solutions - SPO,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+19947cfd-0303-466c-ac3c-fcc19a7a1570,Azure DNS,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1996141e-2b07-4491-927a-5a024b335c78,Microsoft Teams UIS,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1ac05c7e-12d2-4605-bf9d-549d7041c6b3,Microsoft Azure Synapse Gateway,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1b912ec3-a9dd-4c4d-a53e-76aa7adb28d7,AADReporting,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1c2909a7-6432-4263-a70d-929a3c1f9ee5,Common Data Service License Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1c827867-9069-4bde-8155-1a0267a3dea5,Microsoft DataMovement Metadata Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1d3443bd-4cbc-483e-9f09-00ba7ee54655,Microsoft Synapse Notebook Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1d78a85d-813d-46f0-b496-dd72f50a3ec0,Microsoft Azure Policy Insights,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1dcb1bc7-c721-498e-b2fa-bcddcea44171,Microsoft Azure Authorization Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1df56b4e-ffe0-4283-a5b6-283c6c632d52,asp-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1e2ca66a-c176-45ea-a877-e87f7231e0ee,Microsoft B2B Admin Worker,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1e3e4475-288f-4018-a376-df66fd7fac5f,NetworkTrafficAnalyticsService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1e70cd27-4707-4589-8ec5-9bd20c472a46,Skype Presence Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1ee90862-7618-4518-aba6-c39a184bcf24,apagentdemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1efb1569-5fd6-4938-8b8d-9f3aa07c658d,Microsoft Defender for Cloud for AI,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1f5530b3-261a-47a9-b357-ded261e17918,Azure Multi-Factor Auth Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+1fe0d6b3-81f0-4cf5-9dfd-fbb297d7848c,Microsoft Insider Risk Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+207a6836-d031-4764-a9d8-c1193f455f21,Conference Auto Attendant,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+20e940b3-4c77-4b0b-9a53-9e16a1b010a7,MarketplaceAPI ISV,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+21a8a852-89f4-4947-a374-b26b2db3d365,IC3 Long Running Operations Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2220bbc4-4518-4fef-aac6-c6f32e9f9fd1,Customer Experience Platform PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2233b157-f44d-4812-b777-036cdaf9a96e,Azure Cloud Shell,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+224a7b82-46c9-4d6b-8db0-7360fb444681,Microsoft Modern Contact Master,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+229c0a71-0789-4652-8054-3f547fcc66f0,Microsoft Threat Protection Bicep Extension,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+24b2c2bc-4e48-4b69-9c88-33f4cd04c867,Planner Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+25664c89-cea5-4ab6-b924-a54fd8a19ae0,Microsoft Copilot Studio agent identity blueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+26a18ebc-cdf7-4a6a-91cb-beb352805e81,Skype Teams Calling API Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2746ea77-4702-4b45-80ca-3c97e680e8b7,Azure Data Explorer,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2793995e-0a7d-40d7-bd35-6968ba142197,My Apps,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+27a762be-14e7-4f92-899c-151877d6d497,Bot Service CMEK Prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+28154493-4393-4702-8c47-4c83b9ea736a,fuam-pbi,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+28aaf9f8-ba31-48cf-bdd0-50a6abd8b5e1,aif-agenticudfd2ncb-proj-agenticudfd2ncb-AgentIdentityBlueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+29f411f1-b2cf-4043-8ac8-2185d7316811,Azure Iot Hub Publisher App,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2a486b53-dbd2-49c0-a2bc-278bdfc30833,Cortana at Work Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2adab1ca-07a9-4f03-848d-050cdbc75ae1,adf-apfsipurviewdemo-dev-001,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2b22d34b-b2c3-427a-816c-389b7ad3592a,dbmanagedidentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2b479c68-8d9b-4e27-9d85-5d74803de734,Virtual Visits App,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2c220739-d44d-4bf7-ba5f-95cf9fb7f10c,MIP Exchange Solutions - Teams,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2c7dd73f-7a21-485b-b97d-a2508fa152c3,Azure ContainerApps Sessions,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2cf9eb86-36b5-49dc-86ae-9a63135dfa8c,Azure Traffic Manager and DNS,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2cfc91a4-7baa-4a8f-a6c9-5f3d279060b8,Azure Application Change Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2d215f00-80d1-4f4b-a6c8-28080dfafc81,Microsoft Authorization System Policy,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2d4e7d66-4baf-4714-bf99-7e03dc377fdb,Workload Identity Control Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2db0b1c2-10f1-423c-8d90-f3c94bbb36b1,spn-dataplatorm-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2ddfbe71-ed12-4123-b99b-d5fc8a062a79,Microsoft Teams Admin Portal Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2e458d69-0892-4655-b713-4f7b182315dd,Microsoft.BareBoneClusterService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2e49aa60-1bd3-43b6-8ab6-03ada3d9f08b,Dynamics Data Integration,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2eba9957-8c82-4bfd-8025-e4a4a97a9110,GSA-Purview,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2f3f02c9-5679-4a5c-a605-0de55b07d135,Office 365 Information Protection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+2ff814a6-3304-4ab8-85cb-cd0e6f879c1d,AzureDatabricks,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+30b96d53-9fc1-4139-9bae-7bf8a1ded937,ProvisioningHealthPME,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+30e5659d-7a97-4c66-8863-497f329ac280,DataAssessments,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3138fe80-4087-4b04-80a6-8866c738028a,SharePoint Notification Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3184af01-7a88-49e0-8b55-8ecdce0aa950,Azure Cost Management XCloud,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+319386df-3f08-46d0-ae48-18d441959675,Insurance IQ,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+319f651f-7ddb-4fc6-9857-7aef9250bd05,K8 Bridge,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+328fd23b-de6e-462c-9433-e207470a5727,NFV Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+32b6d34b-c894-4971-8223-e17b86e9ad26,Signal B2 Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3340b944-b12e-47d0-b46b-35f08ec1d8ee,SPAuthEvent,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+341b7f3d-69b3-47f9-9ce7-5b7f4945fdbd,Azure Support - Network Watcher,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+34643f9b-80c5-4acc-b9c2-c72b788dd726,content-understanding-f-resource/projects/content-understanding-fsidemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3471ca03-f150-4759-88e6-0bfc97daf723,OneCert-AzureDns-Prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3570e63c-5acf-4f3f-9f15-a49faa5120d3,Power Apps Service Customer Management Plane Backend,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+35e5e31d-b3e8-442b-9a8d-2f81f46938cf,Entra App Platform System Application,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+35ffadb3-7fc1-497e-b61b-381d28e744cc,Azure App Configuration,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3603eff4-9141-41d5-ba8f-02fb3a439cd6,Diagnostic Services Data Access,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+36e2398c-9dd3-4f29-9a72-d9f2cfc47ad9,CosmosDB Dedicated Instance,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+37182072-3c9c-4f6a-a4b3-b3f91cacffce,AzureSupportCenter,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+372140e0-b3b7-4226-8ef9-d57986796201,Azure Windows VM Sign-In,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3734c1a4-2bed-4998-a37a-ff1a9e7bf019,Microsoft Azure Container Apps - Data Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3829f069-1c33-45dd-84ab-2465f4282677,Azure Signup Api,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+394866fc-eedb-4f01-8536-3ff84b16be2a,Microsoft People Cards Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3a3b6b87-84e2-4ad2-aa37-d76c339371a4,Storage Data Management RP Prod FPA,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3af5a1e8-2459-45cb-8683-bcd6cccbcc13,Azure Smart Alerts,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3b80cd3f-61ca-49b0-8d0f-7b6760e08705,ZTNA Policy Service Graph Client ,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3b990c8b-9607-4c2a-8b04-1d41985facca,Azure Deployments,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3bd4d900-a906-4b22-8f9b-b624357b8a3b,Agent 1 (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3c896ded-22c5-450f-91f6-3d1ef0848f6e,WeveEngine,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3cf468b4-12a0-43cd-aa3f-3f39210d14cf,Quota Service Core - ARM Client,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3e28acb6-7793-4fff-9fcf-fb14fbaf42a9,SecOps for Security Copilot,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3e36f539-fc2c-479c-90fb-3cfa21da3a4b,Power Platform Environment Discovery Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3e710f56-38f6-42a3-b32a-293205a5903c,PowerPlatform-a365adminmcp-Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3eb95cef-b10f-46fe-94e0-969a3d4c9292,Office 365 Import Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3edcf11f-df80-41b2-a5e4-7e213cca30d1,Azure Application Change Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+3f6aecb4-6dbf-4e45-9141-440abdced562,PROD Microsoft Defender For Cloud XDR,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+40775b29-2688-46b6-a3b5-b256bd04df9f,Microsoft Information Protection API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+408992c7-2af6-4ff1-92e3-65b73d2b5092,Azure Search Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+409eb69a-5e20-4e1e-a8bf-c23300057950,Azure Container Apps Arc - Data Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+40c49ff3-c6ae-436d-b28e-b8e268841980,Microsoft Azure Network Copilot,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+426e0642-a7d4-4032-a11b-c91ed8f4e87d,Agent 1 (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+43d7b169-1d9e-4d32-8cd8-06c5974ed90c,Security Copilot Agent Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+44b7b882-eb46-485c-9c78-686f6b67b176,AML Registries,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+45164d96-544d-4a64-a1ca-3fb4bbb6eb18,ScheduledActions,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4660504c-45b3-4674-a709-71951a6b0763,Microsoft Invitation Acceptance Portal,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4747d38e-36c5-4bc3-979b-b0ef74df54d1,PushChannel,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+475226c6-020e-4fb2-8a90-7a972cbfc1d4,PowerApps Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4787c7ff-7cea-43db-8d0d-919f15c6354b,Dynamics 365 Viva Sales,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+47c5c8b6-18bf-4739-b75d-54a299e2e900,OneLake-Prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+47ee738b-3f1a-4fc7-ab11-37e4822b007e,Azure AD Application Proxy,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+48459702-b9a4-4a65-bbb3-880ab876c5cb,ap-pview-logins,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+486c78bf-a0f7-45f1-92fd-37215929e116,GatewayRP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+48ac35b8-9aa8-4d74-927d-1f4a14a0b239,Skype and Teams Tenant Admin API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+48af08dc-f6d2-435f-b2a7-069abd99c086,Connectors,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4962773b-9cdb-44cf-a8bf-237846a00ab7,Microsoft.EventGrid,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+499b84ac-1321-427f-aa17-267ca6975798,Azure DevOps,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+49e2f8c0-e398-4266-b624-6ea8f57caf89,b_cicd_auth,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4b55a631-6b07-4d07-a701-28f46d72f3df,Microsoft Teams Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4b8b5782-ce67-4239-937d-d49a49c0a313,cu-apfsidemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4bfd5d66-9285-44a1-bb14-14953e8cdf5e,Audit GraphAPI Application,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4c8f074c-e32b-4ba7-b072-0f39d71daf51,IPSubstrate,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4e445925-163e-42ca-b801-9073bfa46d17,SharePoint Home Notifier,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+4eaceb75-fe6c-4953-b873-0fd565ecd334,Request Approvals Write Platform,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+507bc9da-c4e2-40cb-96a7-ac90df92685c,Office 365 Reports,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+509e4652-da8d-478d-a730-e9d4a1996ca4,Azure Resource Graph,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+50d8616b-fd4f-4fac-a1c9-a6a9440d7fe0,OMSAuthorizationServicePROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+50e95039-b200-4007-bc97-8d5790743a63,Azure Virtual Desktop ARM Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5190c608-e9eb-43a3-b416-1f5a39c6e9b0,unity-catalog-access-connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+51b5e278-ed7e-42c6-8787-7ff93e92f577,Narada Notification Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+51b6191a-b045-44cf-8277-ee37c9fb5a06,Compute Image Registry,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+53ddd101-c943-4c8b-ad09-84c09e9d570c,Azure Device Update RP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+540966a4-4198-45bc-9546-f76df4405d16,FUAM,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+557c67cf-c916-4293-8373-d584996f60ae,Configuration Manager Microservice,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+55ebbb62-3b9c-49fd-9b87-9595226dd4ac,Microsoft Azure Legion ,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+562db366-1b96-45d2-aa4a-f2148cef2240,Diagnostic Services Trusted Storage Access,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5657e26c-cc92-45d9-bc47-9da6cfdb4ed9,Azure OSSRDBMS PostgreSQL Flexible Server AAD Authentication,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+56823b05-67d8-413a-b6ab-ad19d7710cf2,Microsoft Defender for APIs Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+56c1da01-2129-48f7-9355-af6d59d42766,Graph Connector Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5728b7e0-e201-4f07-93e2-3e72518df549,ap-backend-spn,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+57671ebf-3d00-f111-8406-6045bd062e4f,UW_Briefing_Generator,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+579d9c9d-4c83-4efc-8124-7eba65ed3356,Azure Compute,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+57c0fc58-a83a-41d0-8ae9-08952659bdfd,Azure Cosmos DB Virtual Network To Network Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+58131f34-bef7-4935-999e-0c16b96a1de9,UnifiedActions,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5861f7fb-5582-4c1a-83c0-fc5ffdb531a6,Azure RBAC Data Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5882560c-fcff-49a8-9b02-8a3e08428404,MPT_RP_PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+589d5083-6f11-4d30-a62a-a4b316a14abf,Azure Key Vault Managed HSM,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+58a2ab84-c615-4527-8dfc-bf05346b6214,aa-apscripting-001,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+59534ab2-0027-4a45-b9ec-61d1b6b871c9,Power Platform Connector Management Service - PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+597cd9fe-6340-49a7-a0e3-8af00a7e1730,Marketplace Rating and Reviews PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+59eca866-2f46-40b8-96ff-63f663121ef9,Agent 365,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+59f0a04a-b322-4310-adc9-39ac41e9631e,Azure SRE Agent,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5a4a238f-f186-4fff-95bd-d3e70f9e1a08,Privacy Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5a807f24-c9de-44ee-a3a7-329e88a00ffc,Messaging Bot API Application,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5b20c633-9a48-4a5f-95f6-dae91879051f,Azure Information Protection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5b404cf4-a79d-4cfe-b866-24bf8e1a4921,Bot Service Token Store,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5b5101ea-475e-4c26-a296-a88814be7d7e,uami-aidemosdev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5b712e99-51a3-41ce-86ff-046e0081c5c0,Marketplace SaaS v2,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5c19f59a-daf6-4704-bf40-3a9009cf1a0d,stagenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5c5c846e-3d3d-4a2d-97d9-f231851e07cf,api-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5d13f7d7-0567-429c-9880-320e9555e5fc,Azure Data Factory,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5d564af7-aad8-4c0b-8cf6-94f935a9250d,Agentic Advisor,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5da7367f-09c8-493e-8fd4-638089cddec3,CABProvisioning,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5dc48733-b5df-475c-a49b-fa307ef00853,Internet resources with Global Secure Access,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5e5e43d4-54da-4211-86a4-c6e7f3715801,Azure Regional Service Manager,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+5ed8fe41-c1bc-4c06-a531-d91e1f1c2fac,Azure Database for PostgreSQL Marlin,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+607ece82-f922-494f-88b8-30effaf12214,Azure Machine Learning Compute,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+60b2e7d5-a27f-426d-a6b1-acced0846fdf,Microsoft Azure IPAM,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+60ca1954-583c-4d1f-86de-39d835f3e452,Microsoft Defender for Identity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+60e6cd67-9c8c-4951-9b3c-23c25a2169af,Managed Disks Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6104ad52-755e-428b-9fb5-5fdf4d2c4d53,Azure ContainerApps Auth,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+614be7b0-d924-4dcd-a74a-5562119c8929,ais-apfsidemos-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+61a63147-3824-45f5-a186-ace3f4c9daeb,MsgDataMgmt,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+61ae9cd9-7bca-458c-affc-861e2f24ba3b,Windows Update for Business Deployment Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+61c50b89-703d-431d-8d80-1e8618748775,Azure Machine Learning OpenAI,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+61f9e166-f678-4342-bfd3-b49781ce7a0a,Teams Policy Notification Processor Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6201d19e-14fb-4472-a2d6-5634a5c97568,Event Hub MSI App,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+62a2cc36-edb8-4520-b7fe-05433a160c32,ds-notebooks,ServicePrincipal,,,DataScience,BU-PLATFORM,CC-3000,ServicePrincipal,FALSE,BU-PLATFORM,PERS-WORKLOAD
+62b732f7-fc71-40bc-b27d-35efcb0509de,Microsoft Teams AadSync,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+62c559cd-db0c-4da0-bab2-972528c65d42,ACR-Tasks-Network,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+63723724-9638-4104-bad5-3591f1aafccc,Arc Data Billing Worker,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+63e61dc2-f593-4a6f-92b9-92e4d2c03d4f,Microsoft Intune SCCM Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+63ea3c01-7483-456e-8073-d3fed34fbdda,Azure Container Scale Sets - CS2,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+644c1b11-f63f-45fa-826b-a9d2801db711,CompliancePolicy,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+64a7b174-5779-4506-b54c-fbb0d80f1c9b,CMAT,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+657f5199-9902-4e65-bfba-5a92f98ee882,Cosmos DB Fleet Analytics,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+65c8bd9e-caac-4816-be98-0692f41191bc,People Profile Event Proxy,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+65d91a3d-ab74-42e6-8a2f-0add61688c74,Microsoft Approval Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6608bce8-e060-4e82-bfd2-67ed4f60262f,AML Inferencing Frontdoor,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+660f9313-e35d-4362-a3cf-94fbfe1b45e6,insurance-resource,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+66244124-575c-4284-92bc-fdd00e669cea,IAMTenantCrawler,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+66278c89-9a1b-49aa-a379-5964852f3ba4,spn-purview-test,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+66a88757-258c-4c72-893c-3e8bed4d6899,Office 365 Search Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+66c23536-2118-49d3-bc66-54730b057680,Skype Core Calling Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+66c6d0d1-f2e7-4a18-97a9-ed10f3347016,Managed Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+67a22a09-a89e-4845-95da-28a8e6f7069d,PowerPlatform-a365outlookmailmcp-Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+67e3df25-268a-4324-a550-0de1c7f97287,Office Online Service LEGACY,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6872b314-67ab-4a16-98e7-a663b0f772c3,Office365 Shell SS-Server Default,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+69dda2a9-33ca-4ed0-83fb-a9b7b8973ff4,Azure Files,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6a0a243c-0886-468a-a4c2-eff52c7445da,Application Insights Configuration Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6a0ec4d3-30cb-4a83-91c0-ae56bc0e3d26,Azure Container Registry,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6abc93dc-978e-48a3-8e54-458e593ed8cf,Customer Service Trial PVA - readonly,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6b3368c6-61d2-4a72-854c-42d1c4e71fed,Azure Cost Management Scheduled Actions,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6b5b3617-ba00-46f6-8770-1849282a189a,Microsoft Defender For Cloud,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6b89dccf-3c00-f111-8406-6045bd062e4f,UW_Briefing_Orchestrator,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+6b91db1b-f05b-405a-a0b2-e3f60b28d645,M365 Admin Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6bb8e274-af5d-4df2-98a3-4fd78b4cafd9,Azure Container Instance Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6bccf540-eb86-4037-af03-7fa058c2db75,Geneva Alert RP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6d057c82-a784-47ae-8d12-ca7b38cf06b4,AzureVirtualNetworkManager,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6d32b7f8-782e-43e0-ac47-aaad9f4eb839,Permission Service O365,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6d81daa3-fdfe-4d42-a619-5b89358c3838,Defender for Cloud Apps - Microsoft Copilot Collector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6df9dff0-41c1-4600-a742-13b2b0a4befa,ap-aifdemos,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6e02f8e9-db9b-4eb5-aa5a-7c8968375f68,Microsoft Azure Vnet Verifier,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6e2cffc9-52e7-4bfa-8155-be5c1dacd81c,Microsoft Defender for Cloud Defender Kubernetes Agent,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6e99704e-62d5-40f6-b2fe-90aafbe3a710,OCaaS Experience Management Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6ea8091b-151d-447a-9013-6845b83ba57b,AD Hybrid Health,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6ee392c4-d339-4083-b04d-6b7947c6cf78,Azure Device Update,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6f0478d5-61a3-4897-a2f2-de09a5a90c7f,WindowsUpdate-Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6f5a074e-45f3-4d48-96c3-07890ab3a1b6,insurance-resource-insurance-AgentIdentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+6fb097ca-e2a5-47b0-a6e6-59c2f71f72e1,cosmos-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+707be275-6b9d-4ee7-88f9-c0c2bd646e0f,Dynamic Alerts,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+73a4c13e-cdf9-43b1-aaa5-820ce6232d74,Test (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+73c2949e-da2d-457a-9607-fcc665198967,Azure Purview,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7442f35f-64b6-45b8-bbee-f069b75cd4f2,Excel Online Business Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7485893f-f5e1-43af-ad69-59c48cc502a6,foundry-fabric-fsidemo-foundry-fabric-fsidemo-AgentIdentityBlueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+74cb6831-0dbb-4be1-8206-fd4df301cdc2,Azure Service Fabric Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+74e54f25-7f92-4425-b1ec-5d299391e845,"Profisee Group, Inc. Fabric Workload",ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+75513c96-801d-4559-830a-6754de13dd19,M365 Label Analytics,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7555793f-24a5-4ff2-9f84-7c418865540d,UnderwriterBriefingDemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7557eb47-c689-4224-abcf-aef9bd7573df,Skype for Business,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7598ef18-a171-4c40-b5b2-9b6df5d67a21,Defender for Cloud Apps - Power Platform Solution Deployer,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+75d4238e-b142-4d2d-aed9-232b830b8706,Viva Skills,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+75dfb250-a492-4b26-a736-c87759e05515,Multivariate Anomaly Detection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+76c7f279-7959-468f-8943-3954880e0d8c,Azure SQL Managed Instance to Microsoft.Network,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+76c92352-c057-4cc2-9b1e-f34c32bc58bd,Azure Container Registry Application,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+76cd24bf-a9fc-4344-b1dc-908275de6d6d,Azure SQL Virtual Network to Network Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+789e8929-0390-42a2-8934-0f9dafb8ec89,Exchange Rbac,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+78b1ee7f-8597-40e3-ad05-a0ca30707e39,app-pviwfsidemo-fabric-scan,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+794ded15-70c6-4bcd-a0bb-9b7ad530a01a,Microsoft Intune Advanced Threat Protection Integration,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+797f4846-ba00-4fd7-ba43-dac1f8f63013,Azure Resource Manager,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+79d7fb34-4bef-4417-8184-ff713af7a679,Azure Bastion,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7a274595-3618-4e6f-b54e-05bb353e0153,Teams NRT DLP Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7ae5462d-d9d1-42f6-93ca-198d7b0ca997,Microsoft O365 Scuba,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7ae74545-a8c2-4c9f-8f0a-04eca6a65991,Insurance Multi-Agent Frontend,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7b7531ad-5926-4f2d-8a1d-38495ad33e17,Azure Advanced Threat Protection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7b7f48f0-62d0-4183-b9ad-c2b6b4fd7aff,Security Copilot,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7bec6f27-dc94-4d6d-b89a-3969513bc71e,mobile-assistant,ServicePrincipal,,,Mobile,BU-RETAIL,CC-4000,ServicePrincipal,FALSE,BU-RETAIL,PERS-WORKLOAD
+7c33bfcb-8d33-48d6-8e60-dc6404003489,Network Watcher,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7c99d979-3b9c-4342-97dd-3239678fb300,Data Classification Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7cb67f16-9174-4dfc-989a-0d02aed8d3c3,MDA LCNC Power Platform Security Webhooks,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7ccfeccc-8feb-438b-932e-7712f1477a5d,insurance-resource/projects/insurance,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7cd684f4-8a78-49b0-91ec-6a35d38739ba,Azure Logic Apps,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7d312290-28c8-473c-a0ed-8e53749b6d6d,Microsoft Cognitive Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7d3471e1-ec8b-4655-92f3-bb331362b5ae,Azure Storage Actions Resource Provider Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7d6bfb15-7db8-47e3-8822-44180774b349,fabric-autopause,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7d954185-d03f-4a7e-9261-e7bc2f49cbf3,log-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7df0a125-d3be-4c96-aa54-591f83ff541c,Microsoft Flow Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7e3bc4fd-85a3-4192-b177-5b8bfc87f42c,Microsoft Azure Container Apps - Control Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7ecfb7e7-24fd-43ba-b64a-4805e75d516f,CloudPosture/securityOperators/DefenderCSPMSecurityOperator,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+7fe3d988-4f3b-4f33-83bd-1fb921a35ed2,PurviewRoleAssignmentMigrator,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+80369ed6-5f11-4dd9-bef3-692475845e77,Microsoft.EventHubs,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+80ccca67-54bd-44ab-8625-4b79c4dc7775,Microsoft 365 Security and Compliance Center,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+80dbdb39-4f33-4799-8b6f-711b5e3e61b6,Billing RP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+810dcf14-1858-4bf2-8134-4c369fa3235b,Azure AD Identity Governance - Entitlement Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+81172f0f-5d81-47c7-96f6-49c58b60d192,Microsoft Defender for Cloud MultiCloud Onboarding,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+81473081-50b9-469a-b9d8-303109583ecb,Cortana Runtime Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+822153a9-3909-4624-b1d2-f8b646fb39a6,PowerPlatform-a365wordmcp-Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+822f7873-1b52-48f2-8f56-9458c3fac264,PowerPlatform-a365copilotchatmcp-Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+823c0a78-5de0-4445-a7f5-c2f42d7dc89b,EventGrid Data API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+826870f9-9fbb-4f23-81b8-3a957080dfa2,Security Copilot,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+82db5667-d777-428a-9d72-01c3ef4c2386,ArchSnow,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+82f45fb0-18b4-4d68-8bed-9e44909e3890,Meeting Migration Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8375769e-54ff-4d7f-89f3-412c794b995e,Containers/securityOperators/DefenderForContainersSecurityOperator,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+849933cc-a3cb-4c0d-9626-dfcf22f1677c,PowerPlatform-a365teamsmcp-Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8578e004-a5c6-46e7-913e-12f58912df43,Power Platform API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+85eced78-2127-4b24-9418-95f0bbe3d145,Safelinks,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8602e328-9b72-4f2d-a4ae-1387d013a2b3,Azure API Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+86b4b4b4-db10-481c-876b-07447e7f204f,Groups Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+870c4f2e-85b6-4d43-bdda-6ed9a579b725,Microsoft Information Protection Sync Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+87251ad4-d513-4246-8138-b40d418b9005,CommComplianceApp,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+87df0fbf-e22d-4d7c-bc30-f59ca7460837,Microsoft Solution Providers,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+880da380-985e-4198-81b9-e05b1cc53158,Azure Cognitive Search,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+887c6b43-ba92-4adb-a82b-73670fc48dac,Durable Task Scheduler,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+89b757f8-1e01-4f41-8c72-75e191b11b8c,Azure Context Cache RP Prod Identity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+89d10474-74af-4874-99a7-c23c2f643083,Azure Iot Hub,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+89e7f920-bdc3-4e71-99e5-30d84827b610,Microsoft Authorization Service Dataplane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8ad61c39-5b6e-447c-b26a-a64eee436502,M365AdminAgent,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8adc51cc-7477-49a4-be4e-263946b4d561,MIP Exchange Solutions - ODB,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8ae6a0b1-a07f-4ec9-927a-afb8d39da81c,Microsoft Device Management EMM API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8b3391f4-af01-4ee8-b4ea-9871b2499735,O365 Secure Score,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8bbf8725-b3ca-4468-a217-7c8da873186e,DeploymentScheduler,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8bdebf23-c0fe-4187-a378-717ad86f6a53,ResourceHealthRP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8c59ead7-d703-4a27-9e55-c96a0054c8d2,My Profile,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8c723128-b312-4fb5-a6a9-2ea093cfa95f,aif-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8cae6e77-e04e-42ce-b5cb-50d82bce26b1,Microsoft Policy Insights Provider Data Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8d3a7d3c-c034-4f19-a2ef-8412952a9671,Microsoft Office Licensing Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8d605dfc-1a04-4da6-9be2-8426724af3f3,Power Platform Authorization Service PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8edd93e1-2103-40b4-bd70-6e34e586362d,Windows Azure Security Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8ee8fdad-f234-4243-8f3b-15c294843740,Microsoft Threat Protection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+8fca0a66-c008-4564-a876-ab3ae0fd5cff,Microsoft.SMIT,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+905fcf26-4eb7-48a0-9ff0-8dcc7194b5ba,Sway,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+908219f6-2202-4dde-9469-e9b8c0d397de,redteaming-pjct,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+913c6de4-2a4a-4a61-a9ce-945d2b2ce2e0,Dynamics Lifecycle services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+918d0db8-4a38-4938-93c1-9313bdfe0272,asmcontainerimagescanner,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+91a53dc4-b25b-482c-8e83-8d7ac7065b17,CCM_Pricing_PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+91ad134d-5284-4adc-a896-d7fd24e9fa15,Microsoft Alchemy Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+923c1442-b9d7-4c76-86b8-9f1d45ff0123,Underwriting Brief Orchestrator (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+92876b03-76a3-4da8-ad6a-0511ffdf8647,ComplianceWorkbenchApp,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+92dd46aa-7097-41cc-a8d8-23e46ebd8f23,cs-apagentdemo-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9324e81a-10cf-4694-a355-4dae0905638c,SQL ADX Proxy,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+934d626a-1ead-4a36-a77d-12ec63b87a0d,Microsoft Rights Management Services Default,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+93625bc8-bfe2-437a-97e0-3d0060024faa,Microsoft password reset service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+93db134e-16a6-453c-9f65-6c96df8a00a6,spn-purview,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+93efed00-6552-4119-833a-422b297199f9,Azure Database for PostgreSQL Flexible Server Private Network Integration,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+944861d3-5975-4f8b-afd4-3422c0b1b6ce,Customer Service Trial PVA,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+944f0bd1-117b-4b1c-af26-804ed95e767e,Media Analysis and Transformation Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9480c868-9578-46ae-82dd-81168218a404,MCAPSGovDeployPolicies,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9587cc80-4000-f111-8406-6045bd062e4f,UW_Briefing_Validator,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+959678cf-d004-4c22-82a6-d2ce549a58b8,Microsoft_Azure_Support,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+96231a05-34ce-4eb4-aa6a-70759cbb5e83,MicrosoftAzureRedisCache,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+969ec24d-a136-4cc5-85a8-363e8cef1973,OneDrive for Business Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+96ff4394-9197-43aa-b393-6a41652e21f8,Power Virtual Agents ,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+970d4a45-472b-4b9e-bcd0-839f2bdc8dc2,spn-fabricdataagent,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+978877ea-b2d6-458b-80c7-05df932f3723,Microsoft Teams AuditService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+981f26a1-7f43-403b-a875-f8b09b8cd720,Azure Multi-Factor Auth Client,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+982bda36-4632-4165-a46a-9863b1bbcf7d,O365 Demeter,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+986c6b97-0c36-44bf-9355-c7c5b0a6349d,cragenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+98db8bd6-0cc0-4e67-9de5-f187f1cd1b41,Microsoft Substrate Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+990c5731-1c87-42a6-849b-e866c23c8ba6,id-edmeee37dtnd6,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+992136bc-5b57-425f-8d95-ac65975722cd,Microsoft Defender Hunting,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+997dc448-eeab-4c93-8811-6b2c80196a16,CCM TAGS,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9bc34e93-2f23-4102-abe9-0112b766793d,foundry-fabric-fsidemo-foundry-fabric-fsidemo-AgentIdentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9bc4cc98-c5f0-4916-b2ef-b55848ef0f48,ptm-prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9c8b80bc-6887-42d0-b1af-d0c40f9bf1fa,Azure SQL Managed Instance to Azure AD Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9c903464-e111-4d27-ae6a-e72c65a2691b,aif-agenticudfd2ncb/projects/proj-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9cb77803-d937-493e-9a3b-4b49de3f5a74,Microsoft Intune Service Discovery,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9cdead84-a844-4324-93f2-b2e6bb768d07,Azure Virtual Desktop,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9d0b50c2-e9ec-404d-8b4d-28662857d597,managedenvironments-ar-tenant-connector-ame,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9d4afbbc-06a4-49e0-8005-4e5afd1d4fec,ZTNA Network Access Control Plane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9d63c6b1-f6ff-4079-bbdc-80f423ee18d8,spn-aidemos-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9d8f559b-5984-46a4-902a-ad4271e83efa,Power Virtual Agents Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9db9051f-123d-4b32-af4c-75f71f4464a3,app-agenticudfd2ncb,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9db9850c-00b5-4257-82fc-edd748d24dd3,insurance-resource-insurance-AgentIdentityBlueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9e09aefc-b2e5-4d19-9f74-3e3e8b11a57b,Microsoft Azure Synapse Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9e133cac-5238-4d1e-aaa0-d8ff4ca23f4e,Conferencing Virtual Assistant,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9e4a5442-a5c9-4f6f-b03f-5b9fcaaf24b1,OfficeServicesManager,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9e5d84af-8971-422f-968a-354cd675ae5b,ComplianceAuthServer,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9e9bd865-9c02-4c93-967a-6c583036864f,ap-frontend-xp3dffze5stsu-oai-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9ea1ad79-fdb6-4f9a-8bc3-2b70f96e34c7,Bing,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9ec59623-ce40-4dc8-a635-ed0275b5d58a,Purview Ecosystem,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9f3ec0d4-1d72-4b91-b5c6-11788256bbdf,Insurance Underwriting Intelligence Agent (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+9fcb3732-5f52-4135-8c08-9d4bbaf203ea,Microsoft Azure BatchAI,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+Abdy.Iman_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Abdy Iman,User,Abdy.Iman_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Arunansu.Pattanayak_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Arunansu Pattanayak,User,Arunansu.Pattanayak_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Ashish.Talati_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Ashish Talati,User,Ashish.Talati_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Brian.Walker_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Brian Walker,User,Brian.Walker_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Charles.Morris_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Charles Morris,User,Charles.Morris_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Del.Ana_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Ana Del Campo Mendizabal,User,Del.Ana_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+James.Morantus_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,James Morantus,User,James.Morantus_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Karriem.Lateef_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Karriem Lateef,User,Karriem.Lateef_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Shekhar.Kumar_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Shekhar Kumar,User,Shekhar.Kumar_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+Snow2@MngEnvMCAP257273.onmicrosoft.com,SnowUserTwo,User,Snow2@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+a0be0c72-870e-46f0-9c49-c98333a996f7,AzureDnsFrontendApp,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a0e1e353-1a3e-42cf-a8ea-3a9746eec58c,Microsoft AppSource,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a11ab414-9e09-4b9d-bc04-60e85d30ba7a,aif-agenticudfd2ncb-proj-agenticudfd2ncb-TitleAgent-AgentIdentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a12e8ccb-0fcd-46f8-b6a1-b9df7a9d7231,Azure Arc Data Processing Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a150d169-7d37-47dd-9b20-156207b7b02f,MIP Exchange Solutions,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a164aee5-7d0a-46bb-9404-37421d58bdf7,Microsoft Teams AuthSvc,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a1a9c5b6-7a4f-4288-89ab-6805873f65d1,MCAPSGovernance-AutomationApp,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a1b76039-a76c-499f-a2dd-846b4cc32627,Azure Key Vault Managed HSM Key Governance Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a232010e-820c-4083-83bb-3ace5fc29d0b,Azure Cosmos DB,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a2451b93-19e6-4171-9d8e-ef172b102521,DTS-ControlPlane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a284ed42-af3c-f011-b4cc-00224803f016,Agent,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+a2e5d98b-c0e5-4191-b4ae-f6aa7e469ede,commerce-copilot-firstpartyappid,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a303894e-f1d8-4a37-bf10-67aa654a0596,Compute Usage Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a319ff97-8b59-49de-8a22-426be1164d90,spn-fabric-purview-security-connect,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a368aeaa-7651-4785-a0d8-fb74417eac2f,CDX-SecurityScanner,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a3747411-ce7c-4888-9ddc-3a230786ca19,Azure Container Registry - Dataplane,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a3dfc3c6-2c7d-4f42-aeec-b2877f9bce97,Microsoft Azure AD Identity Protection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a45c1cb0-6899-445e-8961-29576781c228,TEST-Azure API Center,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a47591ab-e23e-4ffa-9e1b-809b9067e726,Microsoft Teams User Profile Search Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a4c95b9e-3994-40cc-8953-5dc66d48348d,Microsoft Container Registry,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a57aca87-cbc0-4f3c-8b9e-dc095fdc8978,IAM Supportability,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a5ce81bb-67c7-4043-952a-22004782adb5,Marketplace Catalog,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a665538c-5b51-48a1-b3a5-cf20f42c3785,Prod-DPS-vNext-1P,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a68e1e61-ad4f-45b6-897d-0a1ea8786345,Office365 Shell WCSS-Server Default,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a6aa9161-5291-40bb-8c5c-923b567bee3b,Storage Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a70c8393-7c0c-4c1e-916a-811bd476ee11,Microsoft Defender for Cloud CIEM,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a7d8f84e-510b-46d6-8f59-77e581db63bc,Azure Static Web Apps,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a893dadc-5c8e-47f4-8379-6afb34bdbe12,Managed Network Fabric Surrogate RP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a8b6bf88-1d1a-4626-b040-9a729ea93c65,Compute Artifacts Publishing Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a9158145-bd03-4931-b4c0-45146bd6b663,insurance-resource-insurance-AgentIdentityBlueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+a99783bc-5466-4cef-82eb-ebf285d77131,Common Job Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+aa3d7f76-4aa9-48e6-90c9-69ad14bfa4ad,apfsifabricdemo-pbidevops-4ccec990-8114-405e-b6e2-30377a856b1b,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+aa9ecb1e-fd53-4aaa-a8fe-7a54de2c1334,Office 365 Configure,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ab158d9a-0b5c-4cc3-bb2b-f6646581e4e4,CAP Neptune Prod CM Prod ,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ab3be6b7-f5df-413d-ac2d-abf1e3fd9c0b,Microsoft Teams Graph Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ab4f056c-fd93-40bc-9239-d974157d81b7,GSA-Internettrafficforwardingprofile,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+abc63b55-0325-4305-9e1e-3463b182a6dc,TenantSearchProcessors,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+abea0e3b-c71d-4c4d-aa80-a58aaf727742,insurance-resource-insurance-AgentIdentityBlueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+abfa0a7c-a6b6-4736-8310-5855508787cd,Microsoft Azure App Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ac6dbf5e-1087-4434-beb2-0ebf7bd1b883,Microsoft Defender for Cloud Apps - Customer Experience,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ad15ab7e-44a9-4092-9079-304173cd8a18,sqlvm-abdemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+admin@MngEnvMCAP257273.onmicrosoft.com,System Administrator,User,admin@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+aeb86249-8ea3-49e2-900b-54cc8e308f85,M365 License Manager,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+aff75787-e598-43f9-a0ea-7a0ca00ababc,MOD Demo Platform UnifiedApiConsumer,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+aisha.rahman,Aisha Rahman,User,aisha.rahman@contoso.com,aisha-rahman,Underwriting,BU-INSURANCE,CC-1000,Human,TRUE,BU-INSURANCE,PERS-KNOW
+alipouw13@MngEnvMCAP257273.onmicrosoft.com,alison admin,User,alipouw13@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+alisonpouw_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Alison Pouw,User,alisonpouw_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+alisonpouw_mircosoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,alisonpouw,User,alisonpouw_mircosoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+amolmanocha_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Amol Anocha,User,amolmanocha_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+apdemo@MngEnvMCAP257273.onmicrosoft.com,Alison Pouw,User,apdemo@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+b1379a75-ce5e-4fa3-80c6-89bb39bf646c,Microsoft Teams Chat Aggregator,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b15f3d14-f6d1-4c0d-93da-d4136c97f006,Azure Storage Insights Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b175bb93-9a39-45c6-ac71-4b961f9f6bfc,apagentfoundry-resource,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b20d0d3a-dc90-485b-ad11-6031e769e221,SalesInsightsWebApp,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b25dbd72-8c9f-411a-81e1-932b650ebca5,Financial Insights,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+b277ac9f-30e7-46c0-a076-91abcbbe4451,ap-chatbotdemo-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b2cc270f-563e-4d8a-af47-f00963a71dcd,OneProfile Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b46c3ac5-9da6-418f-a849-0a07a10b3c6c,Cloud Infrastructure Entitlement Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b4bddae8-ab25-483e-8670-df09b9f1d0ea,Signup,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b4ca0290-4e73-4e31-ade0-c82ecfaabf6a,Azure DNS Managed Resolver,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b4fa09d8-5da5-4352-83d9-05c2a44cf431,Azure CosmosDB for PostgreSQL AAD Authentication,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b503eb83-1222-4dcc-b116-b98ed5216e05,Azure Notification Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b5293607-1b33-4215-8a0b-47ba7c0fb2ae,sql-apfsidemo-dev-001,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b55b276d-2b09-4ad2-8de5-f09cf24ffba9,Microsoft Teams - Teams And Channels Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b5a60e17-278b-4c92-a4e2-b9262e66bb28,Azure MFA StrongAuthenticationService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b67c1561-7d53-4399-9438-e5fb997d8751,Transanalytical Taskflows,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b6a1fec6-8029-456b-81ed-de7754615362,TI-1P-APP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b6a9a780-a4a1-4955-a4f8-1fc23a3774f9,ProvisioningHealth,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b6fb6bd6-f0fb-4a60-beb1-4e50afd0eaa9,Power Apps Service Data Plane Backend,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b709481d-4a2f-4898-bc2e-d233e1212059,insurance-resource-insurance-AgentIdentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b87d724b-5bae-459b-afaf-23d15239fde2,Agent (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b8c6afb3-f3a7-4ee4-9b1b-75e72ab1d4c9,Standard Approvals Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b8cf62f3-7cc7-4e32-ab3a-41370ef0cfcf,Azure Machine Learning Services Asset Notification,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b8d56525-1fd0-4121-a640-e0ede64f74b5,M365CommunicationCompliance,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b96b8888-a82c-447e-9cac-2a6504328b61,pview-apfsipurviewdemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b97b6bd4-a49f-4a0c-af18-af507d1da76c,Office Shredding Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+b9a92e36-2cf8-4f4e-bcb3-9d99e00e14ab,Compute Recommendation Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bb2a2e3a-c5e7-4f0a-88e0-8e01fd3fc1f4,CPIM Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bb3d68c2-d09e-4455-94a0-e323996dbaa3,Security Copilot API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bb55177b-a7d9-4939-a257-8ab53a3b2bc6,Azure Arc Data Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bb5ffd56-39eb-458c-a53a-775ba21277da,Security Copilot,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bceea168-88ac-4736-95dc-4ce488ffe324,Microsoft Defender for Cloud,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bd11ca0f-4fd6-4bb7-a259-4a36693b6e13,MCAPI AAD Bridge Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bd6aa92f-de22-4ec8-87e9-7cfdfbad6ad4,insurance-resource-insurance-AgentIdentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bd6d9218-235b-4abd-b3be-9ff157dcf36c,MDC Data Sensitivity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bd93b475-f9e2-476e-963d-b2daf143ffb9,SQLVMResourceProviderAuth,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bda7c733-c5d9-4389-9fd8-3f6edd09d706,WorkdayDQWriteback,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+beba0879-bc82-42c6-98e9-9605f189eaaf,AI Fitness Coach,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bf283ae6-5efd-44a8-b56a-2a7939982d60,Azure Machine Learning Authorization App 2,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+bf854acd-8a7a-4f5f-a648-a018cab4c9e8,cu-apfsidemo/projects/cu-apfsidemo-project,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c08f52c9-8f03-4558-a0ea-9a4c878cf343,Microsoft apps with Global Secure Access,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c0be6b4c-212d-4ca9-8a35-fd260fe22342,Fabric Identity Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c161e42e-d4df-4a3d-9b42-e7a3c31f59d4,Microsoft Intune API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c19490b5-c092-426f-b1a2-674b279d4975,Bing Search APIs,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c1f969b6-65eb-49d5-80d4-84b9a5359f53,GSA-Privateaccesstrafficforwardingprofile,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c2ada927-a9e2-4564-aae2-70775a2fa0af,OCaaS Client Interaction Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c392b621-83f1-4a20-95bf-c4e89bcac44b,Insurance,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c39c9bac-9d1f-4dfb-aa29-27f6365e5cb7,Azure Advisor,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c3ca1a77-7a87-4dba-b8f8-eea115ae4573,Azure API Center,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c44b4083-3bb0-49c1-b47d-974e53cbdf3c,Azure Portal,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c476eb34-4c94-43bc-97fc-94ede0534615,Azure Update Manager,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c4de86e3-e322-4889-a781-968c76b6b325,Medeina Service PPE,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c5393580-f805-4401-95e8-94b7a6ef2fc2,Office 365 Management APIs,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c5b17a4f-cc6f-4649-9480-684280a2af3a,aciapi,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c728155f-7b2a-4502-a08b-b8af9b269319,AAD Request Verification Service - PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c80bf83e-87f0-4404-b550-7d57dc648efe,SnowDemo2,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c830ddb0-63e6-4f22-bd71-2ad47198a23e,Microsoft To-Do,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c8ae378e-26fd-f011-8406-000d3a3306be,Insurance Underwriting Intelligence Agent,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+c9224372-5534-42cb-a48b-8db4f4a3892e,MS Teams Griffin Assistant,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c9299480-c13a-49db-a7ae-cdfe54fe0313,PowerApps-Advisor,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c94ede5f-b856-405a-bcd9-406285330a76,PrivacyEngine,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c98e5057-edde-4666-b301-186a01b4dc58,MicrosoftEndpointDLP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c992c65d-3675-4374-8012-2fe0035690c6,di-aifdemos,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c9a559d2-7aab-4f13-a6ed-e7e9c52aec87,Microsoft Forms,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+c9bbf84d-9d69-494f-9b24-750b3e970685,Agent 1 (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ca0a114d-6fbc-46b3-90fa-2ec954794ddb,Microsoft Device Management Checkin,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ca7f3f0b-7d91-482c-8e09-c5d840d0eac5,Log Analytics API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+caae038f-c2fc-4fe7-9939-3c68c23ee7a9,ContosoCoffee-XMLA-Modeling,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cb0f5a4c-ab6e-4fa3-8c1f-c10628d83e5a,snowflake-auth,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cb1bda4c-1213-4e8b-911a-0a8c83c5d3b7,o365.servicecommunications.microsoft.com,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cb4dc29f-0bf4-402a-8b30-7511498ed654,Power BI Premium,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cbb07bf9-ab6a-4f53-883f-e051c616ba60,spn-ai-restaurant-agent-rag,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cbfda01c-c883-45aa-aedc-e7a484615620,Microsoft Windows AutoPilot Service API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cbff9545-769a-4b41-b76e-fbb069e8727e,Microsoft Defender for Cloud Pricing Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cc15fd57-2c6c-4117-a88c-83b1d56b4bbe,Microsoft Teams Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ce48853e-0605-4f77-8746-d70ac63cc6bc,Bot Framework Composer,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ce6ff14a-7fdc-4685-bbe0-f6afdfcfa8e0,Azure Linux VM Sign-In,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ce79fdc4-cd1d-4ea5-8139-e74d7dbe0bb7,Lifecycle Workflows,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cedebc57-38a2-4f0a-8472-dfcbba5b04c6,M365 Compliance Drive,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ceecbdd6-288c-4be9-8445-74f139e5db19,SQLDBControlPlaneFirstPartyApp,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+cfa8b339-82a2-471a-a3c9-0fc0be7a4093,Azure Key Vault,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+claims-triage-agent,Claims Triage Agent,Agent,,,,BU-INSURANCE,,Agent,FALSE,BU-INSURANCE,PERS-WORKLOAD
+d0ef82bb-244a-4458-9eb4-24a9f093f2c4,Defender for Cloud - Private Link Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d10de03d-5ba3-497a-90e6-7ff8c9736059,Atlas,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d1bd24c7-b27f-477e-86dd-939e107873d7,Managed Network Fabric RP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d202accc-995e-f111-a826-000d3a308996,Test,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+d2450708-699c-41e3-8077-b0c8341509aa,Fabric Client for Workloads,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d2a0a418-0aac-4541-82b2-b3142c89da77,Microsoft Operations Management Suite,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d2fa1650-4805-4a83-bcb9-cf41fe63539c,ACR-Tasks-Prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d360971a-94de-4558-b764-dfd218a8f5ce,Microsoft PrivateStore,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d62cc16b-7464-44e3-9986-6fab87772ffa,content-understanding-f-resource,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d66e9e8e-53a4-420c-866d-5bb39aaea675,networkcopilotRP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d6fdaa33-e821-4211-83d0-cf74736489e1,Microsoft Service Trust,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d7097cd1-c779-44d0-8c71-ab1f8386a97e,Microsoft Office Licensing Service Agents,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d73f4b35-55c9-48c7-8b10-651f6f2acb2e,MCAPI Authorization Prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d7dd3481-96e9-44df-8cc3-fd1f43ce7c61,Prod-RTI-OA-Teams-Global1,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d8c767ef-3e9a-48c4-aef9-562696539b39,Request Approvals Read Platform,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+d9327919-6775-4843-9037-3fb0fb0473cb,Databricks Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+da9b70f6-5323-4ce6-ae5c-88dcc5082966,Universal Print,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dae6f812-2cfd-f011-8406-000d3a3306be,Underwriting Brief Orchestrator,Agent,,,,,,Agent,FALSE,,PERS-WORKLOAD
+db0d7b13-c227-409d-ad2a-b95c811592e3,aif-apfsidemos-dev,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+db44d869-9bce-4198-809b-a806756b0d31,ExchangeRevocationSync,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dbcbd02a-d7c4-42fb-8c27-b07e5118b848,Azure Graph,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dc457883-bafe-4f8b-a333-29685e7eaa9e,PPE-DataResidencyService,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dcad865d-9257-4521-ad4d-bae3e137b345,Microsoft SharePoint Online - SharePoint Home,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dcae1254-e4a3-42a5-96e7-9688bc6450ff,Esri.ArcGISMaps,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dd6d3503-88f1-4fc9-a4d0-1a79c3aaf364,search-api,ServicePrincipal,,,Search,BU-DISCOVERY,CC-2000,ServicePrincipal,FALSE,BU-DISCOVERY,PERS-WORKLOAD
+de247707-4e4a-47d6-89fd-3c632f870b34,CloudLicensingSystem,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+de926fbf-e23b-41f9-ae15-c943a9cfa630,Microsoft Azure Authorization Private Link Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dee7ba80-6a55-4f3b-a86c-746a9231ae49,Microsoft AppPlat EMA,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+dev.patel,Dev Patel,User,dev.patel@contoso.com,dev-patel,Platform,BU-TECH,CC-3000,Human,TRUE,BU-TECH,PERS-PLAT
+df77edef-903d-416b-bcc0-cc8b91af54ea,Defender for IoT,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e06bb8ac-b2ff-4b2b-85e9-344e15cedd3d,macae-frontend-e2d6u2noh3axk,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e0ccf59d-5a20-4a87-a122-f42842cdb86a,Microsoft Defender for Cloud Scanner Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e1979c22-8b73-4aed-a4da-572cc4d0b832,App Studio for Microsoft Teams,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e1b276a9-3a2c-4321-83fe-8c6e189326c5,spn-fabric-purview-dq,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e1e504be-67b6-4805-a0a0-fbee8f27a7bb,GSA-Microsoft365trafficforwardingprofile,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e29b5c86-b9ab-4a86-9a20-d10842007599,SharePoint Framework Azure AD Helper,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e3335adb-5ca0-40dc-b8d3-bedc094e523b,SubscriptionRP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e3a3c6d7-bd80-4be5-88da-c2226a5d9328,Microsoft Defender For Cloud Billing,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e406a681-f3d4-42a8-90b6-c2b029497af1,Azure Storage,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e4ab0ea1-39ad-4b2e-aa67-cdf813e3421c,StorageDataScanner,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e4ab13ed-33cb-41b4-9140-6e264582cf85,Azure SQL Database Backup To Azure Backup Vault,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e5408ad0-c4e2-43aa-b6f2-3b4951286d99,Azure Cost Management Exports,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e64bd61e-5424-451f-b666-e02ee2878437,Microsoft Power Platform Service - PROD,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e6650347-047f-4e51-9386-839384472ea5,Bot Service Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e6d9c1d6-72d0-4722-92b2-85d61ff9a464,Reflex - Public,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e74a9aae-ce66-426d-b197-ef43a773faa8,Microsoft.Defender.Incident,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e8be65d6-d430-4289-a665-51bf2a194bda,Microsoft 365 App Catalog Services,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e92b9b37-1b47-4c01-9fbc-91d84450870e,All private resources with Global Secure Access,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e933bd07-d2ee-4f1d-933c-3752b819567b,Azure Monitor Control Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e935b4a5-8968-416d-8414-caed51c782a9,MicrosoftGuestConfiguration,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e95a6071-4f90-4971-84e2-492d9323345b,CosmosDBMongoClusterPrivateEndpoint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+e9c3020c-b976-40a7-b6c2-0d56abaa82f8,CosmosDB-Garnet-Cache,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ea890292-c8c8-4433-b5ea-b09d0668e1a6,Azure Credential Configuration Endpoint Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+eace8149-b661-472f-b40d-939f89085bd4,Substrate Instant Revocation Pipeline,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+eadea216-1d5c-4a4b-beaf-4f145e6b1cb4,MCAPSGov-AutomationApp,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+eb333adc-0fff-4b44-989f-7d91236a9b87,apic-apfsidemo,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+eb5f18c7-5c81-49ce-9611-9e8396c7fa6c,dbmanagedidentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ebe0c285-db95-403f-a1a3-a793bd6d7767,Office MRO Device Manager Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ec32cc4e-a086-4860-b15c-7b9d98722d20,SharePoint Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ec52d13d-2e85-410e-a89a-8c79fb6a32ac,Azure Synapse Studio,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+eca96461-c16b-4b17-b866-9d01edf9c3ad,ab-fabric-workshop,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ecafc2d9-cf1a-49a7-b60f-e44e34a988d2,Azure CosmosDB for PostgreSQL Microsoft EntraId,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ee45196f-bd15-4010-9a66-c8497a97a873,Microsoft Defender For Cloud Discovery,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ee4b9d97-ffb7-4ba1-bee4-9047505b1c94,aifapfsidemosd9537609558,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ef1e3bba-b59c-45c6-93dd-c7fc96e274e3,Microsoft To-Do Business Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ef5d5c69-a5df-46bb-acaf-426f161a21a2,Managed Service Identity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f0ae4899-d877-4d3c-ae25-679e38eea492,AAD App Management,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f17b6d53-7873-477d-a097-bc0d8b327da9,Power BI DevOps,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f18474f2-a66a-4bb0-a3c9-9b8d892092fa,MaintenanceResourceProvider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f2302d25-414d-497a-b5b9-7cd79995bc17,aif-agenticudfd2ncb-proj-agenticudfd2ncb-AgentIdentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f2537abf-644e-4a0d-9f7b-c91c45c643db,Teams Admin Monitoring Alerting Platform,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f2c304cf-8e7e-4c3f-8164-16299ad9d272,Azure Management Groups,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f3723d34-6ff5-4ceb-a148-d99dcd2511fc,Bot Framework Dev Portal,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f3a218b7-5c8f-460b-93af-56b072788c15,Microsoft Workplace Search Service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f3d139e2-3c60-47ea-8530-fb7ea8facb9d,apfsifabricdemo-pbidevops-b3f18828-c729-415c-9c4b-78e662055e13,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f3e3092d-5925-4418-aa9d-c401ce3308f2,StorageAccounts/securityOperators/DefenderForStorageSecurityOperator,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f3fedc7a-1e20-49a3-9e5d-fb6d777a95f0,Financial Insights (Microsoft Copilot Studio),ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f43e4cb3-c2bb-42e3-bb39-e1ad7426adbb,CDS Web Server Role NAM,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f50d0784-cb84-4838-8b38-2fafa5860e72,ME-SecurityScanner,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f53895d3-095d-408f-8e93-8f94b391404e,Portfolios,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f569b9c7-be15-4e87-86f7-87d30d02090b,O365 LinkedIn Connection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f578ea2f-9d15-4634-a611-0a6e7ddf2491,apagentfoundry-resource/projects/apagentfoundry,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f5c26e74-f226-4ae8-85f0-b4af0080ac9e,Application Insights API,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f5f46cfd-576b-4dd6-b24e-460c84b3793c,PowerPlatform-a365memcp-Connector,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f6b60513-f290-450e-a2f3-9930de61c5e7,Microsoft Azure Log Search Alerts,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f738ef14-47dc-4564-b53b-45069484ccc7,Marketplace Api,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f77c2a8f-8a0a-4776-8e0a-bcb2549610ca,RPSaaS Meta RP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f8f7a2aa-e116-4ba6-8aea-ca162cfa310d,Microsoft Graph Connectors Core,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+f9d02341-e7aa-456d-926d-4a0ca599fbee,Office 365 Enterprise Insights,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fb47f985-a242-4f1c-8479-634829fcff66,apagentfoundry-resource/projects/insuranceprojectfoundry,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fb9de05a-fecc-4642-b3ca-66b9d4434d4d,Azure Machine Learning Authorization App 1,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fbb0ac1a-82dd-478b-a0e5-0b2b98ef38fe,Substrate-FileWatcher,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fc03f97a-9db0-4627-a216-ec98ce54e018,Azure AD Notification,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fc0e60a7-5fe3-4f46-93d6-b0b0bbba9e47,spn-apscripting,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fc5a2d00-1dc1-4e41-b998-3fab267441e1,aif-agenticudfd2ncb-proj-agenticudfd2ncb-TitleAgent-18b03-AgentIdentityBlueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fc68d9e5-1f76-45ef-99aa-214805418498,Azure AD Identity Protection,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fc68f4ab-1685-40df-a690-15fb51c7b894,aif-agenticudfd2ncb-proj-agenticudfd2ncb-ChatAgent-a68f1-AgentIdentityBlueprint,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fc75330b-179d-49af-87dd-3b1acf6827fa,AzureAutomation,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fc780465-2017-40d4-a0c5-307022471b92,WindowsDefenderATP,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fd14a986-6fe4-409a-883e-cdec1009cd54,Intune Grouping and Targeting Client Prod,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fd225045-a727-45dc-8caa-77c8eb1b9521,Azure Help Resource Provider,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fd642066-7bfc-4b65-9463-6a08841c12f0,Microsoft Purview Platform,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+fe053c5f-3692-4f14-aef2-ee34fc081cae,Azure API Connections,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ff0e179f-bccc-4d56-b684-be96139feac0,agentic-advisor-app,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ff846ae4-7ec9-42f4-8576-eb14198ad5e1,Microsoft Edge management service,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+ff88da89-008b-44a3-9e3d-53347b9db78a,aif-agenticudfd2ncb-proj-agenticudfd2ncb-ChatAgent-AgentIdentity,ServicePrincipal,,,,,,ServicePrincipal,FALSE,,PERS-WORKLOAD
+hr-helpdesk-bot,HR Helpdesk Bot,Agent,,,,BU-TECH,,Agent,FALSE,BU-TECH,PERS-WORKLOAD
+jcarver_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Joe Carver,User,jcarver_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+jenny.oyelaran,Jenny Oyelaran,User,jenny.oyelaran@contoso.com,jenny-oyelaran,Platform,BU-TECH,CC-3000,Human,TRUE,BU-TECH,PERS-PLAT
+jobur_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Josh Burgin,User,jobur_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+joshikunal_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Kunal Joshi,User,joshikunal_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+kim.arroyo,Kim Arroyo,User,kim.arroyo@contoso.com,kim-arroyo,Actuarial,BU-INSURANCE,CC-4000,Human,TRUE,BU-INSURANCE,PERS-AIDS
+lee.novak,Lee Novak,User,lee.novak@contoso.com,lee-novak,Data,BU-TECH,CC-3000,Human,TRUE,BU-TECH,PERS-AIDS
+marco.silva,Marco Silva,User,marco.silva@contoso.com,marco-silva,Claims,BU-INSURANCE,CC-1000,Human,TRUE,BU-INSURANCE,PERS-KNOW
+markm_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Mark Moore,User,markm_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+mohitdhande_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Mohit Dhande,User,mohitdhande_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+ms-serviceaccount@MngEnvMCAP257273.OnMicrosoft.com,Microsoft Service Account,User,ms-serviceaccount@MngEnvMCAP257273.OnMicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+ogonzalez_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Orlando Gonzalez,User,ogonzalez_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+parassitaula_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Paras Sitaula,User,parassitaula_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+ppatwari_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Pratik Patwari,User,ppatwari_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewCatalogViewer@MngEnvMCAP257273.onmicrosoft.com,pviewCatalogViewer,User,pviewCatalogViewer@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewConsumer@MngEnvMCAP257273.onmicrosoft.com,pviewConsumer,User,pviewConsumer@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewConsumerCCB@MngEnvMCAP257273.onmicrosoft.com,pviewConsumerCorporateConsumerBanking,User,pviewConsumerCCB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewConsumerRB@MngEnvMCAP257273.onmicrosoft.com,pviewConsumerRetailBanking,User,pviewConsumerRB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewConsumersAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,pviewConsumersAzurePaaS,User,pviewConsumersAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewDataSteward@MngEnvMCAP257273.onmicrosoft.com,pviewDataSteward,User,pviewDataSteward@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewDataStewardAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,pviewDataStewardAzurePaaS,User,pviewDataStewardAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewDataStewardCCB@MngEnvMCAP257273.onmicrosoft.com,pviewDataStewardCorporateConsumerBanking,User,pviewDataStewardCCB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewDataStewardRB@MngEnvMCAP257273.onmicrosoft.com,pviewDataStewardRetailBanking,User,pviewDataStewardRB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewGovAdmin@MngEnvMCAP257273.onmicrosoft.com,pviewGovAdmin,User,pviewGovAdmin@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewGovAdminAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,pviewGovAdminAzurePaaS,User,pviewGovAdminAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewGovAdminCCB@MngEnvMCAP257273.onmicrosoft.com,pviewGovAdminCorporateConsumerBanking,User,pviewGovAdminCCB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewGovAdminRB@MngEnvMCAP257273.onmicrosoft.com,pviewGovAdminRetailBanking,User,pviewGovAdminRB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewProducer@MngEnvMCAP257273.onmicrosoft.com,pviewProducer,User,pviewProducer@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewProducerCCB@MngEnvMCAP257273.onmicrosoft.com,pviewProducerCorporateConsumerBanking,User,pviewProducerCCB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewProducerRB@MngEnvMCAP257273.onmicrosoft.com,pviewProducerRetailBanking,User,pviewProducerRB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewProducersAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,pviewProducersAzurePaaS,User,pviewProducersAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewPublisher@MngEnvMCAP257273.onmicrosoft.com,pviewPublisher,User,pviewPublisher@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewPublisherCCB@MngEnvMCAP257273.onmicrosoft.com,pviewPublisherCorporateConsumerBanking,User,pviewPublisherCCB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewPublisherRB@MngEnvMCAP257273.onmicrosoft.com,pviewPublisherRetailBanking,User,pviewPublisherRB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewPublishersAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,pviewPublishersAzurePaaS,User,pviewPublishersAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewSharedServices@MngEnvMCAP257273.onmicrosoft.com,pviewSharedServices,User,pviewSharedServices@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewSharedServicesAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,pviewSharedServicesAzurePaaS,User,pviewSharedServicesAzurePaaS@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewSharedServicesCCB@MngEnvMCAP257273.onmicrosoft.com,pviewSharedServicesCorporateConsumerBanking,User,pviewSharedServicesCCB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewSharedServicesRB@MngEnvMCAP257273.onmicrosoft.com,pviewSharedServicesRetailBanking,User,pviewSharedServicesRB@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+pviewViewer@MngEnvMCAP257273.onmicrosoft.com,pviewViewer,User,pviewViewer@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+ravi.penmetsa_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Ravi Penmetsa,User,ravi.penmetsa_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+rickyrios_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Ricky Rios,User,rickyrios_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+robin.hale,Robin Hale,User,robin.hale@contoso.com,robin-hale,Checkout,BU-RETAIL,CC-1000,Human,TRUE,BU-RETAIL,PERS-DEV
+ryanokeeffe_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Ryan OKeeffe,User,ryanokeeffe_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+sam.chen,Sam Chen,User,sam.chen@contoso.com,sam-chen,Search,BU-DISCOVERY,CC-2000,Human,TRUE,BU-DISCOVERY,PERS-DEV
+sam.hameed_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Sam Hameed,User,sam.hameed_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+seankelley_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Sean Kelley,User,seankelley_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+shbitla_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Shivashanker Bitla,User,shbitla_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+shekhark@MngEnvMCAP257273.onmicrosoft.com,Shekhar Kumar Guest,User,shekhark@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+snowflake.ap1@MngEnvMCAP257273.onmicrosoft.com,Snowflake User One,User,snowflake.ap1@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+store-ops-assistant,Store Ops Assistant,Agent,,,,BU-RETAIL,,Agent,FALSE,BU-RETAIL,PERS-WORKLOAD
+unknown,Unattributed Identity,Unknown,,,,BU-UNALLOC,,Application,FALSE,BU-UNALLOC,PERS-WORKLOAD
+vtirumalai_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Venu Tirumalai,User,vtirumalai_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED
+yudaipurwala_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,Yasmin Udaipurwala,User,yudaipurwala_microsoft.com#EXT#@MngEnvMCAP257273.onmicrosoft.com,,,,,Human,TRUE,,PERS-UNASSIGNED

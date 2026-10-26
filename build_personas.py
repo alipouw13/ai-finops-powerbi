@@ -19,6 +19,9 @@ ALIAS = {
     "dim_application": "da", "dim_environment": "de", "dim_cost_center": "dcc",
     "dim_rate_card": "drc",
     "dim_data_source": "dds",
+    "fact_user_cost_allocation": "fuc",
+    "dim_agent": "dag", "fact_agent_inventory": "fai", "fact_agent_activity": "faa",
+    "dim_persona": "dpe", "bridge_persona_platform": "bpp",
 }
 # which fields are measures (all live on fact_ai_usage)
 _MEASURES = {
@@ -37,13 +40,24 @@ _MEASURES = {
 
 
 _DS_MEASURES = {"Extractable Signals", "Signals Live (REAL)", "Signals Available"}
+_ALLOC_MEASURES = {"User Allocated Cost", "User Allocated Tokens", "User Allocated Requests", "Directly Attributed Cost",
+                  "Owner Allocated Cost", "Unallocated User Cost", "Directly Attributed Cost %",
+                  "Owner Allocated Tokens", "Allocated Users"}
+_AGENT_MEASURES = {"Agents", "Unowned Tenant Agents", "Agents With Owner", "Agents With Entra Identity",
+                   "Agents With Entra Identity %", "Agents With File or Site Access",
+                   "Agents With Custom Actions", "Agents With Code Interpreter", "Available Agents"}
+_ACT_MEASURES = {"Agent Active Users", "Agent Sessions", "Agent Users Resolved %"}
+_BRIDGE_MEASURES = {"Spend on Primary Tool %"}
+_ENTITY_MEASURES = {"fact_user_cost_allocation": _ALLOC_MEASURES, "fact_agent_inventory": _AGENT_MEASURES,
+                    "fact_agent_activity": _ACT_MEASURES, "bridge_persona_platform": _BRIDGE_MEASURES}
 
 
 def _ref(entity, prop):
     """One Select entry + queryRef, dispatching measure vs column."""
     src = {"Expression": {"SourceRef": {"Source": ALIAS[entity]}}, "Property": prop}
     is_meas = (entity == "fact_ai_usage" and prop in _MEASURES) or \
-              (entity == "dim_data_source" and prop in _DS_MEASURES)
+              (entity == "dim_data_source" and prop in _DS_MEASURES) or \
+              prop in _ENTITY_MEASURES.get(entity, ())
     kind = "Measure" if is_meas else "Column"
     return {kind: src, "Name": f"{entity}.{prop}"}, f"{entity}.{prop}"
 
@@ -274,13 +288,74 @@ def page_datasources():
     return section(9, "DATA_SPECTRUM", "10 · Extractable Data Spectrum", v)
 
 
+def page_user_allocation():
+    f, u, a = "fact_user_cost_allocation", "dim_identity", "dim_application"
+    v = cards_row([
+        (f, "User Allocated Cost", "Cost allocated to a user key"),
+        (f, "Directly Attributed Cost %", "Directly attributed %"),
+        (f, "Owner Allocated Cost", "Owner-allocated cost"),
+        (f, "Unallocated User Cost", "Unallocated cost"),
+        (f, "User Allocated Tokens", "Tokens"),
+        (f, "Allocated Users", "Users with allocated spend"),
+    ])
+    v += [_catval(16, 150, 624, 300, "clusteredBarChart", u, "display_name", f, "User Allocated Cost",
+                  "Cost by user (DIRECT = caller is human; OWNER = app owner; Unallocated = no owner)"),
+          _catval(656, 150, 608, 300, "clusteredBarChart", a, "application_name", f, "User Allocated Tokens",
+                  "Tokens by application / agent"),
+          table(16, 466, 1248, 236, [
+              (u, "display_name"), (a, "application_name"), (f, "allocation_basis"),
+              (f, "User Allocated Tokens"), (f, "User Allocated Requests"), (f, "User Allocated Cost")],
+              "User x application. Same dollars as Total AI Cost, re-keyed to a person; OWNER is accountability, not proof of who made the calls")]
+    return section(10, "USER_ALLOC", "11 · User Cost Allocation", v)
+
+def page_agents():
+    i, a, act = "fact_agent_inventory", "dim_agent", "fact_agent_activity"
+    v = cards_row([
+        (i, "Agents", "Agents in registry"),
+        (i, "Unowned Tenant Agents", "Unowned tenant agents"),
+        (i, "Agents With Entra Identity %", "With Entra agent ID"),
+        (i, "Agents With File or Site Access", "Can read files / sites"),
+        (act, "Agent Active Users", "Agent users (export)"),
+        (act, "Agent Users Resolved %", "Users matched to identity"),
+    ])
+    v += [_catval(16, 150, 408, 300, "clusteredBarChart", a, "owner_class", i, "Agents",
+                  "Agents by ownership (Unowned = governance gap)"),
+          _catval(440, 150, 408, 300, "clusteredBarChart", a, "platform", i, "Agents",
+                  "Agents by build platform (blank = store / unclassified)"),
+          _catval(864, 150, 400, 300, "clusteredColumnChart", a, "status", i, "Agents", "Agents by status"),
+          table(16, 466, 1248, 236, [
+              (a, "agent_name"), (a, "publisher"), (a, "publisher_type"), (a, "owner_class"),
+              (a, "owner_upn"), (a, "platform"), (a, "status"), (i, "Agents With Entra Identity")],
+              "Agent 365 registry (REAL export). No cost per agent is exposed by Agent 365; cost joins by owner or tag")]
+    return section(11, "AGENT365", "12 · Agent 365 Governance", v)
+
+
+def page_personas():
+    p, b = "dim_persona", "bridge_persona_platform"
+    v = cards_row([
+        ("fact_ai_usage", "Total AI Cost", "AI cost (all personas)"),
+        ("fact_ai_usage", "Active Users", "Active principals"),
+        (b, "Spend on Primary Tool %", "Spend on primary tool"),
+    ])
+    v += [_catval(16, 150, 624, 300, "clusteredBarChart", p, "persona_name", "fact_ai_usage", "Total AI Cost",
+                  "AI cost by persona (ASSUMED persona mapping)"),
+          _catval(656, 150, 608, 300, "clusteredBarChart", p, "persona_name", b, "Spend on Primary Tool %",
+                  "Share of persona spend on its primary tool"),
+          table(16, 466, 1248, 236, [
+              (p, "persona_name"), ("dim_platform", "platform_name"), (b, "affinity"),
+              ("fact_ai_usage", "Total AI Cost")],
+              "Persona to tool affinity (Primary / Secondary) from the stakeholder map; Cowork and Azure ML are not ingested yet")]
+    return section(12, "PERSONAS", "13 · Persona Coverage", v)
+
+
 def main():
     r = json.load(open(RP))
     persona_names = {"PERSONA_CFO", "PERSONA_GOV", "PERSONA_ENG", "PERSONA_APP",
-                     "PERSONA_LIC", "DATA_SPECTRUM"}
+                     "PERSONA_LIC", "DATA_SPECTRUM", "DATABRICKS_TAGS", "USER_ALLOC", "AGENT365", "PERSONAS"}
     r["sections"] = [s for s in r["sections"] if s["name"] not in persona_names]
     r["sections"] += [page_cfo(), page_governance(), page_engineering(),
-                      page_appowner(), page_license(), page_datasources()]
+                      page_appowner(), page_license(), page_datasources(), page_user_allocation(),
+                      page_agents(), page_personas()]
     for i, s in enumerate(r["sections"]):
         s["ordinal"] = i
     with open(RP, "w") as f:
