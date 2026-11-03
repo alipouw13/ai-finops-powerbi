@@ -231,6 +231,20 @@
   language, model, suggestions_count, acceptances_count, chat_count
 - **Descriptions:** engagement/ROI (acceptance rates) — no cost.
 
+### bronze_azure_cost_focus  *(NEW — implemented MOCK & REAL)*
+- **Contract:** Microsoft Cost Management **FOCUS 1.0r2 / 1.2-preview** cost and usage details
+  ([official FOCUS schema](https://learn.microsoft.com/en-us/azure/cost-management-billing/dataset-schema/cost-usage-details-focus),
+  distinct from the [legacy EA `usageDetails` schema](https://learn.microsoft.com/en-us/azure/cost-management-billing/dataset-schema/cost-usage-details-ea)).
+- **Grain:** one provider charge line (resource × meter × day for AOAI, Studio PAYG, and Fabric capacity)
+- **Columns:** all 96 Microsoft FOCUS 1.0 fields (`BilledCost`, `EffectiveCost`, `ListCost`,
+  `ContractedCost`, `ConsumedQuantity`, `ConsumedUnit`, `PricingQuantity`, `PricingUnit`,
+  `ResourceId`, `SubAccountId`, `Tags`, `x_ResourceGroupName`, `x_SkuMeterId`, `x_SkuMeterName`,
+  `x_SkuDetails`, etc.) + Bronze lineage.
+- **Silver allocation:** when paired with `bronze_foundry_gateway`, Silver allocates billed
+  Azure OpenAI FOCUS cost onto gateway callers by token share per direction (input, output,
+  cached) and excludes those allocated lines from `silver_usage_azure` so they are never
+  double-counted.
+
 ### bronze_azure_ai_cost
 - **PK:** `usage_date + resource_id + meter_id`
 - **Grain:** daily cost per resource per meter

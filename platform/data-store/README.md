@@ -12,16 +12,18 @@ a Fabric Lakehouse or Azure SQL when the tenant is unblocked.
 
 `build_store.py` loads two things into `finops.db`:
 
-1. **16 Bronze tables** — the raw per-platform telemetry from
-   `platform/fabric/bronze_out/*.csv` (~2,792 rows).
-2. **`extractable_data_catalog`** — a 74-row queryable metadata table listing
+1. **17 Bronze tables** — the raw per-platform telemetry from
+   `platform/fabric/bronze_out/*.csv` (~4,231 rows), including the 96-column
+   source-faithful FOCUS 1.0r2 cost export (`bronze_azure_cost_focus.csv`).
+2. **`extractable_data_catalog`** — a 76-row queryable metadata table listing
    every extractable field for all 7 products (product, category, field,
    description, source API, grain). This is the machine-readable companion to
    `docs/extractable-data-by-product.md`.
 
 | Table | Rows | What it is |
 |---|---|---|
-| `bronze_azure_ai_cost` | 360 | Foundry/AOAI real $ by day/meter |
+| `bronze_azure_cost_focus` | 1,439 | Source-faithful Cost Management FOCUS 1.0r2 charge lines (96 source columns + lineage), reconciled to gateway tokens |
+| `bronze_azure_ai_cost` | 360 | Foundry/AOAI real $ by day/meter (legacy `usageDetails` fallback) |
 | `bronze_azure_ai_metrics` | 180 | AOAI tokens/requests/latency (resource-grain, no identity) |
 | `bronze_foundry_gateway` | 534 | Per-user Foundry tokens via APIM AI Gateway (preferred over metrics) |
 | `bronze_fabric_capacity_cost` | 60 | Fabric CU + capacity $ |
@@ -33,7 +35,7 @@ a Fabric Lakehouse or Azure SQL when the tenant is unblocked.
 | `bronze_m365_cowork_usage` | 32 | M365 Copilot Cowork add-on (Copilot Credits @ $0.01) |
 | `bronze_studio_credits` | 72 | Copilot Studio credits by agent/action |
 | `bronze_ref_*` (5 tables) | 42 | Identity map, app/BU hierarchy, agents, rate card |
-| `extractable_data_catalog` | 74 | Every extractable field per product |
+| `extractable_data_catalog` | 76 | Every extractable field per product |
 
 ## Run it
 

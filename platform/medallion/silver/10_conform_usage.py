@@ -730,7 +730,7 @@ GATEWAY_APP_OWNERSHIP = {
 }
 
 
-def _conform_gateway(df):
+def _conform_gateway(df, focus_df=None):
     df = dedupe(df, "bronze_foundry_gateway")
     df = grain_guard(df, "foundry_gateway", "time_generated",
                      ["client_id", "oid", "model_name"], "total_tokens")
@@ -743,12 +743,10 @@ def _conform_gateway(df):
     app = F.lit("")
     for caller, appkey in GATEWAY_APP_OWNERSHIP.items():
         app = F.when(F.col("upn_or_app_name") == caller, F.lit(appkey)).otherwise(app)
-    # Foundry token rows ARE rate-card priced (there is no invoice line), so the
-    # gateway's real input/output/cached token counts give a genuine list cost
-    # and has_rate_card = TRUE for every model that has a rate-card row.
-    cost, has_rate_flag = foundry_list_cost(
+    list_cost, has_rate_flag = foundry_list_cost(
         df, F.col("prompt_tokens"), F.col("completion_tokens"), F.col("cached_prompt_tokens"))
-    return conform(df
+
+    base = (df
         .withColumn("usage_date", F.col("time_generated").cast("date"))
         .withColumn("platform_key", F.lit("Foundry"))
         .withColumn("identity_key", identity)
@@ -772,11 +770,63 @@ def _conform_gateway(df):
         .withColumn("is_error",
                     F.when(F.coalesce(F.col("is_error").cast("boolean"), F.lit(False)),
                            F.lit("True")).otherwise(F.lit("False")))
-        .withColumn("cost_usd", cost)
-        .withColumn("cost_is_estimated", F.lit(True))
-        .withColumn("list_cost_usd", cost)
+        .withColumn("list_cost_usd", list_cost)
         .withColumn("has_rate_card", has_rate_flag)
         .withColumn("application_key", app))
+
+    if focus_df is not None:
+        # Allocate billed FOCUS Azure OpenAI charge lines onto gateway callers by
+        # their share of tokens per direction (input/output/cached), so Foundry
+        # cost reconciles to the invoice when FOCUS is present in the same lakehouse.
+        tags = F.coalesce(F.col("Tags"), F.lit(""))
+        f_app = F.coalesce(
+            F.get_json_object(tags, "$.app"),
+            F.get_json_object(tags, "$.application"),
+            F.lit(""))
+        f_app = F.when(f_app == "APP-UNKNOWN", F.lit("")).otherwise(f_app)
+        sku_det = F.coalesce(F.col("x_SkuDetails"), F.lit(""))
+        f_model = F.coalesce(F.get_json_object(sku_det, "$.model"),
+                             focus_col(focus_df, "x_SkuMeterSubcategory", default=""))
+        f_dir = F.lower(F.coalesce(F.get_json_object(sku_det, "$.tokenType"), F.lit("")))
+        f_billed = focus_col(focus_df, "x_BilledCostInUsd", "BilledCost").cast("double")
+
+        aoai_charges = (focus_df
+            .filter(F.lower(F.coalesce(F.col("ServiceName"), F.lit(""))).contains("azure openai"))
+            .withColumn("usage_date", F.to_date("ChargePeriodStart"))
+            .withColumn("application_key", f_app)
+            .withColumn("model_key", f_model)
+            .withColumn("_dir", f_dir)
+            .withColumn("_billed", f_billed)
+            .groupBy("usage_date", "application_key", "model_key")
+            .agg(F.sum(F.when(F.col("_dir") == "input", F.col("_billed")).otherwise(0.0)).alias("_c_in"),
+                 F.sum(F.when(F.col("_dir") == "output", F.col("_billed")).otherwise(0.0)).alias("_c_out"),
+                 F.sum(F.when(F.col("_dir") == "cached", F.col("_billed")).otherwise(0.0)).alias("_c_ca"),
+                 F.count(F.lit(1)).alias("_f_rows")))
+
+        w_pool = Window.partitionBy("usage_date", "application_key", "model_key")
+        alloc_cost = (
+            F.coalesce(F.col("_c_in"), F.lit(0.0))
+            * F.when(F.sum("input_tokens").over(w_pool) > 0,
+                     F.col("input_tokens") / F.sum("input_tokens").over(w_pool)).otherwise(0.0)
+            + F.coalesce(F.col("_c_out"), F.lit(0.0))
+            * F.when(F.sum("output_tokens").over(w_pool) > 0,
+                     F.col("output_tokens") / F.sum("output_tokens").over(w_pool)).otherwise(0.0)
+            + F.coalesce(F.col("_c_ca"), F.lit(0.0))
+            * F.when(F.sum("cached_tokens").over(w_pool) > 0,
+                     F.col("cached_tokens") / F.sum("cached_tokens").over(w_pool)).otherwise(0.0)
+        )
+        base = (base
+            .join(aoai_charges, ["usage_date", "application_key", "model_key"], "left")
+            .withColumn("cost_usd", F.when(F.col("_f_rows").isNotNull(), alloc_cost)
+                                     .otherwise(F.col("list_cost_usd")))
+            .withColumn("cost_is_estimated", F.col("_f_rows").isNull())
+            .drop("_c_in", "_c_out", "_c_ca", "_f_rows"))
+    else:
+        base = (base
+            .withColumn("cost_usd", F.col("list_cost_usd"))
+            .withColumn("cost_is_estimated", F.lit(True)))
+
+    return conform(base)
 
 
 def _conform_metrics(df):
@@ -822,7 +872,9 @@ def _conform_metrics(df):
 foundry_parts = []
 for _lh in BRONZE_LAKEHOUSES:
     if has_bronze_in(_lh, "bronze_foundry_gateway"):
-        foundry_parts.append(_conform_gateway(_read(_lh, "bronze_foundry_gateway")))
+        _focus_lh = (_read(_lh, "bronze_azure_cost_focus")
+                     if has_bronze_in(_lh, "bronze_azure_cost_focus") else None)
+        foundry_parts.append(_conform_gateway(_read(_lh, "bronze_foundry_gateway"), _focus_lh))
         if has_bronze_in(_lh, "bronze_azure_ai_metrics"):
             _drop = _read(_lh, "bronze_azure_ai_metrics")
             _n = _drop.count()
@@ -914,6 +966,13 @@ if has_bronze("bronze_azure_cost_focus"):
               f"credit feeds. Counting the Azure line too double-counts the same "
               f"dollars.")
     fo = fo.filter(~copilot_credit_svc)
+
+    # When a lakehouse also carries bronze_foundry_gateway, its Azure OpenAI
+    # FOCUS lines were already allocated onto per-caller Foundry rows above, so
+    # exclude those MOCK-allocated AOAI lines here to prevent double-counting.
+    if has_bronze("bronze_foundry_gateway"):
+        fo = fo.filter(~(svc_name.contains("azure openai")
+                         & (F.coalesce(F.col("_data_class"), F.lit("MOCK")) == "MOCK")))
 
     silver_azure = conform(fo
         .withColumn("usage_date", F.to_date("ChargePeriodStart"))
