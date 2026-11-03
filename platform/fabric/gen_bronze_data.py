@@ -24,9 +24,11 @@ committed CSVs in bronze_out/ are pinned to 2026-09-08, regenerated in one run:
 Running that twice in two separate processes yields an identical bronze_out/.
 """
 import csv
+import json
 import os
 import random
 import zlib
+from collections import defaultdict
 from datetime import date, timedelta
 
 random.seed(42)
@@ -98,12 +100,12 @@ def lineage(source_api, watermark):
     }
 
 
-def write(name, rows):
+def write(name, rows, columns=None, lineterminator="\r\n"):
     if not rows:
         print(f"  ! {name}: 0 rows"); return
-    cols = list(rows[0].keys())
+    cols = columns or list(rows[0].keys())
     with open(os.path.join(OUT, f"{name}.csv"), "w", newline="", encoding="utf-8") as fh:
-        w = csv.DictWriter(fh, fieldnames=cols)
+        w = csv.DictWriter(fh, fieldnames=cols, lineterminator=lineterminator)
         w.writeheader(); w.writerows(rows)
     print(f"  ok {name}: {len(rows)} rows")
 
@@ -551,6 +553,284 @@ def gen_ref_rate():
     write("bronze_ref_rate_card", out)
 
 
+# ---------------------------------------------------- bronze_azure_cost_focus
+# Source-faithful Microsoft Cost Management FOCUS 1.0r2 export (all 96 provider
+# columns + Bronze lineage). Priced directly from the gateway's observed token
+# totals and Copilot Studio credit totals so that when Silver allocates billed
+# FOCUS cost onto identities by token/credit share, the allocated sum reconciles
+# to the invoice to the cent.
+FOCUS_COLUMNS = [
+    "BilledCost", "BillingAccountId", "BillingAccountName", "BillingAccountType",
+    "BillingCurrency", "BillingPeriodEnd", "BillingPeriodStart", "ChargeCategory",
+    "ChargeClass", "ChargeDescription", "ChargeFrequency", "ChargePeriodEnd",
+    "ChargePeriodStart", "CommitmentDiscountCategory", "CommitmentDiscountId",
+    "CommitmentDiscountName", "CommitmentDiscountStatus", "CommitmentDiscountType",
+    "ConsumedQuantity", "ConsumedUnit", "ContractedCost", "ContractedUnitPrice",
+    "EffectiveCost", "InvoiceIssuerName", "ListCost", "ListUnitPrice",
+    "PricingCategory", "PricingQuantity", "PricingUnit", "ProviderName",
+    "PublisherName", "RegionId", "RegionName", "ResourceId", "ResourceName",
+    "ResourceType", "ServiceCategory", "ServiceName", "SkuId", "SkuPriceId",
+    "SubAccountId", "SubAccountName", "SubAccountType", "Tags", "x_AccountId",
+    "x_AccountName", "x_AccountOwnerId", "x_BilledCostInUsd", "x_BilledUnitPrice",
+    "x_BillingAccountId", "x_BillingAccountName", "x_BillingExchangeRate",
+    "x_BillingExchangeRateDate", "x_BillingProfileId", "x_BillingProfileName",
+    "x_ContractedCostInUsd", "x_CostAllocationRuleName", "x_CostCenter",
+    "x_CustomerId", "x_CustomerName", "x_EffectiveCostInUsd", "x_EffectiveUnitPrice",
+    "x_InvoiceId", "x_InvoiceIssuerId", "x_InvoiceSectionId", "x_InvoiceSectionName",
+    "x_ListCostInUsd", "x_PartnerCreditApplied", "x_PartnerCreditRate",
+    "x_PricingBlockSize", "x_PricingCurrency", "x_PricingSubcategory",
+    "x_PricingUnitDescription", "x_PublisherCategory", "x_PublisherId",
+    "x_ResellerId", "x_ResellerName", "x_ResourceGroupName", "x_ResourceType",
+    "x_ServicePeriodEnd", "x_ServicePeriodStart", "x_SkuDescription", "x_SkuDetails",
+    "x_SkuIsCreditEligible", "x_SkuMeterCategory", "x_SkuMeterId", "x_SkuMeterName",
+    "x_SkuMeterSubcategory", "x_SkuOfferId", "x_SkuOrderId", "x_SkuOrderName",
+    "x_SkuPartNumber", "x_SkuRegion", "x_SkuServiceFamily", "x_SkuTerm", "x_SkuTier",
+]
+
+AOAI_FOCUS_METERS = {
+    ("gpt-4.1-mini", "input"): ("9d25a9f8-1c8e-5e82-949f-a69580f18e8d", "gpt-4.1-mini Input Tokens", 0.0004),
+    ("gpt-4.1-mini", "output"): ("ce8b7b6e-f4d1-5b56-beca-4ea97224f27b", "gpt-4.1-mini Output Tokens", 0.0016),
+    ("gpt-4.1-mini", "cached"): ("a3f1d0b2-6d52-5c74-8f0a-19a2f1cbb6d4", "gpt-4.1-mini Cached Input Tokens", 0.0001),
+    ("gpt-4.1", "input"): ("22c19c9a-bdbb-5481-969f-a54f3f93391a", "gpt-4.1 Input Tokens", 0.002),
+    ("gpt-4.1", "output"): ("73fcd9cf-82df-5fb5-89d4-1448394f0f1e", "gpt-4.1 Output Tokens", 0.008),
+    ("gpt-4.1", "cached"): ("5b0c47ae-91ad-5f39-a2bd-77d5c6a41f83", "gpt-4.1 Cached Input Tokens", 0.0005),
+}
+AOAI_DISCOUNT = 0.15
+SUBSCRIPTION_ID = "68837237-5a48-41a9-bed4-947f5c277684"
+SUBSCRIPTION_NAME = "Contoso AI Platform"
+BILLING_ACCOUNT_ID = "EA-7654321"
+BILLING_ACCOUNT_NAME = "Contoso Enterprise Agreement"
+
+FOCUS_APP_META = {
+    "APP-CHECKOUT": ("aoai-checkout-prod", "BU-RETAIL", "CC-1000", "ENV-PROD"),
+    "APP-SEARCH": ("aoai-search-prod", "BU-DISCOVERY", "CC-2000", "ENV-PROD"),
+    "APP-DSNB": ("aoai-datascience-dev", "BU-PLATFORM", "CC-3000", "ENV-DEV"),
+    "APP-MOBILE": ("aoai-mobile-test", "BU-RETAIL", "CC-4000", "ENV-TEST"),
+    "APP-UNKNOWN": ("aoai-shared-playground", "BU-UNALLOC", "CC-3000", "ENV-DEV"),
+}
+
+CALLER_TO_APP = {
+    "checkout-service": "APP-CHECKOUT",
+    "search-api": "APP-SEARCH",
+    "ds-notebooks": "APP-DSNB",
+    "mobile-assistant": "APP-MOBILE",
+}
+
+
+def _month_bounds(d):
+    start = d.replace(day=1)
+    end = (start.replace(day=28) + timedelta(days=4)).replace(day=1)
+    return start, end
+
+
+def _focus_row(*, charge_date, charge_description, service_name, service_category,
+               focus_resource_type, resource_name, resource_group, resource_provider,
+               arm_resource_type, meter_id, meter_name, meter_category, meter_subcategory,
+               sku_id, sku_part_number, sku_service_family, sku_details,
+               consumed_quantity, consumed_unit, pricing_unit, pricing_block_size,
+               list_unit_price, discount_pct, tags, cost_center, region_id, region_name):
+    billing_start, billing_end = _month_bounds(charge_date)
+    charge_start = f"{charge_date.isoformat()}T00:00:00Z"
+    charge_end = f"{(charge_date + timedelta(days=1)).isoformat()}T00:00:00Z"
+    pricing_quantity = round(consumed_quantity / pricing_block_size, 6)
+    contracted_unit_price = round(list_unit_price * (1 - discount_pct), 10)
+    list_cost = round(pricing_quantity * list_unit_price, 6)
+    contracted_cost = round(pricing_quantity * contracted_unit_price, 6)
+    resource_id = (f"/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{resource_group}"
+                   f"/providers/{resource_provider}/{resource_name}")
+
+    row = {column: "" for column in FOCUS_COLUMNS}
+    row.update({
+        "BilledCost": contracted_cost,
+        "BillingAccountId": BILLING_ACCOUNT_ID,
+        "BillingAccountName": BILLING_ACCOUNT_NAME,
+        "BillingAccountType": "EA",
+        "BillingCurrency": "USD",
+        "BillingPeriodEnd": f"{billing_end.isoformat()}T00:00:00Z",
+        "BillingPeriodStart": f"{billing_start.isoformat()}T00:00:00Z",
+        "ChargeCategory": "Usage",
+        "ChargeDescription": charge_description,
+        "ChargeFrequency": "Usage-Based",
+        "ChargePeriodEnd": charge_end,
+        "ChargePeriodStart": charge_start,
+        "ConsumedQuantity": consumed_quantity,
+        "ConsumedUnit": consumed_unit,
+        "ContractedCost": contracted_cost,
+        "ContractedUnitPrice": contracted_unit_price,
+        "EffectiveCost": contracted_cost,
+        "InvoiceIssuerName": "Microsoft",
+        "ListCost": list_cost,
+        "ListUnitPrice": list_unit_price,
+        "PricingCategory": "Standard",
+        "PricingQuantity": pricing_quantity,
+        "PricingUnit": pricing_unit,
+        "ProviderName": "Microsoft",
+        "PublisherName": "Microsoft",
+        "RegionId": region_id,
+        "RegionName": region_name,
+        "ResourceId": resource_id,
+        "ResourceName": resource_name,
+        "ResourceType": focus_resource_type,
+        "ServiceCategory": service_category,
+        "ServiceName": service_name,
+        "SkuId": sku_id,
+        "SkuPriceId": meter_id,
+        "SubAccountId": SUBSCRIPTION_ID,
+        "SubAccountName": SUBSCRIPTION_NAME,
+        "SubAccountType": "Subscription",
+        "Tags": json.dumps(tags, separators=(",", ":")),
+        "x_AccountId": "EA-ACCOUNT-1001",
+        "x_AccountName": "AI Platform Account",
+        "x_AccountOwnerId": "finops-owner@contoso.example",
+        "x_BilledCostInUsd": contracted_cost,
+        "x_BilledUnitPrice": contracted_unit_price,
+        "x_BillingAccountId": BILLING_ACCOUNT_ID,
+        "x_BillingAccountName": BILLING_ACCOUNT_NAME,
+        "x_BillingExchangeRate": 1,
+        "x_BillingExchangeRateDate": billing_start.isoformat(),
+        "x_BillingProfileId": BILLING_ACCOUNT_ID,
+        "x_BillingProfileName": BILLING_ACCOUNT_NAME,
+        "x_ContractedCostInUsd": contracted_cost,
+        "x_CostCenter": cost_center,
+        "x_EffectiveCostInUsd": contracted_cost,
+        "x_EffectiveUnitPrice": contracted_unit_price,
+        "x_InvoiceSectionId": "EA-DEPT-042",
+        "x_InvoiceSectionName": "AI and Data",
+        "x_ListCostInUsd": list_cost,
+        "x_PricingBlockSize": pricing_block_size,
+        "x_PricingCurrency": "USD",
+        "x_PricingSubcategory": "On Demand",
+        "x_PricingUnitDescription": pricing_unit,
+        "x_PublisherCategory": "Cloud Provider",
+        "x_PublisherId": "Microsoft",
+        "x_ResourceGroupName": resource_group,
+        "x_ResourceType": arm_resource_type,
+        "x_ServicePeriodEnd": charge_end,
+        "x_ServicePeriodStart": charge_start,
+        "x_SkuDescription": meter_name,
+        "x_SkuDetails": json.dumps(sku_details, separators=(",", ":")),
+        "x_SkuIsCreditEligible": "True",
+        "x_SkuMeterCategory": meter_category,
+        "x_SkuMeterId": meter_id,
+        "x_SkuMeterName": meter_name,
+        "x_SkuMeterSubcategory": meter_subcategory,
+        "x_SkuOfferId": "MS-AZR-0017P",
+        "x_SkuPartNumber": sku_part_number,
+        "x_SkuRegion": region_name,
+        "x_SkuServiceFamily": sku_service_family,
+        **lineage("costmanagement.exports.focus-1.0r2", charge_date.isoformat()),
+    })
+    return row
+
+
+def gen_azure_cost_focus():
+    """Generate source-faithful FOCUS 1.0r2 cost lines reconciled to bronze_foundry_gateway."""
+    gw_path = os.path.join(OUT, "bronze_foundry_gateway.csv")
+    st_path = os.path.join(OUT, "bronze_studio_credits.csv")
+    with open(gw_path, newline="", encoding="utf-8") as fh:
+        gw_rows = list(csv.DictReader(fh))
+    with open(st_path, newline="", encoding="utf-8") as fh:
+        st_rows = list(csv.DictReader(fh))
+
+    gateway_tokens = defaultdict(int)
+    for r in gw_rows:
+        day = r["time_generated"][:10]
+        app_key = CALLER_TO_APP.get(r["upn_or_app_name"], "APP-UNKNOWN")
+        model = r["model_name"]
+        gateway_tokens[(day, app_key, model, "input")] += int(r["prompt_tokens"])
+        gateway_tokens[(day, app_key, model, "output")] += int(r["completion_tokens"])
+        gateway_tokens[(day, app_key, model, "cached")] += int(r["cached_prompt_tokens"])
+
+    studio_credits = defaultdict(int)
+    for r in st_rows:
+        studio_credits[r["usage_date"]] += int(float(r["credits_consumed"]))
+
+    rows = []
+    for (day_str, app_key, model, direction), token_count in sorted(gateway_tokens.items()):
+        if token_count <= 0:
+            continue
+        res_name, bu_key, cc_key, env_key = FOCUS_APP_META[app_key]
+        meter_id, meter_name, list_price = AOAI_FOCUS_METERS[(model, direction)]
+        rows.append(_focus_row(
+            charge_date=date.fromisoformat(day_str),
+            charge_description=meter_name,
+            service_name="Azure OpenAI Service",
+            service_category="AI and Machine Learning",
+            focus_resource_type="AI and Machine Learning",
+            resource_name=res_name,
+            resource_group="rg-aoai-prod",
+            resource_provider="Microsoft.CognitiveServices/accounts",
+            arm_resource_type="microsoft.cognitiveservices/accounts",
+            meter_id=meter_id, meter_name=meter_name,
+            meter_category="Azure OpenAI", meter_subcategory=model,
+            sku_id=f"{model}-{direction}",
+            sku_part_number=f"AOAI-{model.upper()}-{direction.upper()}",
+            sku_service_family="AI + Machine Learning",
+            sku_details={"model": model, "tokenType": direction.capitalize()},
+            consumed_quantity=token_count, consumed_unit="Tokens",
+            pricing_unit="1K Tokens", pricing_block_size=1000,
+            list_unit_price=list_price, discount_pct=AOAI_DISCOUNT,
+            tags={"app": app_key, "bu": bu_key, "env": env_key},
+            cost_center=cc_key,
+            region_id="eastus2", region_name="East US 2",
+        ))
+
+    for day_str, credits in sorted(studio_credits.items()):
+        rows.append(_focus_row(
+            charge_date=date.fromisoformat(day_str),
+            charge_description="Copilot Studio Copilot Credits",
+            service_name="Microsoft Copilot Studio",
+            service_category="AI and Machine Learning",
+            focus_resource_type="AI and Machine Learning",
+            resource_name="pp-contoso-production",
+            resource_group="rg-powerplatform",
+            resource_provider="Microsoft.PowerPlatform/accounts",
+            arm_resource_type="microsoft.powerplatform/accounts",
+            meter_id="b2d4f6a8-3c19-5d7e-90ab-1c2d3e4f5a6b",
+            meter_name="Copilot Studio Copilot Credits",
+            meter_category="Power Platform", meter_subcategory="Copilot Studio",
+            sku_id="copilot-studio-payg",
+            sku_part_number="PP-COPILOT-CREDIT",
+            sku_service_family="Power Platform",
+            sku_details={"capability": "Copilot Studio", "billingType": "PayAsYouGo"},
+            consumed_quantity=credits, consumed_unit="Credits",
+            pricing_unit="1 Credit", pricing_block_size=1,
+            list_unit_price=0.01, discount_pct=0.20,
+            tags={"app": "APP-STUDIO", "bu": "BU-TECH", "env": "ENV-PROD"},
+            cost_center="CC-3000",
+            region_id="global", region_name="Global",
+        ))
+
+    for day in sorted(DAYS):
+        rows.append(_focus_row(
+            charge_date=day,
+            charge_description="F2 Capacity Usage",
+            service_name="Microsoft Fabric",
+            service_category="Analytics",
+            focus_resource_type="Analytics",
+            resource_name="fab-finops-cap01",
+            resource_group="rg-fabric-prod",
+            resource_provider="Microsoft.Fabric/capacities",
+            arm_resource_type="microsoft.fabric/capacities",
+            meter_id="d7e8f9a0-1b2c-5d3e-8f4a-5b6c7d8e9f01",
+            meter_name="F2 Capacity Usage",
+            meter_category="Microsoft Fabric", meter_subcategory="F2",
+            sku_id="Fabric-F2", sku_part_number="FABRIC-F2-CAP",
+            sku_service_family="Analytics",
+            sku_details={"sku": "F2", "capacityUnits": 2},
+            consumed_quantity=24, consumed_unit="Hours",
+            pricing_unit="1 Hour", pricing_block_size=1,
+            list_unit_price=0.36, discount_pct=0.0,
+            tags={"app": "APP-PLATFORM", "bu": "BU-PLATFORM", "env": "ENV-PROD"},
+            cost_center="CC-3000",
+            region_id="eastus2", region_name="East US 2",
+        ))
+
+    write("bronze_azure_cost_focus", rows,
+          columns=FOCUS_COLUMNS + list(lineage("", "").keys()),
+          lineterminator="\n")
+
+
 if __name__ == "__main__":
     print(f"Generating MOCK Bronze datasets -> {OUT}")
     gen_m365_usage(); gen_m365_seats(); gen_m365_credits()
@@ -559,5 +839,5 @@ if __name__ == "__main__":
     gen_ref_identity(); gen_ref_app(); gen_ref_bu(); gen_ref_agent(); gen_ref_rate()
     # New feeds are generated last so they never shift the shared random stream
     # the existing feeds draw from — their output stays byte-stable across runs.
-    gen_m365_cowork(); gen_foundry_gateway()
+    gen_m365_cowork(); gen_foundry_gateway(); gen_azure_cost_focus()
     print("Done.")

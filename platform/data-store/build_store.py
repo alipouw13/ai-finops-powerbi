@@ -79,6 +79,8 @@ CATALOG = [
     ("Foundry/AOAI", "usage", "latency_ms", "Response time", "Monitor", "hour"),
     ("Foundry/AOAI", "usage", "throttled_count", "429s", "Monitor", "hour"),
     ("Foundry/AOAI", "cost", "meter_name/quantity/cost_usd", "Real $", "Cost Management usageDetails", "day/meter"),
+    ("Foundry/AOAI", "cost", "BilledCost/EffectiveCost/ListCost", "Standardized billed, amortized & list $", "Cost Management FOCUS 1.0r2 export", "charge line"),
+    ("Foundry/AOAI", "usage", "ConsumedQuantity/PricingQuantity", "Provider tokens & 1K-token billing blocks", "Cost Management FOCUS 1.0r2 export", "charge line"),
     ("Foundry/AOAI", "dimension", "tags_json", "app/bu/env tags", "Cost Mgmt", "resource"),
     ("Foundry/AOAI", "identity", "caller/api_subscription_id", "Who called (via APIM)", "Log Analytics", "request"),
     ("Foundry/AOAI", "usage", "request_id/status_code", "Per-request detail", "Diagnostic logs", "request"),
@@ -155,6 +157,22 @@ def build():
     print(f"\nMetadata:\n  + extractable_data_catalog          {len(CATALOG):>5} rows "
           f"({len(set(c[0] for c in CATALOG))} products)")
     con.commit()
+    # Verify FOCUS 1.0r2 schema contract and token reconciliation against bronze_foundry_gateway
+    focus_cols = [r[1] for r in con.execute('PRAGMA table_info("bronze_azure_cost_focus")')
+                  if not r[1].startswith("_")]
+    assert len(focus_cols) == 96, f"expected 96 FOCUS columns, got {len(focus_cols)}"
+    focus_tokens = con.execute(
+        'SELECT COALESCE(SUM(CAST("ConsumedQuantity" AS INTEGER)), 0) '
+        'FROM bronze_azure_cost_focus WHERE "ServiceName" = \'Azure OpenAI Service\''
+    ).fetchone()[0]
+    gw_tokens = con.execute(
+        'SELECT COALESCE(SUM(CAST(prompt_tokens AS INTEGER) + CAST(completion_tokens AS INTEGER) '
+        '+ CAST(cached_prompt_tokens AS INTEGER)), 0) FROM bronze_foundry_gateway'
+    ).fetchone()[0]
+    assert focus_tokens == gw_tokens, (
+        f"FOCUS AOAI tokens ({focus_tokens}) != gateway tokens ({gw_tokens})")
+    print(f"\nFOCUS 1.0r2 check: {len(focus_cols)} source columns, "
+          f"{focus_tokens:,} AOAI tokens reconciled to bronze_foundry_gateway.")
     print(f"\nTotal: {total + len(CATALOG)} rows across "
           f"{len(glob.glob(os.path.join(BRONZE,'*.csv'))) + 1} tables.")
     print("\nExtractable fields per product:")
