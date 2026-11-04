@@ -1,9 +1,9 @@
-# AI FinOps Accelerator — Clone & Run Runbook
+# AI FinOps Accelerator - Clone & Run Runbook
 
 Everything here runs **Fabric-free** with the Python standard library only (no pip
 installs, no Power BI license, no cloud). All data is **MOCK** and tagged as such.
-A coworker can clone this repo and see the full story — per-persona BI dashboards +
-the AI insight layer — in under a minute.
+A coworker can clone this repo and see the full story - per-persona BI dashboards +
+the AI insight layer - in under a minute.
 
 ```bash
 git clone https://github.com/natesanshreyas/ai-finops-powerbi.git
@@ -62,7 +62,7 @@ alone does not establish source freshness. Keep the snapshot date visible, and
 check the final validation file rather than treating job acceptance as success.
 The live evidence tables stay in Silver and are not part of the Power BI semantic model.
 
-### Verified run — October 23, 2026
+### Verified run - October 23, 2026
 
 Run `4701cc36-a561-42f7-b806-a84d5bbc47b3` completed successfully at
 18:58:56 UTC. The persisted Gold validation reported:
@@ -174,7 +174,7 @@ Copilot / semantic-model Q&A but runs 100% locally. Try:
 | 5. **Fabric push** | Land Bronze in a Lakehouse | `platform/fabric/load_bronze.py` (run once a Power BI license is assigned) |
 
 Steps 1–4 run today with no license. Step 5 is the handoff to whoever owns the
-Fabric workspace — see `docs/bronze-layer-architecture.md`.
+Fabric workspace - see `docs/bronze-layer-architecture.md`.
 
 ## Also runnable
 - **Power BI Desktop:** open `AIFinOps.pbip` (10 persona report pages, no Fabric needed).

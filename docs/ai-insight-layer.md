@@ -1,26 +1,26 @@
-# AI insight layer — Fabric Copilot, natural language, and RAG
+# AI insight layer - Fabric Copilot, natural language, and RAG
 
-Goal: let a stakeholder ask, in plain language, questions like —
+Goal: let a stakeholder ask, in plain language, questions like  - 
 - Which business unit spent the most last month?
 - Which licenses should be reclaimed?
 - Which applications increased spend?
 - What are the highest-cost models?
 - Where can we reduce AI spend?
 
-— and get grounded, numeric answers. Three layers, each usable on its own.
+ -  and get grounded, numeric answers. Three layers, each usable on its own.
 
 ---
 
-## Layer 1 — Semantic model as the grounding contract
+## Layer 1 - Semantic model as the grounding contract
 Fabric Copilot and Q&A are only as good as the model's metadata. The v2 model is
 already shaped for this:
 
 - **Descriptions** (`///` in TMDL) on every non-obvious measure become Copilot
-  context. Keep writing them — they are prompt grounding, not just docs.
+  context. Keep writing them - they are prompt grounding, not just docs.
 - **Conformed dims** give NL a vocabulary: *business unit, application,
   environment, principal type, model, platform*.
 - **`discourageImplicitMeasures`** is on, so Copilot uses curated measures
-  (`Total AI Cost`, `Chargeback Cost`, …) instead of ad-hoc column sums — answers
+  (`Total AI Cost`, `Chargeback Cost`, …) instead of ad-hoc column sums - answers
   stay consistent with the dashboards.
 - **Synonyms** in `AIFinOps.SemanticModel/synonyms.linguistic.json` map business
   language ("wasted spend", "showback", "unused seats") to measures.
@@ -36,7 +36,7 @@ already shaped for this:
 setup. Kept out of `definition/` deliberately so a malformed edit can never stop
 the model opening.
 
-## Layer 2 — Fabric Copilot / Q&A (self-serve NL over the model)
+## Layer 2 - Fabric Copilot / Q&A (self-serve NL over the model)
 Point Copilot in the Fabric workspace at the published semantic model. It answers
 aggregate/slice questions directly ("spend by business unit last month",
 "idle licensed users by BU") because those map to measures + dim columns.
@@ -44,12 +44,12 @@ aggregate/slice questions directly ("spend by business unit last month",
 - **Strategy.** Publish the semantic model to a Fabric workspace on a Copilot-
   enabled capacity; enable Copilot; ship the synonyms; add 6–10 verified Q&A
   example questions as "featured questions" to steer phrasing.
-- **Tradeoff.** Copilot answers *within the model* — it cannot reason over
+- **Tradeoff.** Copilot answers *within the model* - it cannot reason over
   external policy docs or explain *why* a cost moved. That is Layer 3.
 - **Value.** Zero-BI-skill access for CFO/governance personas.
 - **Effort.** M (capacity + publish + synonyms + featured questions).
 
-## Layer 3 — RAG insight layer (the "why" and the recommendations)
+## Layer 3 - RAG insight layer (the "why" and the recommendations)
 For narrative/analytical questions ("*why* did Insurance's spend jump?", "draft a
 reclaim plan"), combine model data with unstructured context.
 
@@ -57,7 +57,7 @@ reclaim plan"), combine model data with unstructured context.
 User question
    │
    ▼
-Orchestrator (Azure AI Foundry agent, via the APIM AI Gateway — same gateway that
+Orchestrator (Azure AI Foundry agent, via the APIM AI Gateway - same gateway that
    │           already gives per-user Foundry cost attribution & governance)
    ├─► Tool A: DAX/semantic query  → numbers from the Power BI model (grounded truth)
    ├─► Tool B: vector search        → FinOps policy, rate cards, prior optimization
@@ -68,7 +68,7 @@ Orchestrator (Azure AI Foundry agent, via the APIM AI Gateway — same gateway t
 - **Rationale.** Numbers must come from the model (never hallucinated); commentary
   comes from retrieved documents. Separating the two keeps answers auditable.
 - **Grounding truth.** Quantitative claims are executed as measure queries, not
-  generated — the LLM composes prose around returned figures.
+  generated - the LLM composes prose around returned figures.
 - **Governance.** Route the agent's own LLM calls through the APIM AI Gateway so
   the insight layer's cost is itself captured in this same FinOps model (recursive
   dogfooding, and per-user cost control).

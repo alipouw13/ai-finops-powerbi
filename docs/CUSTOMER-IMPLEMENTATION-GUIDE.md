@@ -1,4 +1,4 @@
-# Enterprise Customer Implementation Guide — AI FinOps & Tokenomics Accelerator
+# Enterprise Customer Implementation Guide - AI FinOps & Tokenomics Accelerator
 
 This guide defines how an enterprise **Cloud Solution Architect**, **FinOps Practitioner**, and **Data & AI Engineer** takes this accelerator from the bundled FOCUS 1.2 + Multi-Platform PoC dataset to **100% live production data** across:
 
@@ -26,7 +26,7 @@ This guide defines how an enterprise **Cloud Solution Architect**, **FinOps Prac
              │ OneLake Shortcut         │ Eventhouse / Export     │ Fabric Data Factory  │ REST
              ▼                          ▼                         ▼                      ▼
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  MICROSOFT FABRIC LAKEHOUSE — MEDALLION ARCHITECTURE                                            │
+│  MICROSOFT FABRIC LAKEHOUSE - MEDALLION ARCHITECTURE                                            │
 │                                                                                                 │
 │  [BRONZE] Append-Only Raw Fidelity (platform/medallion/bronze/)                                 │
 │    • bronze_focus_cost              • bronze_m365_copilot_seats / _usage / _credits             │
@@ -50,7 +50,7 @@ This guide defines how an enterprise **Cloud Solution Architect**, **FinOps Prac
 
 ---
 
-## 2. Source 1: Microsoft Cost Management — FOCUS 1.2-Preview Export
+## 2. Source 1: Microsoft Cost Management - FOCUS 1.2-Preview Export
 
 ### Why FOCUS 1.2 Is Mandatory
 FOCUS (FinOps Open Cost and Usage Specification) combines **Actual (Billed)** and **Amortized (Effective)** costs in a single row, includes **ListCost** and **ContractedCost** natively, and exposes commitment utilization (`CommitmentDiscountStatus = 'Used' | 'Unused'`) for **Azure OpenAI PTU Reservations** and **Copilot Credit Pre-Purchase Plans (P3)**.
@@ -91,7 +91,7 @@ FOCUS (FinOps Open Cost and Usage Specification) combines **Actual (Billed)** an
 ## 3. Source 2: Azure API Management (APIM) AI Gateway
 
 ### Why APIM AI Gateway Is Required
-Azure Cost Management (FOCUS) and Azure Monitor metrics have **zero caller identity** — they only know which Azure OpenAI resource was billed. Routing all LLM and agent traffic through **Azure API Management (Standard v2 / Premium v2)** with Entra JWT validation and `llm-emit-token-metric` is the **only way** to attribute tokens and FOCUS dollars to specific users, service principals, and agents.
+Azure Cost Management (FOCUS) and Azure Monitor metrics have **zero caller identity** - they only know which Azure OpenAI resource was billed. Routing all LLM and agent traffic through **Azure API Management (Standard v2 / Premium v2)** with Entra JWT validation and `llm-emit-token-metric` is the **only way** to attribute tokens and FOCUS dollars to specific users, service principals, and agents.
 
 ### Production APIM Policy XML (`inbound` / `outbound`)
 Apply this policy on your APIM AI Gateway APIs fronting Azure AI Foundry / Azure OpenAI:
@@ -158,12 +158,12 @@ In Silver (`10_conform_usage.py` / `build_data.py`), we compare each Azure OpenA
 
 ### Required Entra App Registration Permissions (Microsoft Graph)
 Create an Entra Service Principal for the Fabric ingestion pipeline with the following **Application** or **Delegated** permissions (Admin Consent required):
-- `Reports.Read.All` & `ReportSettings.ReadWrite.All` — Calls `GET https://graph.microsoft.com/beta/reports/getMicrosoft365CopilotUsageUserDetail(period='D28')` (note: v2 requires `D28`, not `D30`)
-- `Directory.Read.All`, `Organization.Read.All`, & `User.Read.All` — Calls `GET /v1.0/subscribedSkus` and `GET /v1.0/users?$select=id,userPrincipalName,displayName,department,assignedLicenses`
-- `CopilotPackages.Read.All` — Calls `GET https://graph.microsoft.com/v1.0/copilot/admin/catalog/packages` and `GET /v1.0/copilot/admin/catalog/packages/{id}` (live Agent 365 Catalog & Package Detail API, returning `activeUsers`, `totalSessions`, `ownerId`, `agentIdentityId`, and `elementDetails` including `SourceIds.AzureResourceId`)
-- `AgentIdentity.Read.All` & `AgentIdentityBlueprint.Read.All` — Calls `GET https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity` and `GET /beta/applications/microsoft.graph.agentIdentityBlueprint`
-- `IdentityRiskyAgent.Read.All` — Calls `GET https://graph.microsoft.com/beta/identityProtection/riskyAgents`
-- *(Optional Phase 2)* `AiEnterpriseInteraction.Read.All` — Calls `GET /v1.0/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions`
+- `Reports.Read.All` & `ReportSettings.ReadWrite.All` - Calls `GET https://graph.microsoft.com/beta/reports/getMicrosoft365CopilotUsageUserDetail(period='D28')` (note: v2 requires `D28`, not `D30`)
+- `Directory.Read.All`, `Organization.Read.All`, & `User.Read.All` - Calls `GET /v1.0/subscribedSkus` and `GET /v1.0/users?$select=id,userPrincipalName,displayName,department,assignedLicenses`
+- `CopilotPackages.Read.All` - Calls `GET https://graph.microsoft.com/v1.0/copilot/admin/catalog/packages` and `GET /v1.0/copilot/admin/catalog/packages/{id}` (live Agent 365 Catalog & Package Detail API, returning `activeUsers`, `totalSessions`, `ownerId`, `agentIdentityId`, and `elementDetails` including `SourceIds.AzureResourceId`)
+- `AgentIdentity.Read.All` & `AgentIdentityBlueprint.Read.All` - Calls `GET https://graph.microsoft.com/beta/servicePrincipals/microsoft.graph.agentIdentity` and `GET /beta/applications/microsoft.graph.agentIdentityBlueprint`
+- `IdentityRiskyAgent.Read.All` - Calls `GET https://graph.microsoft.com/beta/identityProtection/riskyAgents`
+- *(Optional Phase 2)* `AiEnterpriseInteraction.Read.All` - Calls `GET /v1.0/copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions`
 
 ### Critical Tenant Admin Setting (Unmasking User Principal Names)
 By default, Microsoft 365 Admin Center anonymizes `User Principal Name` in usage and Agent 365 active-user exports (`is_identity_resolved = 0` in `fact_agent_activity`).
@@ -172,7 +172,7 @@ To enable per-user attribution and idle-license reclamation (either in the UI or
 - **Via UI:** Go to **Microsoft 365 admin center** (`https://admin.microsoft.com`) → **Settings** → **Org settings** → **Services** → **Reports** → Uncheck *"Display concealed user, group, and site names in all reports"*.
 
 ### Agent 365 Registry & Spend Attribution (100% Live Graph API)
-`platform/fabric/extract_m365_graph.py` automatically queries `GET /v1.0/copilot/admin/catalog/packages`, enriches non-third-party packages via `GET /v1.0/copilot/admin/catalog/packages/{id}`, and queries `GET /beta/servicePrincipals/microsoft.graph.agentIdentity` to write `bronze_agent365_agents.csv` and `bronze_entra_agent_identities.csv` directly into `platform/fabric/bronze_real/` — no manual CSV export required!
+`platform/fabric/extract_m365_graph.py` automatically queries `GET /v1.0/copilot/admin/catalog/packages`, enriches non-third-party packages via `GET /v1.0/copilot/admin/catalog/packages/{id}`, and queries `GET /beta/servicePrincipals/microsoft.graph.agentIdentity` to write `bronze_agent365_agents.csv` and `bronze_entra_agent_identities.csv` directly into `platform/fabric/bronze_real/` - no manual CSV export required!
 - **How Agent 365 Connects to Spend (`rel_usage_agent`):**
   Agent 365 itself does not expose dollar cost per agent, but `GET /v1.0/copilot/admin/catalog/packages/{id}` exposes `elementDetails` (`AgentMetadatas` & `Bots`) which we link to `fact_ai_usage` via three deterministic bridges:
   1. **Direct Azure AI Foundry Resource Link (`foundry_resource_id`):** Extracted from `elementDetails -> AgentMetadatas -> SourceIds.AzureResourceId` (`/subscriptions/.../Microsoft.CognitiveServices/accounts/.../projects/.../agents/...`), joining directly to Azure Cost Management FOCUS `ResourceId`.
@@ -239,9 +239,9 @@ python platform/fabric/extract_real_bronze.py --i-understand-this-is-real-tenant
 python platform/fabric/extract_m365_graph.py --i-understand-this-is-real-tenant-data
 ```
 On first run, `extract_real_bronze.py` automatically seeds three customer-editable reference CSVs in `platform/fabric/bronze_real/` (and preserves your edits on subsequent runs):
-- `bronze_ref_business_hierarchy.csv` — seeded from your live Entra `department` values (`BU-<DEPT>`). Add your monthly budgets (`monthly_budget_usd`) and executive owners.
-- `bronze_ref_rate_card.csv` — seeded with Microsoft & GitHub published list prices. Overwrite `unit_price_usd` with your EA/MCA contract rates.
-- `bronze_ref_persona_map.csv` — maps your Entra `department` / team names to the 5 AI FinOps personas (`PERS-KNOW`, `PERS-MAKER`, `PERS-DEV`, `PERS-AIDS`, `PERS-PLAT`) without editing PySpark code.
+- `bronze_ref_business_hierarchy.csv` - seeded from your live Entra `department` values (`BU-<DEPT>`). Add your monthly budgets (`monthly_budget_usd`) and executive owners.
+- `bronze_ref_rate_card.csv` - seeded with Microsoft & GitHub published list prices. Overwrite `unit_price_usd` with your EA/MCA contract rates.
+- `bronze_ref_persona_map.csv` - maps your Entra `department` / team names to the 5 AI FinOps personas (`PERS-KNOW`, `PERS-MAKER`, `PERS-DEV`, `PERS-AIDS`, `PERS-PLAT`) without editing PySpark code.
 
 ### 7.3 Deploying in `--real-only` Mode
 Pass `--real-only` to `platform/deploy/fabric_deploy.py` to skip the mock lakehouse (`00_load_bronze_csv`) and run the Medallion pipeline exclusively against `bronze_real`:

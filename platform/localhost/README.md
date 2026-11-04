@@ -1,10 +1,10 @@
-# AI FinOps — Local Demo (no Fabric / no Power BI license)
+# AI FinOps - Local Demo (no Fabric / no Power BI license)
 
 A self-contained mock-up of the **deployed** Fabric + Power BI end result, runnable
 entirely on `localhost`. Zero external dependencies (Python stdlib only). All data is
 **MOCK**. The app reads from the portable data store `platform/data-store/finops.db`
 (Bronze + Gold + catalog) when present, and falls back to `AIFinOps.SemanticModel/data/*.csv`
-(the Gold star schema) otherwise — so the BI dashboards and the AI layer read from the
+(the Gold star schema) otherwise - so the BI dashboards and the AI layer read from the
 **same source** the Fabric push (`load_bronze.py`) uses.
 
 ## Run
@@ -34,7 +34,7 @@ Five **persona dashboards** + a working **AI insight layer**:
 
 ## The AI layer
 
-The **Ask AI** tab mocks Fabric Copilot / semantic-model Q&A — but runs 100% locally.
+The **Ask AI** tab mocks Fabric Copilot / semantic-model Q&A - but runs 100% locally.
 Type a question (or click a suggestion). It routes intent → parameterized SQL over
 `fact_ai_usage` + dims, and returns the **answer**, the **SQL it ran** (auditable), and
 the **evidence rows**. Handles: business-unit ranking, idle licenses, cost by model /

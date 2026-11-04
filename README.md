@@ -1,4 +1,4 @@
-# AI FinOps & Tokenomics — FOCUS 1.2 & Multi-Platform Power BI Accelerator
+# AI FinOps & Tokenomics - FOCUS 1.2 & Multi-Platform Power BI Accelerator
 
 A working Power BI Project (PBIP) and Microsoft Fabric Medallion pipeline delivering a unified **FOCUS 1.2-native** FinOps & Tokenomics view across **all Azure AI Services** (**Azure AI Foundry / Azure OpenAI PAYG & PTUs**, **Document Intelligence**, **Speech**, **Content Safety**, **Azure Machine Learning**, and **Supporting AI Infrastructure** like **AI Search**, **APIM AI Gateway**, **Cosmos DB**, **Managed Redis**, and **Fabric Capacity**), plus **Microsoft 365 Copilot**, **M365 Copilot Cowork / Work IQ**, **Microsoft Copilot Studio**, **GitHub Copilot Enterprise**, and **Agent 365 Governance**.
 
@@ -8,7 +8,9 @@ Real vs. modelled provenance is a **first-class column in the model** (`dim_plat
 > See **[docs/CUSTOMER-IMPLEMENTATION-GUIDE.md](docs/CUSTOMER-IMPLEMENTATION-GUIDE.md)** for the complete production blueprint, APIM XML policies, Graph/GitHub scopes, and FOCUS 1.2 column mappings.
 >
 > **Want the runnable demo (persona dashboards + AI Q&A layer, no Fabric/license)?**
-> See **[RUNBOOK.md](RUNBOOK.md)** — clone, run two commands, open http://localhost:8080.
+> See **[RUNBOOK.md](RUNBOOK.md)** - clone, run two commands, open http://localhost:8080.
+
+![Spend & FOCUS Overview](docs/images/report-spend-overview.png)
 
 ---
 
@@ -17,21 +19,21 @@ Real vs. modelled provenance is a **first-class column in the model** (`dim_plat
 ```bash
 git clone https://github.com/alipouw13/ai-finops-powerbi.git
 cd ai-finops-powerbi
-python3 platform/fabric/gen_bronze_data.py   # regenerate FOCUS 1.2 & multi-platform Bronze CSVs
-python3 build_data.py                        # conform Bronze -> 16 Gold star-schema CSVs (0 orphans, tied-out)
-python3 build_pbip.py                        # regenerate TMDL semantic model (16 tables, 25 relationships, 80 measures)
-python3 build_report.py                      # regenerate all 13 Power BI report pages
+python3 platform/fabric/gen_bronze_data.py              # regenerate FOCUS 1.2 & multi-platform Bronze CSVs
+python3 build_data.py                                   # conform Bronze -> 17 Gold star-schema CSVs (0 orphans, tied-out)
+python3 build_pbip.py                                   # regenerate TMDL semantic model (17 tables, 23 relationships, 85 measures)
+python3 platform/validate/build_report_directlake.py    # regenerate the 11-page, 133-visual FinOps report
 ```
 
-1. Open `AIFinOps.pbip` in **Power BI Desktop** (Dec 2023+, with *Preview → Power BI Project* on).
-2. **Transform data → Manage Parameters → `DataFolder`** — defaults automatically to your local `AIFinOps.SemanticModel\data\` folder.
+1. Open `AIFinOps.pbip` in **Power BI Desktop** (Dec 2023+, with *Preview -> Power BI Project* on).
+2. **Transform data -> Manage Parameters -> `DataFolder`** - defaults automatically to your local `AIFinOps.SemanticModel\data\` folder.
 3. **Refresh.**
 
-> The semantic model is the durable artifact — **16 tables, 25 relationships, 80 DAX measures, and 13 report pages**.
+> The semantic model is the durable artifact - **17 tables, 23 relationships, 85 DAX measures, and 11 report pages (133 visuals)**.
 
 ---
 
-## Data provenance — read this before demoing
+## Data provenance - read this before demoing
 
 | Platform (`dim_platform`) | Billing & Telemetry Source | Status in Repo |
 |---|---|---|
@@ -45,7 +47,7 @@ python3 build_report.py                      # regenerate all 13 Power BI report
 | **Microsoft Copilot Studio** (`CopilotStudio`) | Dataverse `msdyn_aievents` + FOCUS P3 Commit & PAYG meters | ⚠️ **MOCK** (Models Prepaid Pack vs P3 Commit vs PAYG, M365 zero-rating & BYOM exclusion) |
 | **GitHub Copilot Enterprise** (`GitHubCopilot`) | REST `/copilot/billing/seats`, `/settings/billing/usage`, `/copilot/metrics` | ⚠️ **MOCK** (Seats + Premium Request overages w/ 13× Code Review multiplier) |
 
-### Live M365 source check — 2026-10-23
+### Live M365 source check - 2026-10-23
 
 A read-only check of the selected demo tenant found **5 enabled Microsoft 365
 Copilot seats, 2 assigned, and 3 unassigned**. The signed-in admin's Copilot
@@ -79,7 +81,7 @@ automatically visible in Power BI.
 The Foundry rows come from the sibling
 [`ai-gateway-apim-finops`](https://github.com/natesanshreyas/ai-gateway-apim-finops) gateway:
 Entra JWT → claims (`cc:`, `bu:`) → APIM policy → DCR → Log Analytics. That gateway is the
-**only** way to get per-user Foundry attribution — Azure Monitor's token metrics have no
+**only** way to get per-user Foundry attribution - Azure Monitor's token metrics have no
 identity dimension at all.
 
 All real rows land on `2026-08-07` (one load-test day). Mocked platforms span 60 days so the
@@ -98,7 +100,7 @@ trend visuals are usable. Run `scripts/traffic.py` in the gateway repo for more 
             dim_business_unit ──┤
               dim_application ──┤
               dim_environment ──┘
-                                     dim_rate_card  (disconnected — the input)
+                                     dim_rate_card  (disconnected - the input)
 ```
 
 **Grain:** one row per `usage_date × platform × identity × model × unit_type`.
@@ -110,7 +112,7 @@ paths). They unlock *spend by business unit / application / environment* and the
 CFO, App-Owner and Optimization personas. `dim_identity` carries a universal
 `identity_class` (Human · ServicePrincipal · ManagedIdentity · Agent · Application)
 because not every AI request maps to a person. Budgets, criticality and SLA tiers
-on these dims are **MOCK** (`is_mock` / `is_mock_budget` columns) — overwrite with
+on these dims are **MOCK** (`is_mock` / `is_mock_budget` columns) - overwrite with
 customer values. Regenerate keys with `python3 build_dimensions.py` (additive; reads
 the CSVs as source of truth, never regenerates the model).
 
@@ -125,24 +127,24 @@ negotiated rates), `Forecast Cost (EOM)`, `Forecast Cost (next 30d, net)`,
 (direct + pro-rata unallocated), `Monthly Budget`, `Budget Variance`, `Budget Variance %`.
 These answer actual / discounted / forecast / chargeback for the CFO persona.
 
-### Pages (13 Report Pages)
-1. **1 · FOCUS & FinOps Executive Overview** — FOCUS List → Contracted → Effective waterfall, FinOps Effective Savings Rate (`ESR %`), Billed vs Modelled `Cost Confidence %`, Actionable Waste
-2. **2 · Foundry, APIM & Azure AI Tokenomics** — LLM tokens, prompt cache hit %, $/1K tokens, PTU reservation spend, PTU & P3 utilization %, APIM Gateway coverage %, and full Azure AI Service & Supporting Infra TCO breakdown
-3. **3 · Waste, PTU & Seat Optimization** — Idle Copilot seats (28d), Unused PTU reservation capacity (`CommitmentDiscountStatus = 'Unused'`), Bypassed APIM Gateway spend, and per-principal reclamation table
-4. **4 · Rate Card & FOCUS Discounts** — `dim_rate_card` customer input + EA/MCA Negotiated Discount Savings vs PTU/P3 Commitment Discount Savings
-5. **5 · CFO — Finance & Chargeback** — FOCUS Effective Cost, ESR %, EOM Forecast, Budget Variance, and full BU Chargeback (Direct + Pro-Rata Unallocated)
-6. **6 · Governance & Gateway Control** — APIM Gateway routing coverage %, Bypassed Gateway shadow-AI spend, Supporting Infra % of TCO, Agent Attributed spend, and Human vs SP vs Agent mix
-7. **7 · Engineering — APIM & Model SLOs** — Token consumption trend, $/1K tokens across OpenAI/MaaS/Reasoning models, P95/avg latency, and error rates
-8. **8 · Application & RAG TCO Owner** — Total Application TCO (combining LLM tokens + AI Search + Cosmos DB + Redis Semantic Cache + DocIntel), accountable owners, and MoM velocity
-9. **9 · License & Credit Optimization** — Reclaimable seat waste by BU and Copilot Credit breakdown (`CreditPack` vs `Committed P3` vs `Standard PAYG` vs `ZeroRated`)
-10. **10 · Extractable Data Spectrum** — Full catalogue of every AI cost & telemetry signal across FOCUS 1.2, APIM, Agent 365, M365, Studio, and GitHub (`REAL` / `AVAILABLE` / `MOCK`)
-11. **11 · User Cost Allocation** — `fact_user_cost_allocation` re-keying 100% of AI spend to human accountability (`DIRECT` vs `OWNER` vs `UNALLOCATED`)
-12. **12 · Agent 365 Governance & Spend** — 393 real Agent 365 registry agents (`Owner assigned`, `Microsoft-managed`, `Publisher-managed`, `Unowned tenant agent`) linked directly to attributed AI spend
-13. **13 · Persona Coverage** — Spend and primary vs secondary tool affinity across the 7 enterprise stakeholder personas
+### Pages (11 Report Pages, 133 Visuals)
+1. **1 - Spend & FOCUS Overview** - FOCUS Effective Cost vs List/Rate Card Cost, Total FOCUS Savings, FinOps Effective Savings Rate (`ESR %`), Billed vs Modelled `Cost Confidence %`, daily spend trend, and Platform & FOCUS capability matrix
+2. **2 - Engineering Tokenomics** - LLM tokens, prompt cache hit %, $/1K tokens, PTU reservation spend, APIM Gateway coverage %, P95/avg latency, and error rates across OpenAI/MaaS/Reasoning models
+3. **3 - Licence Seats, Waste & Utilisation** - Assigned vs active M365 Copilot & GitHub Copilot seats, 28-day idle seat waste, M365 Copilot Cowork add-on credits, and per-principal reclamation table
+4. **4 - Rate Card & FOCUS Discounts** - `dim_rate_card` customer input + EA/MCA Negotiated Discount Savings vs PTU/P3 Commitment Discount Savings
+5. **5 - CFO Finance** - FOCUS Effective Cost, ESR %, EOM Forecast, Budget Variance, and full Business Unit Chargeback (Direct + Pro-Rata Unallocated)
+6. **6 - Governance** - APIM Gateway routing coverage %, Bypassed Gateway shadow-AI spend, Supporting Infra % of TCO, data source provenance (`REAL` vs `MOCK/REAL`), and Human vs SP vs Agent mix
+7. **7 - Application & Infra TCO** - Total Application TCO (combining LLM tokens + AI Search + Cosmos DB + Redis Semantic Cache + Document Intelligence + Fabric Capacity), accountable owners, and MoM velocity
+8. **8 - Extractable Data Spectrum** - Full catalogue of every AI cost & telemetry signal across FOCUS 1.2, APIM, Agent 365, M365, Studio, and GitHub (`REAL` / `AVAILABLE` / `MOCK`)
+9. **9 - User Cost Allocation** - `fact_user_cost_allocation` re-keying 100% of AI spend to human accountability (`DIRECT` vs `OWNER` vs `UNALLOCATED`)
+10. **10 - Agent 365 Governance** - 432 live Agent 365 catalog packages (`Owner assigned`, `Microsoft-managed`, `Publisher-managed`, `Unowned tenant agent`) and 36 Entra Agent Identities linked to AI spend
+11. **11 - Persona Coverage** - Spend and primary vs secondary tool affinity across the 7 enterprise stakeholder personas
+
+![Star Schema](docs/images/model-star-schema.png)
 
 ---
 
-## Cost rationalization — the rationale
+## Cost rationalization - the rationale
 
 ### 1. There is no common unit, so cost is the only conformed measure
 
@@ -155,7 +157,7 @@ Four platforms, four incompatible billing units, and **only one exposes tokens**
 | Copilot Studio | Copilot Credits | ⚠️ partial¹ | ❌ |
 | M365 Copilot | seats | ❌ | ❌ |
 
-¹ Copilot Studio's *Text and generative AI tools* meter is token-denominated — 0.1 / 1.5 / 10
+¹ Copilot Studio's *Text and generative AI tools* meter is token-denominated - 0.1 / 1.5 / 10
 credits per 1K tokens for basic / standard / premium. Everything else is per-event.
 
 A literal cross-platform "tokenomics" dashboard **cannot be built.** Normalising on **USD**
@@ -165,11 +167,11 @@ carries `quantity` + `unit_type` rather than a token column.
 ### 2. Fixed vs variable matters more than the total
 
 ```
-FIXED — already on your invoice, telemetry adds nothing
+FIXED - already on your invoice, telemetry adds nothing
   M365 Copilot seats      × $30/user/mo   ← does not move with usage
   GitHub Copilot seats    × $39/user/mo   ← does not move with usage
 
-VARIABLE — the only half FinOps can influence
+VARIABLE - the only half FinOps can influence
   Foundry tokens · GitHub premium requests · Copilot Studio credits
 ```
 
@@ -186,7 +188,7 @@ Nobody pays list. Foundry has PTU vs PAYG vs reservations vs EA/MCA discounts. G
 volume tiers and included allowances. Copilot Studio has 25k packs ($0.008/credit) vs PAYG
 ($0.01) vs CCCU prepurchase. M365 Copilot is whatever your EA says.
 
-So **every price lives in exactly one place** — `dim_rate_card` — and nowhere else in the
+So **every price lives in exactly one place** - `dim_rate_card` - and nowhere else in the
 model. Swapping a customer's real rates is editing one CSV. Ship the PoC with list prices,
 let them overwrite. Microsoft publishes no price API for M365 Copilot or Copilot Studio,
 so this is manual by necessity, not by design.
@@ -200,13 +202,13 @@ first time Finance reconciles it against an invoice.
 
 ### 5. The real money is waste, not unit price
 
-`Idle Licensed Users` — paid seats with zero activity in 28 days — needs **no cost telemetry
+`Idle Licensed Users` - paid seats with zero activity in 28 days - needs **no cost telemetry
 at all**, and at $30/seat, 200 idle users is $6,000/month recoverable. Higher ROI than any
 token optimisation, and it works on the platform with the *worst* telemetry.
 
 ### 6. Don't double-count bring-your-own-model
 
-Copilot Studio agents on your own Foundry deployment are billed **separately** — Microsoft's
+Copilot Studio agents on your own Foundry deployment are billed **separately** - Microsoft's
 rates *"exclude bring-your-own-model configurations, including Azure Foundry models."* That
 usage appears in Foundry cost, not credits. Summing both naively double-counts.
 
@@ -214,7 +216,7 @@ usage appears in Foundry cost, not credits. Summing both naively double-counts.
 
 M365 Copilot–licensed users are **zero-rated** for classic answers, generative answers, agent
 actions, tenant graph grounding, and agent flows. Identical activity costs 0 or 12 credits
-depending purely on the invoker's licence. `msdyn_creditconsumed` is already net of this —
+depending purely on the invoker's licence. `msdyn_creditconsumed` is already net of this  - 
 **use it directly.** The rate table is for forecasting only.
 
 ---
@@ -224,17 +226,17 @@ depending purely on the invoker's licence. `msdyn_creditconsumed` is already net
 | Platform | What you need |
 |---|---|
 | **Foundry** | Already live. More days: run `scripts/traffic.py` in the gateway repo. |
-| **Copilot Studio** | Publish an agent, have a few conversations. Credits land in `msdyn_aievents` within hours. Dataverse read access already works — no new credentials. |
+| **Copilot Studio** | Publish an agent, have a few conversations. Credits land in `msdyn_aievents` within hours. Dataverse read access already works - no new credentials. |
 | **GitHub Copilot** | Copilot **Business** ($19/user/mo) or Enterprise on the org, ≥1 seat, and the **"Copilot usage metrics" policy enabled**. Premium-request USD additionally needs GitHub **Enterprise Cloud** + a classic PAT with `admin:enterprise`. |
 | **M365 Copilot** | An M365 Copilot SKU in the tenant, plus an app registration with **`Reports.Read.All` (Application)** and admin consent. Also **disable** *"Display concealed user names"* in M365 admin → Settings → Org settings → Reports, or UPNs arrive hashed and attribution is impossible. |
 
 ### Known limits
-- Foundry token metrics carry **no user identity** — the APIM gateway is the only path
+- Foundry token metrics carry **no user identity** - the APIM gateway is the only path
 - M365 Copilot: Global cloud only (no GCC High / DoD / 21Vianet)
 - GitHub metrics: no data before 2025-10-10, 1-year retention; premium requests 24 months
 - `msdyn_aievent` is **per-environment**, not tenant-wide
 - Cost Management month-to-date exports **replace, never append**
-- Azure Monitor metrics retention is 93 days — export or lose history
+- Azure Monitor metrics retention is 93 days - export or lose history
 
 ---
 

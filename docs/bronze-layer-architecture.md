@@ -1,4 +1,4 @@
-# Bronze Layer Architecture — AI FinOps Accelerator (Fabric Medallion)
+# Bronze Layer Architecture - AI FinOps Accelerator (Fabric Medallion)
 
 > **Scope:** Data acquisition and Bronze design across all AI cost/usage sources.
 > Silver/Gold normalization is referenced but not the focus. All schemas assume
@@ -11,7 +11,7 @@
 ## 0. Design principles (Bronze)
 
 1. **Land raw, transform never (in Bronze).** Store the source payload shape as-is,
-   plus ingestion metadata. No joins, no identity resolution — that is Silver's job.
+   plus ingestion metadata. No joins, no identity resolution - that is Silver's job.
 2. **Append-only + historical retention.** Every pull is stamped and kept; Bronze is
    the audit record and the replay source.
 3. **One Bronze table per source *endpoint*, not per concept.** A concept like "GitHub
@@ -42,7 +42,7 @@
 |---|---|
 | **APIs / sources** | Dataverse table **`conversationtranscript`** (per-conversation activity JSON); Copilot Studio Analytics; **Power Platform Admin Center** capacity/licensing; **Azure Cost Management** meter "Copilot Studio…" for PAYG. |
 | **Telemetry** | Conversations, sessions, messages, agent (bot) actions, outcomes, escalations, per-activity type. |
-| **Cost data** | **Copilot Credits consumption** — pure variable. Rate by action type (classic answer=1, generative=2, agent action=3+). Prepaid **Credit packs** (pooled tenant-wide) or **PAYG meter** (real $ in Azure Cost Mgmt). No seats. |
+| **Cost data** | **Copilot Credits consumption** - pure variable. Rate by action type (classic answer=1, generative=2, agent action=3+). Prepaid **Credit packs** (pooled tenant-wide) or **PAYG meter** (real $ in Azure Cost Mgmt). No seats. |
 | **Usage data** | Credits by agent, action type, conversation volume, session length. |
 | **Identity** | **Bot/agent id** (non-human) + end-user id *if* authenticated channel; often anonymous/no user. |
 | **Dimensions** | Environment, agent (bot) name, channel, action type. |
@@ -66,11 +66,11 @@
 |---|---|
 | **APIs** | **Cost:** `Microsoft.Consumption/usageDetails` (or Cost Management Query API). **Usage:** `microsoft.insights/metrics` on the resource. **Logs:** Diagnostic settings → Log Analytics (request/response, `AzureDiagnostics`). |
 | **Telemetry** | Prompt/completion/total tokens, requests, latency, TPM/RPM, error codes, model/deployment name, streaming. |
-| **Cost data** | **Real $** from Azure Cost Management (per meter, per resource, per day) — the authoritative cost source in the whole platform. |
+| **Cost data** | **Real $** from Azure Cost Management (per meter, per resource, per day) - the authoritative cost source in the whole platform. |
 | **Usage data** | Tokens (input/output/cached), requests, latency, throttles by deployment. |
-| **Identity** | **Resource + (optionally) caller** — typically a **Service Principal / Managed Identity**, or an APIM subscription key. Often **no human**. |
+| **Identity** | **Resource + (optionally) caller** - typically a **Service Principal / Managed Identity**, or an APIM subscription key. Often **no human**. |
 | **Dimensions** | Subscription, resource group, resource, deployment, model, region, **resource tags** (app/BU/env). |
-| **Limitations** | Cost is per-resource/meter, **not per-user** — attribution needs tags or APIM. Metrics ≠ cost granularity; token-level user attribution requires the **APIM AI gateway** (emit-token-metric). |
+| **Limitations** | Cost is per-resource/meter, **not per-user** - attribution needs tags or APIM. Metrics ≠ cost granularity; token-level user attribution requires the **APIM AI gateway** (emit-token-metric). |
 
 ### 1.5 Azure Machine Learning
 
@@ -90,7 +90,7 @@
 |---|---|
 | **APIs / sources** | **Fabric Capacity Metrics app** (semantic model behind it); Azure Monitor metrics for `Microsoft.Fabric/capacities` (CU utilization, throttling); Cost Management for capacity $; Fabric Admin APIs (workspace/item inventory, activity events). |
 | **Telemetry** | Capacity Units (CU) consumed by workload (Warehouse, Spark, Pipelines, **Copilot**, Power BI), interactive vs background, throttling/overload, smoothing. |
-| **Cost data** | **Real $** — reserved/PAYG capacity cost (F-SKU) from Cost Management; CU→$ via SKU rate. **Copilot-in-Fabric compute is a CU line** here. |
+| **Cost data** | **Real $** - reserved/PAYG capacity cost (F-SKU) from Cost Management; CU→$ via SKU rate. **Copilot-in-Fabric compute is a CU line** here. |
 | **Usage data** | CU-seconds by operation/user/item, refresh counts, query volume. |
 | **Identity** | Executing user/SP (Entra), by workspace/item. |
 | **Dimensions** | Capacity, workspace, item, operation type, workload. |
@@ -136,7 +136,7 @@
   session_id, created_datetime, body_preview, attachments_count, mentions
 - **Descriptions:** interaction-level depth for adoption/engagement analytics.
 
-### bronze_m365_copilot_credits  *(NEW — see §3)*
+### bronze_m365_copilot_credits  *(NEW - see §3)*
 - **PK:** `usage_date + consumer_id + meter_id`
 - **Grain:** daily credit consumption per consumer (agent/user)
 - **Refresh:** daily
@@ -194,7 +194,7 @@
 - **Permissions:** `manage_billing:copilot` / `read:org`
 - **Columns:** metric_date, total_active_users, total_engaged_users, editor,
   language, model, suggestions_count, acceptances_count, chat_count
-- **Descriptions:** engagement/ROI (acceptance rates) — no cost.
+- **Descriptions:** engagement/ROI (acceptance rates) - no cost.
 
 ### bronze_azure_ai_cost
 - **PK:** `usage_date + resource_id + meter_id`
@@ -228,7 +228,7 @@
   duration_ms, user_or_sp_id
 - **Descriptions:** per-request attribution (the **only** path to per-user token cost).
 
-### bronze_azureml_cost  *(NEW — see §3)*
+### bronze_azureml_cost  *(NEW - see §3)*
 - **PK:** `usage_date + resource_id + meter_id`
 - **Grain:** daily cost per AML resource/meter
 - **Refresh:** daily
@@ -238,7 +238,7 @@
   quantity, cost_usd, tags_json
 - **Descriptions:** AML compute/endpoint **real $**.
 
-### bronze_azureml_usage  *(NEW — see §3, Phase 2)*
+### bronze_azureml_usage  *(NEW - see §3, Phase 2)*
 - **PK:** `event_time + workspace_id + entity_id`
 - **Grain:** per job/endpoint event
 - **Refresh:** hourly
@@ -248,7 +248,7 @@
   deployment_id, node_hours, request_count, latency_ms, gpu_utilization, submitted_by
 - **Descriptions:** AML compute/endpoint usage for allocation.
 
-### bronze_fabric_capacity  *(NEW — see §3)*
+### bronze_fabric_capacity  *(NEW - see §3)*
 - **PK:** `usage_date + capacity_id + workspace_id + operation_type`
 - **Grain:** daily CU consumption per workspace/operation
 - **Refresh:** daily
@@ -269,7 +269,7 @@
 
 ### Reference / master-data collectors (non-telemetry, but Bronze-landed)
 
-### bronze_ref_identity_map  *(NEW — critical)*
+### bronze_ref_identity_map  *(NEW - critical)*
 - **PK:** `identity_key`
 - **Grain:** one row per resolved principal
 - **Refresh:** daily (Entra) / on-change
@@ -322,15 +322,15 @@ Current mock model has: `bronze_m365_usage`, `bronze_ghc_seats`,
 |---|---|---|---|
 | **M365 Copilot Credits** | ✅ Yes | The only **variable** M365 spend; without it, agent/PAYG cost is invisible | MVP |
 | **Copilot Cowork telemetry** | ✅ Yes | New agentic workload; consumes Credits; unattributed otherwise | Phase 2 (folds into Credits) |
-| **Copilot Autopilot telemetry** | ✅ Yes | Same — autonomous agent actions bill Credits | Phase 2 (folds into Credits) |
+| **Copilot Autopilot telemetry** | ✅ Yes | Same - autonomous agent actions bill Credits | Phase 2 (folds into Credits) |
 | **Fabric Capacity telemetry** | ✅ Yes | The platform **bills itself** (Copilot-in-Fabric = CU); needed for true TCO | MVP (cost) / Phase 2 (CU detail) |
 | **Azure ML telemetry** | ✅ Yes | Custom-model compute is real AI spend | Phase 2 (MVP if AML in scope) |
 | **Application inventory** | ✅ Yes | No attribution to app/BU without it | **MVP (blocker)** |
 | **Business hierarchy** | ✅ Yes | No chargeback/budget variance without it | **MVP (blocker)** |
 | **Agent inventory** | ✅ Yes | Non-human spend can't reach a BU without it | MVP |
-| **Identity map** | ✅ Yes | `github_login`↔UPN↔SP resolution — the core IP | **MVP (blocker)** |
+| **Identity map** | ✅ Yes | `github_login`↔UPN↔SP resolution - the core IP | **MVP (blocker)** |
 
-**Key insight:** Cowork, Autopilot, and M365 Credits are **not separate APIs** — they
+**Key insight:** Cowork, Autopilot, and M365 Credits are **not separate APIs** - they
 are **capabilities that consume Copilot Credits**, captured by one
 `bronze_m365_copilot_credits` collector with a `capability` column. Don't build three
 collectors; build one and dimension it.
@@ -363,13 +363,13 @@ collectors; build one and dimension it.
 | *(Phase 2)* bronze_azureml_usage | AML compute usage | Monitor/logs | time+ws+entity | job/endpoint | node_hours, request_count |
 | *(Phase 2)* bronze_fabric_capacity | CU detail (Copilot-in-Fabric) | Metrics app XMLA | date+capacity+ws+op | op/day | cu_seconds, workload |
 
-### MVP vs Phase 2 — what to load first
+### MVP vs Phase 2 - what to load first
 
-**MVP (load these 14 — proves the whole FinOps story end-to-end):**
+**MVP (load these 14 - proves the whole FinOps story end-to-end):**
 - All 4 platform **cost/seat/usage** feeds: m365 usage+seats+credits, studio credits,
   ghc seats+premium, azure_ai cost+metrics, fabric_capacity_cost.
 - **All 5 reference feeds** (identity_map, app_inventory, business_hierarchy,
-  agent_inventory, rate_card) — these are **hard blockers** for attribution and
+  agent_inventory, rate_card) - these are **hard blockers** for attribution and
   chargeback; without them Bronze is just disconnected numbers.
 
 > Rationale: MVP must answer "total AI spend, by BU, with idle-seat waste." That needs

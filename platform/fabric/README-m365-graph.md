@@ -1,4 +1,4 @@
-# REAL M365 collector — Microsoft Graph
+# REAL M365 collector - Microsoft Graph
 
 Two scripts turn the M365 slice from MOCK into a live connector, without ever
 relabelling modelled dollars as billed ones.
@@ -11,7 +11,7 @@ relabelling modelled dollars as billed ones.
 ```bash
 az login --tenant <tenant-id>
 
-# 1. see what Graph exposes for this tenant — writes nothing
+# 1. see what Graph exposes for this tenant - writes nothing
 python platform/fabric/extract_m365_graph.py --probe
 
 # 2. price the seats it found (or a hypothetical count)
@@ -28,11 +28,11 @@ tells you what Microsoft billed you for M365 Copilot. What you get is:
 |---|---|---|
 | Seat **counts** (purchased + assigned) | `subscribedSkus`, `users?$select=assignedLicenses` | **REAL** |
 | Seat **activity** (per-app last-activity dates) | `getMicrosoft365CopilotUsageUserDetail` (`copilotReportRoot`, `/copilot` segment) | **REAL** (needs `Reports.Read.All`) |
-| Seat **dollars** | `dim_rate_card` list price × seat count | **MODELLED** — `cost_is_estimated=TRUE` |
+| Seat **dollars** | `dim_rate_card` list price × seat count | **MODELLED** - `cost_is_estimated=TRUE` |
 
 That is why the M365 rows in the model always carry `cost_is_estimated=TRUE`.
 Load the customer's EA/MCA price sheet into `dim_rate_card` and the same code
-produces contract-accurate figures — the collector itself does not change.
+produces contract-accurate figures - the collector itself does not change.
 
 > The usage report now lives under the `/copilot` segment (`copilotReportRoot`);
 > `extract_m365_graph.py` calls `/copilot/reports/...` first and falls back to the
@@ -61,7 +61,7 @@ clearly labelled `HYPOTHETICAL`.
 | `/copilot/reports/getMicrosoft365CopilotUsageUserDetail` (falls back to `/beta/reports/...`) | `Reports.Read.All` | 403 |
 
 Seat entitlement and seat activity have **different permission floors**. A
-non-admin often gets the first two and not the third — the collector reports
+non-admin often gets the first two and not the third - the collector reports
 exactly which one failed rather than silently emitting zeros.
 
 > The usage report is **Graph beta only**. The v1.0 path returns
@@ -70,7 +70,7 @@ exactly which one failed rather than silently emitting zeros.
 ## Output safety
 
 REAL extracts are written to **`platform/fabric/bronze_real/`**, which is
-gitignored — deliberately separate from the committed MOCK `bronze_out/`.
+gitignored - deliberately separate from the committed MOCK `bronze_out/`.
 Writing also requires an explicit flag:
 
 ```bash

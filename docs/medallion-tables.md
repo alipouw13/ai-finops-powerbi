@@ -1,4 +1,4 @@
-# Medallion Table Inventory — what lives in Bronze, Silver, and Gold
+# Medallion Table Inventory - what lives in Bronze, Silver, and Gold
 
 Companion to `docs/extractable-fields.md` (field sources) and `docs/ARCHITECTURE.md`.
 This is the **concrete table list** for each layer, plus **column-level Gold schemas**
@@ -13,7 +13,7 @@ Flow: **Bronze** = one raw table per API/report feed (source-faithful) →
 
 ---
 
-## BRONZE — raw landing (one table per source feed, source fidelity preserved)
+## BRONZE - raw landing (one table per source feed, source fidelity preserved)
 
 Every Bronze table also carries ingestion metadata columns:
 `_source`, `_ingested_at`, `_watermark`, `_report_refresh_date`, `_raw_payload` (JSON where applicable).
@@ -56,7 +56,7 @@ Every Bronze table also carries ingestion metadata columns:
 | `bronze_studio_cost_usage` | Cost Management (PAYG meter) | meter × day | meterName, quantity, cost, resourceId |
 | `bronze_studio_appinsights` | App Insights (optional) | event | conversationId, activityId, botId, latency, dependency calls |
 
-### Reference / master data (customer inputs — mostly MOCK today)
+### Reference / master data (customer inputs - mostly MOCK today)
 | Bronze table | Source | Notable columns |
 |---|---|---|
 | `bronze_entra_users` | Graph `/users`, `/servicePrincipals` | id, UPN, displayName, type, department, manager |
@@ -66,7 +66,7 @@ Every Bronze table also carries ingestion metadata columns:
 
 ---
 
-## SILVER — conformed entities (the hard, high-value work)
+## SILVER - conformed entities (the hard, high-value work)
 
 Silver cleans, dedupes, resolves identity, normalizes taxonomy, and reconciles cost.
 These are the intermediate conformed tables that feed Gold.
@@ -85,13 +85,13 @@ These are the intermediate conformed tables that feed Gold.
 | `silver_usage_unified` | the 4 `silver_usage_*` | **union to one grain**: date × platform × identity × application × model × cost; nulls where a source's grain doesn't reach; adds `cost_is_estimated` (modelled vs billed) |
 | `silver_cost_reconciliation` | silver_usage_unified vs Cost Mgmt totals | modelled vs billed variance → drives `Cost Confidence %` |
 
-**Silver grain rule:** `silver_usage_unified` is the coarsest common denominator —
+**Silver grain rule:** `silver_usage_unified` is the coarsest common denominator  - 
 **daily**. Per-call detail stays in the Foundry table for engineering drill-down;
 everything rolls up to daily for the cross-platform fact.
 
 ---
 
-## GOLD — the star the Power BI model binds to (exact columns)
+## GOLD - the star the Power BI model binds to (exact columns)
 
 This is **already built** in the repo (`data/*.csv` + TMDL). Gold = `silver_usage_unified`
 projected into `fact_ai_usage` + conformed dimensions. Direct Lake (prod) or import (demo).
@@ -158,5 +158,5 @@ counts (Extractable Signals). These are the numbers the 10 report pages display.
 
 **Bottom line:** Bronze = ~24 raw feed tables (source-faithful, incremental, PII zone for
 content). Silver = ~11 conformed tables (identity + app + model + cost normalization, then
-one unified daily usage table). Gold = **1 fact + 10 dims** — the exact star already in this
+one unified daily usage table). Gold = **1 fact + 10 dims** - the exact star already in this
 repo, which the 10 Power BI pages and 42 measures consume.

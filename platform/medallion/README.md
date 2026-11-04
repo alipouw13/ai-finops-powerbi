@@ -1,10 +1,10 @@
-# Medallion pipeline — bronze → silver → gold
+# Medallion pipeline - bronze → silver → gold
 
 Reference implementation for landing the PoC's mock/real telemetry in Microsoft
 Fabric and materializing the exact 10-table star the semantic model reads. These
 are Fabric notebook scripts (PySpark); they are **not** wired into the PBIP, so
 they cannot affect whether `AIFinOps.pbip` opens. The CSVs + TMDL remain the
-source of truth — gold is written to *match* them, never to replace them.
+source of truth - gold is written to *match* them, never to replace them.
 
 ```
 landing (ADLS/OneLake)          BRONZE (Delta, append-only)        SILVER (conformed)          GOLD (star)
@@ -18,7 +18,7 @@ M365 / GitHub / Studio APIs ───► finops_bronze.{platform}_raw ───�
 
 | Layer | Rule | Why |
 |---|---|---|
-| **Bronze** | Raw, append-only, source columns preserved, partitioned by source/ingest day | Historical system of record; Cost-Management exports *replace* MTD, so append protects prior days. Azure Monitor metrics retention is 93 days — bronze is the durable copy. |
+| **Bronze** | Raw, append-only, source columns preserved, partitioned by source/ingest day | Historical system of record; Cost-Management exports *replace* MTD, so append protects prior days. Azure Monitor metrics retention is 93 days - bronze is the durable copy. |
 | **Silver** | Conform to one grain; USD is the only common measure; `unit_type` is a dimension | Four platforms, four incompatible billing units, only Foundry exposes tokens. USD is the sole thing that reconciles. Identity/app/model normalization lives here. |
 | **Gold** | Emit the star under a fixed **column contract** identical to the CSV headers | The semantic model's TMDL partition casts are keyed to those exact columns; gold asserts the contract so a schema drift fails loudly, not silently. |
 

@@ -1,7 +1,7 @@
-# Extractable Data by Product — AI FinOps
+# Extractable Data by Product - AI FinOps
 
 Every field that can be pulled from each AI product/service, for FinOps analytics.
-Billing model is intentionally omitted here — this is the **data surface** itself.
+Billing model is intentionally omitted here - this is the **data surface** itself.
 All of this is loaded into a portable database by
 `platform/data-store/build_store.py` (table `extractable_data_catalog`).
 
@@ -84,7 +84,7 @@ Foundry/Azure OpenAI · Copilot Cowork/Autopilot · Azure ML · Microsoft Fabric
 | credits_consumed | Copilot Credits | PPAC / Cost Mgmt | day |
 | action_count | Autonomous actions taken | agent telemetry | day |
 | cost_usd | $ from credits | Cost Mgmt | day |
-| (shares M365 identity/license fields) | — | Graph | user |
+| (shares M365 identity/license fields) | - | Graph | user |
 
 ## 6 · Azure ML
 | Field | What it is | Source | Grain |

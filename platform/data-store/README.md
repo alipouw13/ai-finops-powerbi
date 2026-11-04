@@ -12,9 +12,9 @@ a Fabric Lakehouse or Azure SQL when the tenant is unblocked.
 
 `build_store.py` loads two things into `finops.db`:
 
-1. **14 Bronze tables** — the raw per-platform telemetry from
+1. **14 Bronze tables** - the raw per-platform telemetry from
    `platform/fabric/bronze_out/*.csv` (~2,584 rows).
-2. **`extractable_data_catalog`** — a 74-row queryable metadata table listing
+2. **`extractable_data_catalog`** - a 74-row queryable metadata table listing
    every extractable field for all 7 products (product, category, field,
    description, source API, grain). This is the machine-readable companion to
    `docs/extractable-data-by-product.md`.

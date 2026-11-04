@@ -1,4 +1,4 @@
-# Fabric deployment — cost, unblock steps, and one-command deploy
+# Fabric deployment - cost, unblock steps, and one-command deploy
 
 This folder deploys the AI FinOps accelerator into **your** Microsoft Fabric
 tenant: a workspace, a lakehouse, the medallion notebooks (bronze→silver→gold),
@@ -9,7 +9,7 @@ and authenticates through the Azure CLI you already have (`az login`).
 
 ## 1. Check what your account can actually do
 
-Before anything else, run the read-only probe. It creates and changes nothing —
+Before anything else, run the read-only probe. It creates and changes nothing  - 
 it just reports whether your user is licensed, which capacities are active, and
 which workspaces you can write to:
 
@@ -21,11 +21,11 @@ python platform/validate/probe_fabric.py --workspace <name-or-guid>   # one work
 If it reports `licence : OK` and at least one active Fabric capacity, you are
 ready to deploy and can skip section 2.
 
-## 2. If you are blocked — 2 clicks, $0
+## 2. If you are blocked - 2 clicks, $0
 
 A user with **no Power BI / Fabric license** gets `UserNotLicensed` on every
 Fabric REST call, and a tenant with no capacity has nowhere to put a lakehouse.
-Neither is a code problem — both are fixed in **2 one-time browser clicks**.
+Neither is a code problem - both are fixed in **2 one-time browser clicks**.
 
 1. **Get a free Power BI license.** Open <https://app.fabric.microsoft.com> and
    sign in with your work account. This self-service-provisions a **free Power BI
@@ -41,17 +41,17 @@ python platform/deploy/fabric_deploy.py --steps preflight
 
 > If self-service trials are disabled by your tenant admin, ask an admin to
 > either enable trials or assign you a Pro license + an F-SKU capacity.
-> Note that a **Premium-Per-User (PPU) capacity cannot host a Lakehouse** — you
+> Note that a **Premium-Per-User (PPU) capacity cannot host a Lakehouse** - you
 > need a Trial (FT1) or an F-SKU.
 
-## 3. Cost — so you don't burn your account
+## 3. Cost - so you don't burn your account
 
 Fabric bills on **capacity compute time**, not per query. Storage in OneLake is
 trivial. Key numbers:
 
 | Option | Compute cost | Notes |
 |---|---|---|
-| **Fabric Trial (recommended)** | **$0 for 60 days** | ~F64 power. Perfect for the demo. Auto-expires — no runaway bill. |
+| **Fabric Trial (recommended)** | **$0 for 60 days** | ~F64 power. Perfect for the demo. Auto-expires - no runaway bill. |
 | **F2 (smallest paid)** | ~$0.36 / hr → **~$262/mo if left on 24×7** | Enough for this model. **Pause when idle** ⇒ $0. |
 | **F2 paused** | **$0 compute** | Pausing an F-SKU stops all compute billing; state is preserved. |
 | **OneLake storage** | ~$0.023 / GB / mo | This dataset is a few MB ⇒ effectively $0. |
@@ -183,24 +183,24 @@ layer's lakehouse, and `step_run` prints it automatically on failure.
 The deployer builds the **lakehouse + gold tables**. To publish the
 `AIFinOps.SemanticModel` + `AIFinOps.Report` on top, use either:
 
-- **(a) Fabric Git integration** — in the workspace, *Workspace settings ▸ Git
+- **(a) Fabric Git integration** - in the workspace, *Workspace settings ▸ Git
   integration*, connect this GitHub repo, and *Update from Git*. Fabric imports
   the PBIP items natively. Best for a repeatable, source-controlled customer
   accelerator.
-- **(b) Power BI Desktop Publish** — open `AIFinOps.pbip`, *Publish* to the
+- **(b) Power BI Desktop Publish** - open `AIFinOps.pbip`, *Publish* to the
   `AI FinOps Accelerator` workspace. Fastest for a one-off demo.
 
 Hand-crafting PBIP definition REST payloads is intentionally avoided (brittle);
 Git integration is the supported, durable path for the accelerator.
 
-### Deploying the Direct Lake model — reframe on every deploy
+### Deploying the Direct Lake model - reframe on every deploy
 
 For the live Direct Lake path (over the gold Lakehouse), the verified end-to-end
 sequence is:
 
 ```
 bronze upload  ->  10_silver_conform  ->  20_gold_star
-               ->  deploy_semantic_model.py   (now reframes — see below)
+               ->  deploy_semantic_model.py   (now reframes - see below)
                ->  deploy_report.py
 ```
 
@@ -211,12 +211,12 @@ no refresh" is true for *data* and false for *schema*: a **newly declared column
 stays unmapped until the model reframes**. When `list_cost_usd` / `has_rate_card`
 were added to the gold fact, the deploy returned 200 and the table bound, yet
 `Rate Card Cost` / `Rate Card Coverage %` failed at query time with `The value for
-'list_cost_usd' cannot be determined` and rendered blank cards — with no error at
+'list_cost_usd' cannot be determined` and rendered blank cards - with no error at
 deploy time. The reframe closes that gap. Note it uses the **Power BI REST surface**
 (`api.powerbi.com/v1.0/myorg/groups/{ws}/datasets/{ds}/refreshes`), not the Fabric
 one, so the script acquires a second token audience
-(`https://analysis.windows.net/powerbi/api`) — `az login` must be able to issue it.
-The accurate rule is **no gateway, and no refresh for new rows — but a schema change
+(`https://analysis.windows.net/powerbi/api`) - `az login` must be able to issue it.
+The accurate rule is **no gateway, and no refresh for new rows - but a schema change
 requires a reframe.**
 
 > Gotcha: the notebook **`run`** step needs **`lakehouse`** included in `--steps`
@@ -228,14 +228,14 @@ requires a reframe.**
 
 ## 6. Demo storyline this enables
 
-1. **Collect** — bronze notebooks show raw platform telemetry landing in OneLake.
-2. **Land in Fabric** — lakehouse Files/Tables, one place for all AI platforms.
-3. **Conform** — silver/gold build the unified FinOps star (identity/app/BU/cost).
-4. **Persona dashboards** — the 8-page report (Spend Overview → Engineering
+1. **Collect** - bronze notebooks show raw platform telemetry landing in OneLake.
+2. **Land in Fabric** - lakehouse Files/Tables, one place for all AI platforms.
+3. **Conform** - silver/gold build the unified FinOps star (identity/app/BU/cost).
+4. **Persona dashboards** - the 8-page report (Spend Overview → Engineering
    Tokenomics → Licence Seats, Waste & Utilisation → Rate Card → CFO Finance →
    Governance → Application Owner → **Extractable Data Spectrum**).
-5. **Optimize** — idle licenses, expensive-model usage, budget overruns, chargeback.
+5. **Optimize** - idle licenses, expensive-model usage, budget overruns, chargeback.
 
-Real vs mock provenance never blurs — `dim_platform.data_source`,
+Real vs mock provenance never blurs - `dim_platform.data_source`,
 `fact.cost_is_estimated`, and the catalog's `availability` column keep REAL,
 AVAILABLE, MOCK, and ROADMAP signals clearly labeled.

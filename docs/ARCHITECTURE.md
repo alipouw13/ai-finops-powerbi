@@ -1,4 +1,4 @@
-# AI FinOps platform — architecture & decision record
+# AI FinOps platform - architecture & decision record
 
 Scope: evolve the PoC into a reusable enterprise **AI Cost Management** accelerator
 on Microsoft Fabric + Power BI, giving one view of AI usage, licensing, governance,
@@ -38,7 +38,7 @@ through identity.
 
 | Dim | Rationale | Value | Effort |
 |---|---|---|---|
-| dim_business_unit | identity and cost_center carried *divergent* BU labels — conform once | chargeback, budget variance, BU allocation | S (done) |
+| dim_business_unit | identity and cost_center carried *divergent* BU labels - conform once | chargeback, budget variance, BU allocation | S (done) |
 | dim_application | "spend by application" is the App-Owner persona's core question | optimization targeting, showback | S (done) |
 | dim_environment | dev/test/prod split exposes non-prod waste | reclaimable spend | S (done) |
 | universal identity | not every request is a person (SP/MI/agent) | correct attribution across platforms | S (done) |
@@ -51,7 +51,7 @@ Monitor token metrics have no identity dimension at all.
 - **Rationale.** Agents and service principals now drive material AI spend with no
   human in the loop; per-user assumptions silently misattribute cost.
 - **Tradeoffs.** Some platforms (M365) only emit human UPNs; the vocabulary is
-  wider than today's data exercises — intentional, so future rows conform without
+  wider than today's data exercises - intentional, so future rows conform without
   a schema change.
 - **Value.** Honest attribution; enables "spend with no human owner" governance.
 - **Effort.** S (done); ManagedIdentity/Agent rows arrive when those sources land.
@@ -62,7 +62,7 @@ Measures in `fact_ai_usage.tmdl`. Discount is a per-platform attribute
 unallocated spend pro-rata. Budget lives on `dim_business_unit` (MOCK).
 
 - **Rationale.** Finance needs list→net→forecast→showback, not just a total.
-- **Tradeoffs.** Forecast is straight-line MTD projection — simple and explainable;
+- **Tradeoffs.** Forecast is straight-line MTD projection - simple and explainable;
   swap for a time-series model (Fabric AutoML) when history is deep enough.
 - **Value.** Budget variance and chargeback are the CFO's two headline asks.
 - **Effort.** M (done); AutoML forecast is a later M.
@@ -79,7 +79,7 @@ Confidence %` on page 1.
 
 ## 7. Persona reporting
 Five pages (CFO, Governance, Engineering, App Owner, License Optimization) over the
-same model — see `build_personas.py`. Report pages are additive/idempotent so the
+same model - see `build_personas.py`. Report pages are additive/idempotent so the
 model and pages 1–4 are never at risk.
 
 ## Target-state diagram

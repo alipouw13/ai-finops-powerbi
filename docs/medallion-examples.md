@@ -1,4 +1,4 @@
-# Worked Examples — one story traced through Bronze → Silver → Gold
+# Worked Examples - one story traced through Bronze → Silver → Gold
 
 Companion to `docs/medallion-tables.md`. Same table list, but with **example rows**
 so you can see what the data literally looks like at each layer.
@@ -18,7 +18,7 @@ To make lineage visible, everything below follows **one cast of characters**:
 
 ---
 
-## BRONZE — raw, one row per source feed (as the API returns it)
+## BRONZE - raw, one row per source feed (as the API returns it)
 
 ### Azure AI Foundry / Azure OpenAI
 
@@ -37,7 +37,7 @@ To make lineage visible, everything below follows **one cast of characters**:
   "caller_object_id":"0999cfae-085e-464f-a49d-f8851e3e5195", "streamType":"non-stream" }
 ```
 
-`bronze_azure_cost_usage` (Cost Management — the $ authority)
+`bronze_azure_cost_usage` (Cost Management - the $ authority)
 ```json
 { "billingPeriod":"2026-08", "date":"2026-08-07", "meterCategory":"Azure OpenAI",
   "meterName":"gpt-4o Input regional Tokens", "quantity":184000, "effectivePrice":0.0000025,
@@ -47,7 +47,7 @@ To make lineage visible, everything below follows **one cast of characters**:
 
 ### Microsoft 365 Copilot
 
-`bronze_m365_copilot_usage` (getMicrosoft365CopilotUsageUserDetail — exact CSV columns)
+`bronze_m365_copilot_usage` (getMicrosoft365CopilotUsageUserDetail - exact CSV columns)
 ```csv
 Report Refresh Date,Report Period,User Principal Name,Display Name,Last Activity Date,Microsoft Teams Copilot Last Activity Date,Word Copilot Last Activity Date,Excel Copilot Last Activity Date,PowerPoint Copilot Last Activity Date,Outlook Copilot Last Activity Date,OneNote Copilot Last Activity Date,Loop Copilot Last Activity Date,Copilot Chat Last Activity Date
 2026-08-07,D7,priya.nair@contoso.com,Priya Nair,2026-08-06,2026-08-06,2026-08-05,,,2026-08-06,,,2026-08-06
@@ -71,7 +71,7 @@ Report Refresh Date,Report Period,User Principal Name,Display Name,Last Activity
 
 ### GitHub Copilot
 
-`bronze_ghc_seats` (per assigned user — the idle-seat source)
+`bronze_ghc_seats` (per assigned user - the idle-seat source)
 ```json
 { "assignee":{"login":"pnair","id":80421}, "created_at":"2026-01-15T00:00:00Z",
   "last_activity_at":"2026-08-06T18:44:00Z", "last_activity_editor":"vscode/1.93.0",
@@ -80,7 +80,7 @@ Report Refresh Date,Report Period,User Principal Name,Display Name,Last Activity
   "last_activity_at":null, "pending_cancellation_date":null, "plan_type":"enterprise" }   ← idle
 ```
 
-`bronze_ghc_usage_metrics` (daily aggregate — ≥5 active users required)
+`bronze_ghc_usage_metrics` (daily aggregate - ≥5 active users required)
 ```json
 { "date":"2026-08-07", "total_active_users":118, "total_engaged_users":97,
   "copilot_ide_code_completions":{"total_code_suggestions":48120,"total_code_acceptances":15840,
@@ -89,7 +89,7 @@ Report Refresh Date,Report Period,User Principal Name,Display Name,Last Activity
   "copilot_ide_chat":{"total_chats":2140} }
 ```
 
-`bronze_ghc_billing_usage` (enhanced billing — premium-request overage $)
+`bronze_ghc_billing_usage` (enhanced billing - premium-request overage $)
 ```json
 { "date":"2026-08-07", "product":"copilot", "sku":"copilot_premium_request",
   "quantity":320, "unitType":"request", "netAmount":12.80, "repositoryName":"contoso/payments" }
@@ -114,7 +114,7 @@ Report Refresh Date,Report Period,User Principal Name,Display Name,Last Activity
 { "date":"2026-08-07", "meterName":"Copilot Studio Messages", "quantity":1290, "cost":3.23 }
 ```
 
-### Reference / master data (customer inputs — MOCK 📝)
+### Reference / master data (customer inputs - MOCK 📝)
 ```json
 bronze_app_ownership:  { "app":"HR Helpdesk", "owner_upn":"maria.li@contoso.com",
                          "owner_bu":"HR", "agent_id":"b7f2…", "environment":"prod" }
@@ -126,9 +126,9 @@ bronze_rate_card:      { "platform":"Foundry", "unit_type":"token", "model":"gpt
 
 ---
 
-## SILVER — conformed, resolved, reconciled
+## SILVER - conformed, resolved, reconciled
 
-`silver_identity_resolved` — **the identity graph** (github login ↔ UPN ↔ SP all unified)
+`silver_identity_resolved` - **the identity graph** (github login ↔ UPN ↔ SP all unified)
 ```csv
 identity_key,display_name,principal_type,upn,github_login,team,business_unit,identity_class,is_human,home_business_unit_key
 a11f…,Priya Nair,User,priya.nair@contoso.com,pnair,Data Science,Technology,User,TRUE,BU-TECH
@@ -184,7 +184,7 @@ usage_date,identity_key,application_key,sessions,messages_consumed,resolution_ra
 2026-08-07,b7f2…,APP-HRBOT,540,1290,0.71,3.23,FALSE
 ```
 
-`silver_usage_unified`  — **all four unioned to one daily grain** (nulls where a source can't reach)
+`silver_usage_unified`  - **all four unioned to one daily grain** (nulls where a source can't reach)
 ```csv
 usage_date,platform_key,identity_key,model_key,application_key,unit_type,quantity,input_tokens,output_tokens,requests,cost_usd,cost_is_estimated
 2026-08-07,Foundry,0999cfae…,gpt-4o,APP-CHECKOUT,token,226000,184000,42000,920,0.46,FALSE
@@ -201,7 +201,7 @@ usage_date,platform_key,modelled_cost,billed_cost,variance_pct
 
 ---
 
-## GOLD — the star the Power BI model binds to (exact repo schema)
+## GOLD - the star the Power BI model binds to (exact repo schema)
 
 `fact_ai_usage`  (grain: date × platform × identity × model × application × environment × BU × cost center)
 ```csv
@@ -269,5 +269,5 @@ rate-foundry-4o,Foundry,token,gpt-4o,0.0000025,2026-01-01,USD,price-sheet,EA rat
 Trace **Priya**: she shows up in 3 Bronze feeds (M365 usage, GitHub seats, AOAI caller
 via her apps), gets **collapsed to one `identity_key`** in Silver, and appears as clean
 fact rows in Gold that every persona page can slice by her BU (Technology), her apps,
-and her platforms — while **Sam and jdoe** surface as **idle-seat reclaim** because they
+and her platforms - while **Sam and jdoe** surface as **idle-seat reclaim** because they
 hold licenses with no activity. That end-to-end lineage is exactly what the demo tells.

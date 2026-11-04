@@ -1,4 +1,4 @@
-# Real-Data Spec — wiring live sources into the AI FinOps accelerator
+# Real-Data Spec - wiring live sources into the AI FinOps accelerator
 
 > **Status:** proposal. Grounded in a read-only probe of a Microsoft
 > partner (MCAP) sandbox tenant, run 2026-09-08. Every availability claim below
@@ -18,7 +18,7 @@ data". That is the wrong shape, and the repo already has the right one.
 bronze row carries `_data_class` (`REAL` / `MOCK`); gold derives
 `dim_platform[data_source]` from it; every fact row carries
 `cost_is_estimated`. A REAL Azure feed and a MOCK GitHub feed can sit in the
-*same* fact table and the report already tells them apart — that is the
+*same* fact table and the report already tells them apart - that is the
 product's central claim.
 
 Forking into a parallel stack costs you:
@@ -31,8 +31,8 @@ Forking into a parallel stack costs you:
 | Places a schema fix must be applied | 1 | 2 |
 | Demo narrative | "here is real spend beside modelled spend, and the model says which is which" | two disconnected demos |
 
-Every defect found while building this — duplicate dimension keys, orphaned
-foreign keys, the TMDL triple-backtick trap, gold/CSV contract drift — would
+Every defect found while building this - duplicate dimension keys, orphaned
+foreign keys, the TMDL triple-backtick trap, gold/CSV contract drift - would
 need fixing twice, and the two would silently diverge.
 
 ### What to build instead
@@ -43,10 +43,10 @@ bronze landing ──────┤
                      └─ REAL collectors  → LH_tokenomics_bronze_real (NEW, 1 lakehouse)
                                     │
                                     ▼
-              LH_tokenomics_silver  (unchanged — unions both, keeps _data_class)
+              LH_tokenomics_silver  (unchanged - unions both, keeps _data_class)
                                     │
                                     ▼
-              LH_tokenomics_gold    (unchanged — derives provenance)
+              LH_tokenomics_gold    (unchanged - derives provenance)
                                     │
                                     ▼
               AIFinOps.DirectLake + AIFinOps.DirectLake.Report (unchanged)
@@ -66,11 +66,11 @@ stay single.
 | **Azure Cost Management** | ✅ REAL | 1 subscription. **91 days, 61,340 line items, $5,809.81** |
 | **Entra identities** | ✅ REAL | 694 principals (users + service principals), both readable |
 | **M365 licence inventory** | ✅ REAL | 5 subscribed SKUs returned |
-| **Azure AI resource inventory** | ✅ REAL | **16 Cognitive Services accounts** — 8 `AIServices`, 3 `OpenAI`, plus ContentSafety / FormRecognizer / Speech / Translation |
+| **Azure AI resource inventory** | ✅ REAL | **16 Cognitive Services accounts** - 8 `AIServices`, 3 `OpenAI`, plus ContentSafety / FormRecognizer / Speech / Translation |
 | **Fabric capacity cost** | ✅ REAL | 9 capacities; 2 Active (one F2, one PPU) |
 | **Copilot Studio** | ⚠️ SPLIT | **8 real agents exist** across 2 environments. But `msdyn_aievents` returns **0 rows**: the agents have never been run, so there is no credit consumption to report |
-| **Azure OpenAI token telemetry** | ❌ NONE | 6 resources emit telemetry (3,923 calls over 31 days) but **every token metric is zero** — they are Content Understanding / Doc Intelligence / Speech / Translation, which bill per *call*. The 3 `OpenAI`-kind resources have no traffic at all |
-| **M365 Copilot** | ❌ NONE | No `Microsoft_365_Copilot` SKU — confirms your read |
+| **Azure OpenAI token telemetry** | ❌ NONE | 6 resources emit telemetry (3,923 calls over 31 days) but **every token metric is zero** - they are Content Understanding / Doc Intelligence / Speech / Translation, which bill per *call*. The 3 `OpenAI`-kind resources have no traffic at all |
+| **M365 Copilot** | ❌ NONE | No `Microsoft_365_Copilot` SKU - confirms your read |
 | **GitHub Copilot** | ❌ NONE | No org access |
 
 > An earlier draft of this table claimed *0 Cognitive Services accounts*. That
@@ -82,7 +82,7 @@ stay single.
 
 1. **`usageDetails` ignores `$filter` on dates.** A request filtered with
    `properties/usageStart ge '…'` returns HTTP 200 and *only the open billing
-   period* — 8 days instead of the 91 requested. The dedicated `startDate` /
+   period* - 8 days instead of the 91 requested. The dedicated `startDate` /
    `endDate` query parameters are honoured. Nothing errors, so the extract just
    quietly covers the wrong window; `extract_real_bronze.py` now prints the day
    count and warns when it looks truncated.
@@ -91,12 +91,12 @@ stay single.
    total. The cap now warns loudly when more data was available.
 
 Also: `usageDetails` echoes its `$filter` back inside `nextLink` **unencoded**,
-so the continuation URL contains raw spaces and `http.client` rejects it —
+so the continuation URL contains raw spaces and `http.client` rejects it  - 
 continuation URLs must be re-quoted before use.
 
 ### The honest headline
 
-The real data you can get is **identity, licence and infrastructure cost** —
+The real data you can get is **identity, licence and infrastructure cost**  - 
 *not AI usage telemetry*. That means:
 
 - Pages **5 CFO Finance**, **6 Governance**, **7 Application Owner** and **1 Spend
@@ -104,12 +104,12 @@ The real data you can get is **identity, licence and infrastructure cost** —
 - Page **2 Engineering Tokenomics** (Azure AI Foundry + Azure OpenAI) stays MOCK,
   because nothing in the tenant is currently emitting tokens.
 
-If real tokenomics matters for the demo, see Phase 0 below — it is a small,
+If real tokenomics matters for the demo, see Phase 0 below - it is a small,
 cheap unlock.
 
 ---
 
-## 3. Phase 0 (optional, ~30 min) — unlock real tokenomics
+## 3. Phase 0 (optional, ~30 min) - unlock real tokenomics
 
 Deploy one Azure OpenAI resource and push a little traffic through it. This is
 the single highest-value addition, because it turns the *token* story real:
@@ -121,7 +121,7 @@ the single highest-value addition, because it turns the *token* story real:
 
 That yields real `processed_prompt_tokens` / `generated_tokens` /
 `latency_ms`, which is exactly what `bronze_azure_ai_metrics` expects. Note that
-Azure Monitor metrics are **resource-grain and carry no identity** — per-user token
+Azure Monitor metrics are **resource-grain and carry no identity** - per-user token
 attribution needs the APIM AI Gateway feed (`bronze_foundry_gateway`), which silver
 prefers over the metrics table when present. Cost is a few cents.
 
@@ -136,7 +136,7 @@ already consumes, plus the standard lineage columns
 (`_ingested_at`, `_source_system`, `_source_api`, `_watermark`, `_batch_id`,
 `_data_class='REAL'`). No silver or gold change is required for any of them.
 
-### 4.1 `bronze_azure_cost` — REAL invoiced Azure spend ★ highest value
+### 4.1 `bronze_azure_cost` - REAL invoiced Azure spend ★ highest value
 
 | | |
 |---|---|
@@ -147,7 +147,7 @@ already consumes, plus the standard lineage columns
 | Columns | `usage_date, subscription_id, resource_group, resource_id, meter_id, meter_name, meter_category, quantity, unit_price, cost_usd, currency, tags_json` |
 
 > **Do not use the Cost Management *Query* API for recurring ingestion.** The
-> probe hit `HTTP 429` on every attempt across 7 retries with backoff — this
+> probe hit `HTTP 429` on every attempt across 7 retries with backoff - this
 > tenant is aggressively throttled. Scheduled **Exports** to a storage account
 > are Microsoft's supported pattern for FinOps ingestion and have no such limit.
 > Query API is fine for ad-hoc exploration only.
@@ -156,7 +156,7 @@ This is the only feed that produces genuinely **billed** dollars
 (`cost_is_estimated = FALSE`), which is what makes `Cost Confidence %`
 meaningful rather than decorative.
 
-### 4.2 `bronze_ref_identity_map` — REAL identity dimension ★ high value
+### 4.2 `bronze_ref_identity_map` - REAL identity dimension ★ high value
 
 | | |
 |---|---|
@@ -168,7 +168,7 @@ meaningful rather than decorative.
 
 `department` from the Entra profile feeds the business-unit rollup, so
 chargeback becomes real rather than fabricated. `github_login` and
-`cost_center_key` have no Entra source — leave blank or supply a mapping file;
+`cost_center_key` have no Entra source - leave blank or supply a mapping file;
 they stay MOCK and should be labelled as such.
 
 **Privacy note:** this pulls real names and UPNs. It must land in the
@@ -176,14 +176,14 @@ they stay MOCK and should be labelled as such.
 enforces both (gitignored output + an explicit
 `--i-understand-this-is-real-tenant-data` flag).
 
-### 4.3 `bronze_m365_license_inventory` — REAL licence entitlement
+### 4.3 `bronze_m365_license_inventory` - REAL licence entitlement
 
 Already built and proven: `platform/fabric/extract_m365_graph.py`. Point it at
 this tenant and it emits the 5 real SKUs. Note the Copilot usage report will
-return 404/403 here because there is no Copilot service plan — that is the
+return 404/403 here because there is no Copilot service plan - that is the
 correct, truthful result.
 
-### 4.4 `bronze_fabric_capacity_cost` — REAL Fabric spend
+### 4.4 `bronze_fabric_capacity_cost` - REAL Fabric spend
 
 | | |
 |---|---|
@@ -193,11 +193,11 @@ correct, truthful result.
 
 Pleasingly self-referential: the platform reports its own cost.
 
-### 4.5 `bronze_ref_agent_inventory` — REAL agents ✅ / `bronze_studio_credits` — not yet
+### 4.5 `bronze_ref_agent_inventory` - REAL agents ✅ / `bronze_studio_credits` - not yet
 
 The Dataverse check has been run. The two halves land differently:
 
-**Agent inventory — REAL and available now.**
+**Agent inventory - REAL and available now.**
 
 | | |
 |---|---|
@@ -211,7 +211,7 @@ This matters more than it looks: agent → owner → business unit is what makes
 **agent chargeback** real, and non-human spend attribution is the accelerator's
 core IP.
 
-**Credit consumption — REAL source, currently empty.**
+**Credit consumption - REAL source, currently empty.**
 
 | | |
 |---|---|
@@ -219,13 +219,13 @@ core IP.
 | Result | **0 rows in both environments** |
 | Meaning | The agents exist but have never been invoked, so no credits have been consumed |
 | To unlock | Run a few conversations against one agent, then re-query |
-| Note | `msdyn_creditconsumed` is already net of zero-rating — use it directly, never model credits from activity counts. **Caveat:** Microsoft does **not** document `msdyn_aievent` as a billing/consumption source; the *documented* Copilot Credit capacity surface is Power Platform admin center → Licensing → Products → Copilot Studio. Reading `msdyn_aievent` is community/unsupported practice — honest, but not Microsoft guidance. |
+| Note | `msdyn_creditconsumed` is already net of zero-rating - use it directly, never model credits from activity counts. **Caveat:** Microsoft does **not** document `msdyn_aievent` as a billing/consumption source; the *documented* Copilot Credit capacity surface is Power Platform admin center → Licensing → Products → Copilot Studio. Reading `msdyn_aievent` is community/unsupported practice - honest, but not Microsoft guidance. |
 
 Wire the collector now and it will return a truthful zero; it starts producing
 real numbers the moment someone uses an agent. Do **not** substitute mock rows
 into a table labelled REAL.
 
-### 4.6 `bronze_azure_ai_metrics` — REAL tokens (only after Phase 0)
+### 4.6 `bronze_azure_ai_metrics` - REAL tokens (only after Phase 0)
 
 | | |
 |---|---|
@@ -242,9 +242,9 @@ Deliberately small:
 |---|---|
 | `fabric_deploy.py` | add `--lakehouse-bronze-real`; upload real extracts there |
 | `10_conform_usage.py` | read each bronze table from **both** bronze lakehouses and union; carry `_data_class` through to silver |
-| `20_build_star.py` | `provenance()` already derives from `_data_class` — **no change** |
+| `20_build_star.py` | `provenance()` already derives from `_data_class` - **no change** |
 | Semantic model | **no change** |
-| Report | **no change** — the Governance page's REAL-vs-MOCK register updates itself |
+| Report | **no change** - the Governance page's REAL-vs-MOCK register updates itself |
 
 The one genuinely new piece of logic is the silver union, and it is a few lines,
 because provenance was designed as data from the start.
@@ -281,13 +281,13 @@ the identity, licence and agent stories genuine.
 
 ---
 
-## 7. What stays MOCK — and must keep saying so
+## 7. What stays MOCK - and must keep saying so
 
-- **GitHub Copilot** — no org access
-- **M365 Copilot usage/credits** — no SKU in tenant
-- **`github_login` ↔ UPN mapping** — no automated source
-- **Budgets, criticality, SLA tiers** — customer inputs, never derivable
-- **Rate card** — published list prices, not your contract
+- **GitHub Copilot** - no org access
+- **M365 Copilot usage/credits** - no SKU in tenant
+- **`github_login` ↔ UPN mapping** - no automated source
+- **Budgets, criticality, SLA tiers** - customer inputs, never derivable
+- **Rate card** - published list prices, not your contract
 
 All of these already carry MOCK markers and `is_mock*` flags. The Governance
 page will show a genuine mix of REAL and MOCK rows, which is a **better** demo
@@ -298,7 +298,7 @@ honestly.
 
 ## 8. Open questions
 
-1. ~~Do any Copilot Studio agents exist?~~ **Answered:** yes — 8 agents across
+1. ~~Do any Copilot Studio agents exist?~~ **Answered:** yes - 8 agents across
    the two environments, but `msdyn_aievents` is empty, so credits are zero
    until someone actually runs one.
 2. **Is Phase 0 (deploy AOAI + generate traffic) acceptable?** It is the only
@@ -310,7 +310,7 @@ honestly.
 4. **Retention:** Cost Management exports replace month-to-date. Bronze must
    append and dedupe on `(usage_date, resource_id, meter_id)`, or you lose
    prior-day history. Confirm you want history kept from day one.
-5. **Blended or separated?** Recommendation is blended — one fact table with
+5. **Blended or separated?** Recommendation is blended - one fact table with
    `_data_class` distinguishing rows, because that *is* the demo. Say so if you
    would rather the report defaulted to a REAL-only filter.
 
@@ -318,7 +318,7 @@ honestly.
 
 ## 8. What was actually built (implemented and verified)
 
-Decisions taken: **keep all history**, **display real names**, **blended** —
+Decisions taken: **keep all history**, **display real names**, **blended**  - 
 one fact table carrying both provenances rather than a parallel stack.
 
 ### Topology
@@ -339,7 +339,7 @@ LH_tokenomics_bronze_real  (REAL)  ─┘
 
 | Platform | What it is | 91-day spend |
 |---|---|---|
-| `AzureAI` | Cognitive Services / AI Foundry / ML meters — AI spend proper | **$500.62** |
+| `AzureAI` | Cognitive Services / AI Foundry / ML meters - AI spend proper | **$500.62** |
 | `AzureInfra` | Storage, search, database, networking the AI workloads run on | **$5,309.18** |
 
 Merging them would overstate AI platform spend; dropping `AzureInfra` would
@@ -350,7 +350,7 @@ reports them side by side and lets the reader pick the denominator.
 
 Azure emits several `usageDetails` line items per resource-meter-day (one per
 deployment, benefit, reservation) that are identical across every projected
-column. They are **not** duplicates, so they cannot be dropped — but they are
+column. They are **not** duplicates, so they cannot be dropped - but they are
 not separately meaningful either. The extractor sums them onto the declared
 grain and records `line_item_count`, which makes re-extraction idempotent:
 61,340 line items → 17,775 rows, $5,809.81 preserved exactly.
@@ -359,18 +359,18 @@ The loader then appends and de-duplicates on *the grain minus the measures*,
 keeping the newest extract. De-duplicating on every column instead looks safer
 and is wrong: Azure **restates** recent usage, so a restated row differs in
 `cost_usd`, fails to match the row it supersedes, and both survive. That was
-observed live — 17,956 rows / $5,838.74 against a true 17,775 / $5,809.81, a
+observed live - 17,956 rows / $5,838.74 against a true 17,775 / $5,809.81, a
 silent $28.93 double-count.
 
 ### Attribution
 
 `bronze_ref_app_inventory` is built from every resource that either is an AI
-account or incurred cost — 144 real applications — so real spend lands on a real
+account or incurred cost - 144 real applications - so real spend lands on a real
 workload name instead of `APP-UNKNOWN`. Verified at 100% key coverage.
 
 Business-unit attribution is a different story: Azure resources here carry no
 owning-BU tag, so real spend routes to `BU-UNALLOC` and chargeback coverage
-falls to ~46%. That is not a defect to paper over — an unattributable majority
+falls to ~46%. That is not a defect to paper over - an unattributable majority
 of real AI spend is precisely the finding this accelerator exists to surface.
 
 ### Defects found and fixed along the way
@@ -393,10 +393,10 @@ of real AI spend is precisely the finding this accelerator exists to surface.
 |---|---|
 | Agents in tenant | **8** across 2 environments |
 | Published | **1 of 8** (`Test`, `Contoso` env, published 2026-06-02). The 7 interesting ones have `publishedon: null` |
-| `msdyn_aievent` readable | ✅ HTTP 200 in both environments — the collector works |
+| `msdyn_aievent` readable | ✅ HTTP 200 in both environments - the collector works |
 | Credit consumption | **0 events, 0 credits** |
 | Licensing | `Power_Virtual_Agents` (1 seat, **0 assigned**) + `CCIBOTS_PRIVPREV_VIRAL` (2 assigned) |
-| Authentication mode | `authenticationmode=2` on every agent — Entra auth required to converse |
+| Authentication mode | `authenticationmode=2` on every agent - Entra auth required to converse |
 
 The collector is now wired (`collect_studio_credits`) and writes
 `bronze_studio_credits` with an explicit schema **even at zero rows**, so the
@@ -414,7 +414,7 @@ to generate genuine usage.
 The correct endpoint is
 `https://{env}.environment.api.powerplatform.com/copilotstudio/dataverse-backed/authenticated/bots/{schema}/conversations`.
 It accepted an Azure CLI token and rejected it with
-`403 InsufficientDelegatedPermissions` — the route is right, the scope is
+`403 InsufficientDelegatedPermissions` - the route is right, the scope is
 missing.
 
 Requesting that scope directly fails harder:
@@ -422,7 +422,7 @@ Requesting that scope directly fails harder:
 ```
 AADSTS65002: Consent between first party application '04b07795-…' (Azure CLI)
 and first party resource '8578e004-…' (Power Platform API) must be configured
-via preauthorization — applications owned and operated by Microsoft must get
+via preauthorization - applications owned and operated by Microsoft must get
 approval from the API owner before requesting tokens for that API.
 ```
 
@@ -435,7 +435,7 @@ does exist in the tenant, so that path is available.
 ### Resolved: the custom app registration works
 
 `platform/fabric/generate_studio_traffic.py --setup` builds exactly that path and
-it is now **verified end to end** — 48 real messages sent to a published agent,
+it is now **verified end to end** - 48 real messages sent to a published agent,
 48 reply activities received, HTTP 200 throughout.
 
 Two findings from getting there:
@@ -451,12 +451,12 @@ Two findings from getting there:
    `{"activity": {...}}` returns `200` with the bot's reply activities.
 
 The script only drives **published** agents, because an unpublished agent cannot
-be invoked over the API at all — and Copilot Studio only bills published ones.
+be invoked over the API at all - and Copilot Studio only bills published ones.
 
 ### Still outstanding: the telemetry lag
 
 `msdyn_aievent` and `conversationtranscript` were both still **0 rows**
-immediately after the traffic run. That is expected — `msdyn_aievent` is a
+immediately after the traffic run. That is expected - `msdyn_aievent` is a
 *billing* surface rather than a live trace and can lag by up to ~24h. The
 collector is already wired, so re-running `extract_real_bronze.py` after the lag
 window picks the credits up with no code change.
@@ -480,7 +480,7 @@ python platform/fabric/generate_studio_traffic.py --conversations 6 --turns 8
 
 Two caveats worth setting expectations on:
 
-- Copilot Studio credit telemetry **lags** — `msdyn_aievent` is a billing
+- Copilot Studio credit telemetry **lags** - `msdyn_aievent` is a billing
   surface, not a live trace, so allow up to ~24h before the rows appear.
 - Credits are real but **dollars are not**: Dataverse reports credits, never
   currency. Silver prices them from the rate card and marks those rows
@@ -490,11 +490,11 @@ Two caveats worth setting expectations on:
 
 Declined, for two independent reasons:
 
-1. **Governance** — it lives in Microsoft's corporate tenant
+1. **Governance** - it lives in Microsoft's corporate tenant
    corporate tenant. Copying corporate telemetry into an MCAP sandbox moves
    Microsoft-internal data across a tenant boundary into an unmanaged
    environment, and into a report intended for screen-sharing.
-2. **Accuracy** — it is scoped to a *single user's own* usage. An admin pulls
+2. **Accuracy** - it is scoped to a *single user's own* usage. An admin pulls
    `getMicrosoft365CopilotUsageUserDetail` (Graph beta), the Viva Copilot
    Dashboard, or the GitHub org metrics API, all tenant-scoped. Presenting
    personal-scope figures as admin-grade would be exactly the relabelling this

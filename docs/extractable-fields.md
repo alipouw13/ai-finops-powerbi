@@ -1,4 +1,4 @@
-# Definitively Extractable Fields — M365 Copilot · Copilot Studio · GitHub Copilot · Azure AI Foundry / Azure OpenAI
+# Definitively Extractable Fields - M365 Copilot · Copilot Studio · GitHub Copilot · Azure AI Foundry / Azure OpenAI
 
 This is the **field-level companion** to `AIFinOps.SemanticModel/data/extractable_data_catalog.csv`
 (which is the signal-level summary that drives the *Extractable Data Spectrum*
@@ -14,15 +14,15 @@ grain · refresh/retention · fields · cost authority · analytics it feeds**.
 ## 0. TL;DR on the architecture question
 
 > *"Take ALL extractable data into Bronze, all relevant data into Silver, and the
-> actual tables that back the Power BI visuals into Gold — is that good?"*
+> actual tables that back the Power BI visuals into Gold - is that good?"*
 
-**Yes — that is exactly right, and it's the standard Fabric medallion pattern.**
+**Yes - that is exactly right, and it's the standard Fabric medallion pattern.**
 Bronze = source-faithful raw, Silver = conformed/relevant, Gold =
 star tables the semantic model binds to. Five refinements make it production-grade
-for FinOps specifically — see [§6](#6-architecture-verdict--refinements). The short
+for FinOps specifically - see [§6](#6-architecture-verdict--refinements). The short
 version:
 
-1. **Bronze fidelity = "as fine as each API allows"** — several of these sources
+1. **Bronze fidelity = "as fine as each API allows"** - several of these sources
    are *pre-aggregated* (GitHub = daily org/enterprise rollups; M365 = per-user
    *last-activity dates*, not per-prompt). You cannot land finer than the API grain.
 2. **Cost authority ≠ usage telemetry.** Actual $ comes from **Azure Cost
@@ -32,7 +32,7 @@ version:
    Entra user ↔ UPN ↔ service principal ↔ agent). Budget for it.
 4. **Content/PII (prompts, transcripts) needs a governed Bronze zone**, not the
    broadly-readable lakehouse.
-5. **Gold stays a star** (import or Direct Lake) — don't over-normalize.
+5. **Gold stays a star** (import or Direct Lake) - don't over-normalize.
 
 ---
 
@@ -40,7 +40,7 @@ version:
 
 The only platform with **true per-request, per-token, real-dollar** granularity.
 
-### 1a. Azure Monitor platform metrics — `GET .../providers/microsoft.insights/metrics`
+### 1a. Azure Monitor platform metrics - `GET .../providers/microsoft.insights/metrics`
 Grain: per **deployment / model / resource**, 1-min+ aggregations. Retention 93 days (metrics).
 Permission: `Monitoring Reader`. Cost authority: **driver only** (not $).
 Ref: [Monitor Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/monitor-openai).
@@ -68,9 +68,9 @@ Feeds: per-request cost attribution, identity-level usage, error/latency, abuse 
 OpenTelemetry GenAI semantic conventions: `gen_ai.request.model`, `gen_ai.response.model`,
 `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, `gen_ai.operation.name`,
 span latency, prompt/response (if logging enabled). Feeds: **application**-level attribution,
-agent traces. *(AVAILABLE — requires app instrumentation.)*
+agent traces. *(AVAILABLE - requires app instrumentation.)*
 
-### 1d. **Cost authority** — Azure Cost Management / Consumption `UsageDetails`
+### 1d. **Cost authority** - Azure Cost Management / Consumption `UsageDetails`
 Grain: per **meter × resource × day**. Fields: `meterId`, `meterName`, `meterCategory`,
 `quantity`, `effectivePrice`, `costInBillingCurrency`, `resourceId`, `resourceGroup`,
 `tags`, `billingPeriod`. **This is the authoritative actual $** for Foundry/AOAI/PAYG.
@@ -83,7 +83,7 @@ Feeds: CFO actuals, discounted (EA/MCA price sheet), chargeback by tag/resource.
 Seat-licensed (flat ~$30/user/mo). **No per-token cost.** FinOps value = **utilization
 vs. assigned seats** (idle-seat reclaim) + adoption + governance/data-access risk.
 
-### 2a. Usage — `GET /reports/getMicrosoft365CopilotUsageUserDetail(period='D7')`
+### 2a. Usage - `GET /reports/getMicrosoft365CopilotUsageUserDetail(period='D7')`
 Permission: `Reports.Read.All`. Grain: **per user, last-activity dates** (NOT per prompt).
 Refresh: daily; periods D7/D30/D90/D180. Returns 302 → CSV.
 Ref: [getMicrosoft365CopilotUsageUserDetail](https://learn.microsoft.com/en-us/graph/api/reportroot-getmicrosoft365copilotusageuserdetail?view=graph-rest-beta).
@@ -96,7 +96,7 @@ Ref: [getMicrosoft365CopilotUsageUserDetail](https://learn.microsoft.com/en-us/g
 `Copilot Chat Last Activity Date`.
 Feeds: **idle-seat detection** (license assigned but no `Last Activity Date`), adoption by app.
 
-### 2b. Interaction history — `GET /copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions`
+### 2b. Interaction history - `GET /copilot/users/{id}/interactionHistory/getAllEnterpriseInteractions`
 Permission: `AiEnterpriseInteraction.Read.All`. Grain: **per prompt / per response**.
 Ref: [aiInteraction](https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/api/ai-services/interaction-export/resources/aiinteraction).
 **Properties:** `id`, `appClass` (e.g. `IPM.SkypeTeams.Message.Copilot.Excel`),
@@ -106,12 +106,12 @@ Ref: [aiInteraction](https://learn.microsoft.com/en-us/microsoft-365/copilot/ext
 Feeds: adoption depth, app distribution, governance. **⚠ contains prompt/response content
 → governed Bronze zone + Purview.**
 
-### 2c. Licensing — `GET /subscribedSkus`, `GET /users?$select=assignedLicenses`
+### 2c. Licensing - `GET /subscribedSkus`, `GET /users?$select=assignedLicenses`
 Fields: `skuPartNumber` (`Microsoft_365_Copilot`), `prepaidUnits` (enabled/suspended),
 `consumedUnits`; per user `assignedLicenses`, assignment date (via audit/directory).
 **This × seat price = M365 Copilot cost.** Feeds: CFO seat cost, License Optimization.
 
-### 2d. Audit (governance) — Purview Unified Audit Log / `auditLogs`
+### 2d. Audit (governance) - Purview Unified Audit Log / `auditLogs`
 `CopilotInteraction` events: `AppHost`, `AccessedResources` (files/sites referenced),
 `Operation`, `UserId`, `CreationTime`, `ClientIP`. Feeds: Governance risk, oversharing.
 
@@ -122,20 +122,20 @@ Fields: `skuPartNumber` (`Microsoft_365_Copilot`), `prepaidUnits` (enabled/suspe
 Seat-licensed ($19 Business / $39 Enterprise) **plus** metered premium features.
 FinOps value = **idle-seat reclaim** + adoption + (new) premium-request overage cost.
 
-### 3a. **Seats (idle detection)** — `GET /orgs/{org}/copilot/billing/seats`
+### 3a. **Seats (idle detection)** - `GET /orgs/{org}/copilot/billing/seats`
 Permission: `manage_billing:copilot` or `read:org`. Grain: **per assigned user**.
 Ref: [Copilot user management](https://docs.github.com/en/rest/copilot/copilot-user-management).
 Per-seat fields: `assignee.login`, `assignee.id`, `created_at` (seat assigned),
 **`last_activity_at`**, `last_activity_editor`, `pending_cancellation_date`, `plan_type`.
 Feeds: **idle-seat reclaim** (`last_activity_at` null/stale), seat tenure.
 
-### 3b. Billing summary — `GET /orgs/{org}/copilot/billing`
+### 3b. Billing summary - `GET /orgs/{org}/copilot/billing`
 `seat_breakdown` → `total`, `added_this_cycle`, `pending_invitation`,
 `pending_cancellation`, `active_this_cycle`, `inactive_this_cycle`; plus
 `seat_management_setting`, `plan_type`, `public_code_suggestions`, `ide_chat`, `cli`.
 Feeds: CFO seat cost, **`inactive_this_cycle` = reclaimable spend**.
 
-### 3c. Usage metrics — `GET /orgs|enterprises/{}/copilot/metrics` + report-download endpoints
+### 3c. Usage metrics - `GET /orgs|enterprises/{}/copilot/metrics` + report-download endpoints
 Permission: metrics policy enabled. Grain: **daily, aggregated** (org/enterprise/repo;
 newer report exports add user-level & team-level). 28-day window (older endpoint); the
 report endpoints (`enterprise-1-day`, `enterprise-28-day/latest`, `repos-1-day`) return
@@ -149,7 +149,7 @@ model usage per chat mode (ask/edit/plan/agent); agent adoption. Feeds: Engineer
 adoption, acceptance rate, model/language distribution.
 > Privacy floor: metrics need ≥5 active Copilot users to return data.
 
-### 3d. **Cost authority** — Enhanced Billing Platform usage `GET /organizations/{org}/settings/billing/usage`
+### 3d. **Cost authority** - Enhanced Billing Platform usage `GET /organizations/{org}/settings/billing/usage`
 Fields per line: `date`, `product`, `sku`, `quantity`, `unitType`, `netAmount`,
 `grossAmount`, `discountAmount`, `repositoryName`. Captures **premium-request overage**
 (metered) beyond flat seats. Feeds: CFO actuals incl. variable GitHub cost.
@@ -163,7 +163,7 @@ Data lives in **Dataverse** + Application Insights.
 Ref: [Copilot Studio analytics](https://learn.microsoft.com/en-us/microsoft-copilot-studio/analytics-overview)
 (Monitor data 360 days; session/transcript detail 28 days; UTC).
 
-### 4a. Conversation transcripts — Dataverse `conversationtranscript` table
+### 4a. Conversation transcripts - Dataverse `conversationtranscript` table
 Grain: **per conversation** (transcript = JSON of activities/turns). Fields: `conversationtranscriptid`,
 `botid` (agent), `conversationid`, `content` (activities JSON: messages, triggered topics,
 timestamps, channel), `createdon`, `schematype`. Access: Dataverse Web API / dataflow
@@ -175,7 +175,7 @@ Sessions, engagement rate, resolution rate, escalation rate, abandonment, CSAT,
 topics triggered, outcomes, per-agent/per-environment. Feeds: App-Owner effectiveness,
 Governance adoption.
 
-### 4c. Billing / capacity — Power Platform Admin + Azure meter (PAYG)
+### 4c. Billing / capacity - Power Platform Admin + Azure meter (PAYG)
 Messages consumed per agent/environment; generative "answers" & AI Builder credit
 consumption; environment capacity. **PAYG → Azure Cost Management meter = actual $.**
 Feeds: CFO actuals, cost-per-agent, cost-per-resolution.
@@ -197,7 +197,7 @@ generative-answer calls. Feeds: Engineering latency, error, model calls.
 | Real dollars authority | Cost Mgmt | seats × price | seats × price + billing usage | Cost Mgmt (PAYG) |
 
 **Design consequence:** the unified fact grain is **daily × platform × identity ×
-application × model × cost**, and each source fills the columns it *can* — nulls where
+application × model × cost**, and each source fills the columns it *can* - nulls where
 the API grain doesn't reach. Don't fake a finer grain than the source supports.
 
 ---
@@ -207,7 +207,7 @@ the API grain doesn't reach. Don't fake a finer grain than the source supports.
 **Verdict: the Bronze(all) → Silver(relevant/conformed) → Gold(PBI star) design is
 correct and is what a customer accelerator should ship.** Map it like this:
 
-**BRONZE — source-faithful raw, one landing zone per source above**
+**BRONZE - source-faithful raw, one landing zone per source above**
 - Land each API/report *as returned* (JSON/CSV/NDJSON), plus ingestion metadata
   (`_source`, `_ingested_at`, `_watermark`, `_report_refresh_date`).
 - **Incremental** per source cadence: AOAI logs near-real-time; GitHub 28-day/daily
@@ -215,10 +215,10 @@ correct and is what a customer accelerator should ship.** Map it like this:
 - **Governed sub-zone** for content (M365 interaction bodies, Studio transcripts,
   AOAI prompt/response) with restricted access + retention policy. Everything else
   in the open analytics zone.
-- Keep raw even if unused today — that's the "source fidelity / historical retention"
+- Keep raw even if unused today - that's the "source fidelity / historical retention"
   the brief asks for and future-proofs new metrics.
 
-**SILVER — conform to the unified taxonomy (the hard, valuable work)**
+**SILVER - conform to the unified taxonomy (the hard, valuable work)**
 - **Identity resolution**: map GitHub `login` ↔ Entra user ↔ UPN ↔ service principal ↔
   agent/bot id → one `identity_key` with `identity_class`/`is_human` (already in the model).
 - **Application / BU / environment** normalization from tags, SP ownership, repo→app,
@@ -229,22 +229,22 @@ correct and is what a customer accelerator should ship.** Map it like this:
   EA/MCA discounts). Flag `cost_is_estimated` where modelled vs billed.
 - Harmonize everything to a **daily** grain (the coarsest common denominator).
 
-**GOLD — the exact star the semantic model binds to**
+**GOLD - the exact star the semantic model binds to**
 - Materialize `fact_ai_usage` + the dims (`dim_date/platform/identity/model/cost_center/
   rate_card/business_unit/application/environment/data_source`). This is what the 10 report
-  pages query — no over-normalization, keep it a clean star.
+  pages query - no over-normalization, keep it a clean star.
 - **Direct Lake** (recommended at scale): point the semantic model at Gold delta tables →
   no import refresh, near-real-time. Import mode is fine for the demo (today's CSVs).
 
 **Five refinements to call out to a customer:**
-1. *Grain honesty* (per §5) — set expectations that M365/GitHub are seat+adoption, not per-token.
-2. *Cost authority* — Cost Management + price sheet is the source of $; telemetry explains it.
-3. *Identity graph* — the single biggest engineering effort and the thing that makes
+1. *Grain honesty* (per §5) - set expectations that M365/GitHub are seat+adoption, not per-token.
+2. *Cost authority* - Cost Management + price sheet is the source of $; telemetry explains it.
+3. *Identity graph* - the single biggest engineering effort and the thing that makes
    cross-platform chargeback possible.
-4. *Content governance* — prompts/transcripts are sensitive; isolate + Purview + retention.
-5. *Reconciliation loop* — modelled cost vs billed cost variance is itself a Gold metric
+4. *Content governance* - prompts/transcripts are sensitive; isolate + Purview + retention.
+5. *Reconciliation loop* - modelled cost vs billed cost variance is itself a Gold metric
    (already surfaced as `Cost Confidence %`).
 
 **Effort / value:** Bronze connectors ≈ per-source S; Silver identity+cost conform ≈ L
 (highest value); Gold ≈ S (already designed here). The current repo *is* the Gold + semantic
-contract — Fabric bronze/silver just have to deliver these columns.
+contract - Fabric bronze/silver just have to deliver these columns.
