@@ -3,6 +3,7 @@ table dim_agent
 	column agent_key
 		dataType: string
 		isHidden
+		isKey
 		summarizeBy: none
 		sourceColumn: agent_key
 
@@ -82,7 +83,6 @@ table dim_agent
 		dataType: string
 		summarizeBy: none
 		sourceColumn: data_class
-
 
 	partition dim_agent = m
 		mode: import

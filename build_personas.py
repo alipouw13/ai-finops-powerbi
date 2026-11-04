@@ -32,9 +32,15 @@ _MEASURES = {
     "Licensed Seats", "Total Requests", "Active Users", "Cost per Active User",
     "Idle Licensed Users", "Idle Seat Waste (monthly)", "Error Rate",
     "Avg Latency (ms)", "Cost PM", "MoM Cost Delta %", "Cost (30d run-rate)",
-    "Discounted Cost", "Discount Savings", "Cost MTD", "Forecast Cost (EOM)",
-    "Forecast Cost (next 30d, net)", "Attributable Cost", "Unallocated Cost",
-    "Chargeback Coverage %", "Chargeback Cost", "Monthly Budget",
+    "Discounted Cost", "Discount Savings", "FOCUS List Cost", "FOCUS Contracted Cost",
+    "FOCUS Effective Cost", "FOCUS Billed Cost", "Total FOCUS Savings",
+    "Effective Savings Rate (ESR %)", "Negotiated Discount Savings",
+    "Commitment Discount Savings", "PTU Commitment Cost", "PTU Unused Waste",
+    "Commitment Utilization %", "Total Actionable Waste", "Gateway Routed Spend",
+    "Bypassed Gateway Spend", "Gateway Governance %", "Supporting AI Infra Spend",
+    "Supporting Infra % of TCO", "Agent Attributed Spend", "Cost MTD",
+    "Forecast Cost (EOM)", "Forecast Cost (next 30d, net)", "Attributable Cost",
+    "Unallocated Cost", "Chargeback Coverage %", "Chargeback Cost", "Monthly Budget",
     "Budget Variance", "Budget Variance %",
 }
 
@@ -147,48 +153,54 @@ def section(sid, name, display, visuals):
 # --------------------------------------------------------------------- personas
 def page_cfo():
     v = cards_row([
-        ("fact_ai_usage", "Total AI Cost", "Total AI Spend"),
-        ("fact_ai_usage", "Discounted Cost", "Net of Discounts"),
+        ("fact_ai_usage", "Total AI Cost", "FOCUS Effective Cost"),
+        ("fact_ai_usage", "Total FOCUS Savings", "Total FOCUS Savings"),
+        ("fact_ai_usage", "Effective Savings Rate (ESR %)", "FinOps ESR %"),
         ("fact_ai_usage", "Forecast Cost (EOM)", "Forecast (EOM)"),
         ("fact_ai_usage", "Monthly Budget", "Monthly Budget"),
-        ("fact_ai_usage", "Budget Variance %", "Budget Variance %"),
         ("fact_ai_usage", "Chargeback Coverage %", "Chargeback Coverage"),
     ])
     v += [column(16, 150, 624, 300, "dim_business_unit", "business_unit_name",
-                 "Chargeback Cost", "Chargeback by business unit"),
-          line(656, 150, 608, 300, "Total AI Cost", "Daily spend trend"),
+                 "Chargeback Cost", "Chargeback by business unit (Direct + Pro-Rata Unallocated)"),
+          bar(656, 150, 608, 300, "fact_ai_usage", "service_category",
+              "Total AI Cost", "Spend by FOCUS Service Category (AI/ML vs Infra vs SaaS)"),
           table(16, 466, 1248, 236, [
               ("dim_business_unit", "business_unit_name"),
               ("dim_business_unit", "division"),
+              ("fact_ai_usage", "FOCUS List Cost"),
               ("fact_ai_usage", "Total AI Cost"),
+              ("fact_ai_usage", "Total FOCUS Savings"),
               ("fact_ai_usage", "Chargeback Cost"),
               ("fact_ai_usage", "Monthly Budget"),
               ("fact_ai_usage", "Budget Variance"),
               ("fact_ai_usage", "Budget Variance %")],
-              "Business-unit allocation vs budget")]
-    return section(4, "PERSONA_CFO", "5 · CFO — Finance", v)
+              "Business-unit FOCUS cost, savings & full chargeback vs budget")]
+    return section(4, "PERSONA_CFO", "5 · CFO — Finance & Chargeback", v)
 
 
 def page_governance():
     v = cards_row([
-        ("fact_ai_usage", "Active Users", "Active Principals"),
-        ("fact_ai_usage", "Licensed Seats", "Licensed Seats"),
-        ("fact_ai_usage", "Total Requests", "Total Requests"),
-        ("fact_ai_usage", "Cost Confidence %", "Cost Confidence"),
+        ("fact_ai_usage", "Gateway Governance %", "APIM Gateway Routed %"),
+        ("fact_ai_usage", "Bypassed Gateway Spend", "Bypassed Gateway $"),
+        ("fact_ai_usage", "Supporting Infra % of TCO", "Supporting Infra %"),
+        ("fact_ai_usage", "Agent Attributed Spend", "Agent Attributed $"),
+        ("fact_ai_usage", "Unallocated Cost", "Unallocated Spend"),
+        ("fact_ai_usage", "Cost Confidence %", "Cost Confidence %"),
     ])
     v += [column(16, 150, 624, 300, "dim_platform", "platform_name",
-                 "Total AI Cost", "Platform adoption (spend)"),
+                 "Total AI Cost", "Spend by AI Platform & Supporting Infrastructure"),
           bar(656, 150, 608, 300, "dim_identity", "identity_class",
-              "Active Users", "Adoption by principal type"),
+              "Total AI Cost", "Spend by Principal Class (Human vs ServicePrincipal vs Agent)"),
           table(16, 466, 1248, 236, [
               ("dim_platform", "platform_name"),
               ("dim_platform", "data_source"),
               ("dim_platform", "billing_model"),
               ("dim_platform", "is_variable_cost"),
               ("fact_ai_usage", "Total AI Cost"),
+              ("fact_ai_usage", "Gateway Routed Spend"),
               ("fact_ai_usage", "Cost Confidence %")],
-              "Platform policy & risk register — REAL vs MOCK provenance")]
-    return section(5, "PERSONA_GOV", "6 · Governance", v)
+              "Platform Governance, APIM Gateway Routing & Provenance Register")]
+    return section(5, "PERSONA_GOV", "6 · Governance & Gateway Control", v)
 
 
 def page_engineering():
@@ -200,62 +212,73 @@ def page_engineering():
         ("fact_ai_usage", "Avg Latency (ms)", "Avg Latency (ms)"),
         ("fact_ai_usage", "Error Rate", "Error Rate"),
     ])
-    v += [line(16, 150, 624, 300, "Total Tokens", "Token consumption trend"),
+    v += [line(16, 150, 624, 300, "Total Tokens", "Daily Token Consumption across APIM AI Gateway"),
           column(656, 150, 608, 300, "dim_model", "model_name",
-                 "Cost per 1K Tokens", "Unit economics by model"),
+                 "Cost per 1K Tokens", "Unit Economics ($ / 1K Tokens) by Model"),
           table(16, 466, 1248, 236, [
               ("dim_model", "model_name"),
               ("dim_model", "provider"),
+              ("dim_model", "modality"),
               ("fact_ai_usage", "Total Tokens"),
               ("fact_ai_usage", "Cached Tokens"),
               ("fact_ai_usage", "Cache Hit Rate"),
               ("fact_ai_usage", "Avg Latency (ms)"),
-              ("fact_ai_usage", "Error Rate")],
-              "Model performance & APIM telemetry (Foundry = REAL)")]
-    return section(6, "PERSONA_ENG", "7 · Engineering", v)
+              ("fact_ai_usage", "Error Rate"),
+              ("fact_ai_usage", "Total AI Cost")],
+              "Model & Azure AI Service Performance + APIM Gateway Telemetry")]
+    return section(6, "PERSONA_ENG", "7 · Engineering — APIM & Model SLOs", v)
 
 
 def page_appowner():
     v = cards_row([
-        ("fact_ai_usage", "Total AI Cost", "Application Spend"),
-        ("fact_ai_usage", "Variable Cost", "Variable Cost"),
+        ("fact_ai_usage", "Total AI Cost", "Total Application TCO"),
+        ("fact_ai_usage", "Supporting AI Infra Spend", "Supporting Infra $"),
+        ("fact_ai_usage", "Supporting Infra % of TCO", "Infra % of TCO"),
+        ("fact_ai_usage", "Agent Attributed Spend", "Agent Attributed $"),
         ("fact_ai_usage", "Total Tokens", "Total Tokens"),
-        ("fact_ai_usage", "MoM Cost Delta %", "MoM Cost Delta"),
+        ("fact_ai_usage", "MoM Cost Delta %", "MoM Cost Delta %"),
     ])
     v += [column(16, 150, 624, 300, "dim_application", "application_name",
-                 "Total AI Cost", "Spend by application"),
-          line(656, 150, 608, 300, "Total AI Cost", "Application spend trend"),
+                 "Total AI Cost", "Total AI Spend by Application / Agent Workload"),
+          bar(656, 150, 608, 300, "fact_ai_usage", "service_name",
+              "Total AI Cost", "Spend by Underlying Azure AI & Supporting Infra Service"),
           table(16, 466, 1248, 236, [
               ("dim_application", "application_name"),
               ("dim_application", "application_type"),
               ("dim_application", "criticality"),
+              ("dim_application", "owner_upn"),
               ("fact_ai_usage", "Total AI Cost"),
               ("fact_ai_usage", "Total Tokens"),
+              ("fact_ai_usage", "Total Requests"),
               ("fact_ai_usage", "MoM Cost Delta %")],
-              "Application cost, model usage & trend")]
-    return section(7, "PERSONA_APP", "8 · Application Owner", v)
+              "Application TCO, Accountable Owner, Token Volume & MoM Trend")]
+    return section(7, "PERSONA_APP", "8 · Application & RAG TCO Owner", v)
 
 
 def page_license():
     v = cards_row([
         ("fact_ai_usage", "Idle Licensed Users", "Idle Licensed Users"),
-        ("fact_ai_usage", "Idle Seat Waste (monthly)", "Reclaimable / mo"),
-        ("fact_ai_usage", "Licensed Seats", "Licensed Seats"),
+        ("fact_ai_usage", "Idle Seat Waste (monthly)", "Reclaimable Seat $ / mo"),
+        ("fact_ai_usage", "Licensed Seats", "Total Licensed Seats"),
+        ("fact_ai_usage", "Copilot Credits", "Copilot Credits"),
+        ("fact_ai_usage", "Premium Requests", "GitHub Premium Reqs"),
         ("fact_ai_usage", "Cost per Active User", "Cost / Active User"),
     ])
     v += [column(16, 150, 624, 300, "dim_business_unit", "business_unit_name",
-                 "Idle Seat Waste (monthly)", "Reclaimable spend by business unit"),
-          bar(656, 150, 608, 300, "dim_business_unit", "business_unit_name",
-              "Active Users", "Active users by business unit"),
+                 "Idle Seat Waste (monthly)", "Reclaimable Seat Waste by Business Unit"),
+          bar(656, 150, 608, 300, "fact_ai_usage", "pricing_category",
+              "Copilot Credits", "Copilot Credits by Billing Tier (Prepaid Pack vs P3 Commit vs PAYG)"),
           table(16, 466, 1248, 236, [
               ("dim_identity", "display_name"),
               ("dim_identity", "team"),
               ("dim_identity", "business_unit"),
               ("fact_ai_usage", "Licensed Seats"),
-              ("fact_ai_usage", "Total Requests"),
-              ("fact_ai_usage", "M365 Prompts")],
-              "Seat utilisation — zero activity = reclaim candidate")]
-    return section(8, "PERSONA_LIC", "9 · License Optimization", v)
+              ("fact_ai_usage", "M365 Prompts"),
+              ("fact_ai_usage", "Premium Requests"),
+              ("fact_ai_usage", "Copilot Credits"),
+              ("fact_ai_usage", "Total AI Cost")],
+              "Seat & Credit Utilisation — Zero Activity = Reclaim Candidate")]
+    return section(8, "PERSONA_LIC", "9 · License & Credit Optimization", v)
 
 
 def _ds_chart(x, y, w, h, vtype, cat_c, meas, title):
@@ -314,20 +337,22 @@ def page_agents():
         (i, "Agents", "Agents in registry"),
         (i, "Unowned Tenant Agents", "Unowned tenant agents"),
         (i, "Agents With Entra Identity %", "With Entra agent ID"),
-        (i, "Agents With File or Site Access", "Can read files / sites"),
+        ("fact_ai_usage", "Agent Attributed Spend", "Agent Attributed Spend"),
         (act, "Agent Active Users", "Agent users (export)"),
         (act, "Agent Users Resolved %", "Users matched to identity"),
     ])
     v += [_catval(16, 150, 408, 300, "clusteredBarChart", a, "owner_class", i, "Agents",
                   "Agents by ownership (Unowned = governance gap)"),
           _catval(440, 150, 408, 300, "clusteredBarChart", a, "platform", i, "Agents",
-                  "Agents by build platform (blank = store / unclassified)"),
-          _catval(864, 150, 400, 300, "clusteredColumnChart", a, "status", i, "Agents", "Agents by status"),
+                  "Agents by build platform (Foundry, Copilot Studio, Toolkit, Store)"),
+          _catval(864, 150, 400, 300, "clusteredBarChart", a, "agent_name", "fact_ai_usage", "Agent Attributed Spend",
+                  "Attributed AI Spend by Registered Agent"),
           table(16, 466, 1248, 236, [
               (a, "agent_name"), (a, "publisher"), (a, "publisher_type"), (a, "owner_class"),
-              (a, "owner_upn"), (a, "platform"), (a, "status"), (i, "Agents With Entra Identity")],
-              "Agent 365 registry (REAL export). No cost per agent is exposed by Agent 365; cost joins by owner or tag")]
-    return section(11, "AGENT365", "12 · Agent 365 Governance", v)
+              (a, "owner_upn"), (a, "platform"), (a, "status"),
+              (i, "Agents With Entra Identity"), ("fact_ai_usage", "Total AI Cost")],
+              "Agent 365 Registry (REAL export) Linked to FOCUS & Copilot Studio Spend via agent_key")]
+    return section(11, "AGENT365", "12 · Agent 365 Governance & Spend", v)
 
 
 def page_personas():

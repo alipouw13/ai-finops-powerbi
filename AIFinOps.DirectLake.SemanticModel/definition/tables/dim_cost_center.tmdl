@@ -1,0 +1,30 @@
+table dim_cost_center
+
+	column cost_center_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: cost_center_key
+
+	column cost_center_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_center_name
+
+	column business_unit
+		dataType: string
+		summarizeBy: none
+		sourceColumn: business_unit
+
+	column owner_upn
+		dataType: string
+		summarizeBy: none
+		sourceColumn: owner_upn
+
+	partition dim_cost_center = entity
+		mode: directLake
+		source
+			entityName: dim_cost_center
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

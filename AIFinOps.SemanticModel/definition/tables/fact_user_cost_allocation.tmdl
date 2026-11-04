@@ -60,26 +60,31 @@ table fact_user_cost_allocation
 
 	column input_tokens
 		dataType: double
+		isHidden
 		summarizeBy: none
 		sourceColumn: input_tokens
 
 	column output_tokens
 		dataType: double
+		isHidden
 		summarizeBy: none
 		sourceColumn: output_tokens
 
 	column total_tokens
 		dataType: double
+		isHidden
 		summarizeBy: none
 		sourceColumn: total_tokens
 
 	column requests
 		dataType: double
+		isHidden
 		summarizeBy: none
 		sourceColumn: requests
 
 	column cost_usd
 		dataType: double
+		isHidden
 		summarizeBy: none
 		sourceColumn: cost_usd
 

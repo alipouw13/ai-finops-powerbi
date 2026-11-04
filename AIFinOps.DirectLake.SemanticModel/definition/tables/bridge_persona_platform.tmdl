@@ -1,0 +1,41 @@
+table bridge_persona_platform
+
+	column persona_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: persona_key
+
+	column platform_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: platform_key
+
+	column affinity
+		dataType: string
+		summarizeBy: none
+		sourceColumn: affinity
+
+	column is_primary
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: is_primary
+
+	column bridge_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: bridge_key
+
+
+	/// Share of the selected persona AI spend that lands on the primary tool of that persona.
+	measure 'Spend on Primary Tool %' = DIVIDE(CALCULATE([Total AI Cost], TREATAS(CALCULATETABLE(VALUES(bridge_persona_platform[platform_key]), bridge_persona_platform[is_primary] = 1), dim_platform[platform_key])), [Total AI Cost])
+		formatString: 0.0%
+
+	partition bridge_persona_platform = entity
+		mode: directLake
+		source
+			entityName: bridge_persona_platform
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

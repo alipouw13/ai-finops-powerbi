@@ -1,8 +1,8 @@
 persona_key,persona_name,persona_order,description
-PERS-KNOW,Knowledge & Frontline Worker,1,Consumes AI inside the tools they already use
-PERS-AIDS,AI Engineer / Data Scientist,4,Builds and tunes models and AI pipelines
-PERS-PLAT,Platform / Infrastructure Engineer,5,Runs the cloud and AI platform
-PERS-WORKLOAD,Workload (non-human),6,Service principals and managed identities
-PERS-MAKER,Business-Led Developer / Maker,2,Builds low-code agents and flows
-PERS-UNASSIGNED,Unassigned,7,Human identity with no persona mapping yet
-PERS-DEV,Software Developer,3,Writes and ships application code
+PERS-KNOW,Knowledge & Frontline Worker,1,Consumes AI inside Microsoft 365 apps and enterprise agents
+PERS-MAKER,Business-Led Developer / Maker,2,Builds low-code Copilot Studio agents and Power Platform flows
+PERS-DEV,Software Developer,3,Writes and ships application code with GitHub Copilot and Foundry APIs
+PERS-AIDS,AI Engineer / Data Scientist,4,"Builds and tunes models, RAG pipelines, and ML workloads in Foundry & Azure ML"
+PERS-PLAT,Platform / Infrastructure Engineer,5,"Operates the APIM AI Gateway, AI Search, Fabric capacity, and guardrails"
+PERS-WORKLOAD,Workload (non-human),6,"Service principals, managed identities, and autonomous agents"
+PERS-UNASSIGNED,Unassigned,7,Identity with no persona mapping yet

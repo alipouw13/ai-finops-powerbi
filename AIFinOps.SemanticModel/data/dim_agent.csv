@@ -1,0 +1,433 @@
+agent_key,agent_name,status,publisher,publisher_type,platform,version,owner_upn,owner_class,channel,deployment,entra_agent_id,environment_id,created_date,last_modified_date,data_class
+P_5581ba3a-c317-9106-21b4-f7514ee5e17d,Lexis® Create DMS for Copilot,Available,Henchman B.V,ThirdParty,Not Available,1.1.0,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2024-04-14,2026-09-24,REAL
+P_9acb39d9-a1f8-47cf-2d9f-5193a1724c9e,Creately,Available,Creately (Cinergix Pty. Ltd.),ThirdParty,Not Available,2.5.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2024-06-14,2026-10-10,REAL
+P_c98e5b3a-2716-b130-177b-d875ea13064e,Autopilot Accounts Payable AI,Available,Autopilot Workflow Solutions,ThirdParty,Not Available,2.0.1,,Publisher-managed,Outlook;Teams;Copilot;Office,acquiredForNone,,,2024-03-15,2026-09-24,REAL
+P_4a92d831-6e6b-dcb7-6bc3-fee57f8e7c37,Verto 365,Available,TMI SYSTEMS LIMITED,ThirdParty,Not Available,1.2.2,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2024-05-16,2026-09-24,REAL
+P_e2e29e2c-3b7e-9d9f-debd-bdbca826e24c,NexAA,Available,TVS Next Ltd,ThirdParty,Not Available,4.0.1,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2026-04-09,2026-10-16,REAL
+P_98d00815-dc80-32b2-daa0-9451a024b9a6,Lucidchart for Microsoft Teams,Available,Lucid Software Inc,ThirdParty,Not Available,1.2.8,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2024-08-06,2026-09-24,REAL
+P_f2104ff7-e173-21bc-60df-2dffb7832eb4,iPlanner Pro for Teams,Available,iGlobe,ThirdParty,Not Available,1.0.50,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2024-10-06,2026-09-24,REAL
+P_2d63ef3c-adb7-4b3a-bb64-231320120ec9,Dropbox,Available,Dropbox Inc.,ThirdParty,Not Available,1.2.17,,Publisher-managed,Teams;Outlook;Copilot;Office,acquiredForNone,,,2024-08-03,2026-10-01,REAL
+P_964a4682-111f-ff92-9366-536cb8e6d4f6,ALVAO,Available,ALVAO s.r.o.,ThirdParty,Not Available,1.1.33,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2024-03-01,2026-09-24,REAL
+P_9946b656-2c96-e9fa-4ce4-8ad96c5b789b,Jurisprudência GPT,Available,Studio 365,ThirdParty,Not Available,1.6.1,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2024-06-03,2026-09-24,REAL
+P_d297d49e-2e52-b555-f7da-4746436e600b,Lupl for Teams,Available,"Lupl, Inc.",ThirdParty,Not Available,1.1.1,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2024-11-22,2026-10-16,REAL
+P_37eaa533-3e63-8645-7602-0696f7462bbb,Priority Matrix,Available,Appfluence Inc,ThirdParty,Not Available,1.1.35,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-10-13,2026-10-13,REAL
+P_e68d994e-c4bb-65d4-13ad-dfc71a6a7fcd,Partner Onboarding,Available,Datamatics Global Services Ltd,ThirdParty,Not Available,1.0.19,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2024-12-12,2026-10-15,REAL
+P_c9d1d96f-eecd-a05b-34de-9b49bd36a163,Backlog,Available,Nulab Inc.,ThirdParty,Not Available,1.2.1,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2024-06-10,2026-09-25,REAL
+P_e3d64609-7a28-6de6-3093-402c20bb96ce,Writing Coach,Available,Microsoft Corporation,FirstParty,Not Available,1.0.0,,Microsoft-managed,Copilot,acquiredForNone,,,2026-04-01,2026-09-24,REAL
+P_f11bb333-9020-9598-f82d-1f21486ae2dc,Panopto for Microsoft Teams,Available,Panopto.com,ThirdParty,Not Available,1.3.9,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2025-03-10,2026-10-13,REAL
+P_0144db69-dd94-443d-cd7e-f3aaf0f6935c,Simpatico,Available,Mesh Assist Pty Ltd,ThirdParty,Not Available,1.0.27,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2025-02-19,2026-10-10,REAL
+P_0023883f-09d2-d7bd-03a1-06b6a0d84c6c,Booking Room Pro,Available,Witivio,ThirdParty,Not Available,3.0.1,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2024-10-15,2026-09-24,REAL
+P_be9a59a1-37ff-789c-e3e9-ef4b0ce1d262,Abi,Available,Beroe,ThirdParty,Not Available,1.1.1,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2024-12-02,2026-09-24,REAL
+P_9be3f265-1c0c-756d-90c1-c7c330945899,Workway,Available,Mindvalley,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot;Outlook;Teams;Office,acquiredForNone,,,2024-10-15,2025-07-17,REAL
+P_dba2ae65-b3b5-62ed-635e-4ef764bf2ac1,Teams Manager,Available,Solutions2Share,ThirdParty,Not Available,3.3.4,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2024-10-15,2026-09-25,REAL
+P_9c6a19d5-5f0a-7678-7cb2-e64a6fe06504,Presentations AI,Available,infographfx technologies,ThirdParty,Not Available,2.4.16,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-04-04,2026-09-24,REAL
+P_cf616f06-271b-8272-a049-a1f3144453bf,PHONE APPLI PEOPLE bot,Available,PHONE APPLI,ThirdParty,Not Available,1.2.0,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-04-01,2026-09-24,REAL
+P_0dba957f-3c3e-615d-cbd7-4c51d16d897c,ORSERS HCM Agent,Available,ORSERS Consulting Services,ThirdParty,Not Available,3.1.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-03-20,2026-10-10,REAL
+P_7c69ad60-9565-29c7-8bd9-d83f454ee238,Confluence Cloud,Available,Atlassian.com,ThirdParty,Not Available,2025.3.11,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2025-02-28,2026-09-24,REAL
+P_4f0fcef3-4ed8-d173-8300-f1a1b9545537,Focusworks AI Agent,Available,Augmentech Ltd,ThirdParty,Not Available,1.2.1,,Publisher-managed,Copilot,acquiredForNone,,,2025-04-30,2026-10-10,REAL
+P_1ad856f0-38f9-d6a1-b724-10c6edbbf739,NetDocuments Copilot (US),Available,NetDocuments Inc,ThirdParty,Not Available,1.0.10,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2025-07-18,2026-09-24,REAL
+P_aa158823-7ff5-4cda-bd35-36e5b2fdd5d1,Sift,Available,"Sift, LLC",ThirdParty,Not Available,4.2.0,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2025-05-08,2026-10-16,REAL
+P_4295c25c-322d-8ee4-68d5-a51e438b4fb2,iGlobe CRM,Available,iGlobe,ThirdParty,Not Available,3.1.7,,Publisher-managed,Copilot;Teams;Outlook;Office,acquiredForNone,,,2025-05-26,2026-10-16,REAL
+P_fcaaab0f-7062-e237-7557-77b846a22444,Career Coach,Available,Microsoft Corporation,FirstParty,Not Available,1.2.0,,Microsoft-managed,Copilot,acquiredForNone,,,2024-10-10,2026-09-24,REAL
+P_be483bea-dc19-b6ae-1d69-fde1f2c7b661,Idea Coach,Available,Microsoft Corporation,FirstParty,Not Available,1.3.0,,Microsoft-managed,Copilot,acquiredForNone,,,2025-05-11,2026-09-24,REAL
+P_f0ff38f1-4d81-a9b7-dbf1-b161328daa1f,Prompt Coach,Available,Microsoft Corporation,FirstParty,Not Available,1.3.0,,Microsoft-managed,Copilot,acquiredForNone,,,2024-10-08,2026-09-24,REAL
+P_93ca5108-820b-e163-147b-1419cce9d53e,EcoMatcher,Available,EcoMatcher Limited,ThirdParty,Not Available,3.1.16,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2025-07-07,2026-10-15,REAL
+P_ae7859a7-30f9-95e9-aeb7-4f6c0c4b53ed,NetDocuments Copilot (CAN),Available,NetDocuments Inc,ThirdParty,Not Available,1.0.14,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2025-07-07,2026-10-15,REAL
+P_0bb56a96-1481-d944-bca6-d02184e95e80,NetDocuments Copilot (AU),Available,NetDocuments Inc,ThirdParty,Not Available,1.0.14,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2025-07-07,2026-10-16,REAL
+P_5bc5e167-bad2-86ae-3179-a68b36df6880,NetDocuments Copilot (DE),Available,NetDocuments Inc,ThirdParty,Not Available,1.0.14,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2025-07-07,2026-10-16,REAL
+P_70db558f-972e-c9e8-4585-c8ad95f2cfcf,ServiceDesk Plus Cloud for Microsoft Teams,Available,Zoho Corporation Private Limited,ThirdParty,Not Available,7.0.0,,Publisher-managed,Copilot;Outlook;Teams;Office,acquiredForNone,,,2023-11-20,2026-05-23,REAL
+P_3d4b827e-6cd0-fb2a-a86d-6bd440af0fec,Vani,Available,Zoho Corporation Private Limited,ThirdParty,Not Available,2.0.0,,Publisher-managed,Copilot;Office;Outlook;Teams,acquiredForNone,,,2025-07-18,2026-05-13,REAL
+P_81ac6fae-722c-4ce8-672a-298a9ec2435a,Zoho Projects,Available,Zoho Corporation Private Limited,ThirdParty,Not Available,5.0.0,,Publisher-managed,Copilot;Outlook;Teams;Office,acquiredForNone,,,2025-07-17,2026-05-19,REAL
+P_302a0c99-13fa-b72a-4494-3bcbaa515c3d,SlidesGPT,Available,Lightstone GmbH,ThirdParty,Not Available,1.0.5,,Publisher-managed,Copilot,acquiredForNone,,,2025-09-03,2026-10-15,REAL
+P_855fb978-0c53-e355-7771-d8402fc75218,SAP Joule,Available,SAP SE,ThirdParty,Not Available,1.1.18,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-08-18,2026-09-24,REAL
+P_400b4085-0fa6-3da0-4002-308aae86557d,Insight+ Ask Knowledge,Available,iManage Power Platform Connector,ThirdParty,Not Available,1.0.13,,Publisher-managed,Copilot,acquiredForNone,,,2025-10-21,2026-10-16,REAL
+P_dfbcba81-f7e1-1bc3-e495-9d4f24b7cc16,Gloat Copilot Agent,Available,Gloat,ThirdParty,Not Available,1.3.2,,Publisher-managed,Copilot,acquiredForNone,,,2025-10-30,2026-10-10,REAL
+P_ebc4513e-b752-ab7a-7c83-36da006b9bdf,TSIA Intelligence,Available,TSIA (Technology & Services Industry Association),ThirdParty,Not Available,1.0.1,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-10-30,2026-10-16,REAL
+P_cbc3b006-7aa6-bb05-14ca-82609733918a,Trados,Available,RWS GROUP LIMITED,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-04-01,2026-09-24,REAL
+P_a7920a86-f7d4-3c02-fcd3-52664e4f810b,Zendesk Agent,Available,Zendesk Inc,ThirdParty,Not Available,1.0.1,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-11,2026-10-10,REAL
+P_452a7b60-0181-2a3b-8523-d1c1c5339541,LawToolBox,Available,LawToolBox.com Inc.,ThirdParty,Not Available,1.0.7,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2025-11-19,2026-10-27,REAL
+P_2e2b2bc7-7fb4-6f8e-b0f9-6d1e306fdb17,RechtGPT für Copilot & Teams,Available,Prime AI GmbH,ThirdParty,Not Available,1.1.2,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-10,2026-10-16,REAL
+P_c26b71ca-35d9-0329-aeec-b814838c3cd6,Mail Pro,Available,Witivio,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-04,2026-10-10,REAL
+P_dbc99069-6152-cbb5-cd9f-8614927ecc8a,Day One Employee Onboarding,Available,Kainos Software,ThirdParty,Not Available,1.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2025-12-16,2026-10-16,REAL
+P_13001d9b-2af4-bd2f-5458-ffa544bc62b7,ASC Recording Insights,Available,ASC Technologies AG,ThirdParty,Not Available,2.8.4,,Publisher-managed,Copilot;Office;Outlook;Teams,acquiredForNone,,,2025-10-21,2026-09-24,REAL
+P_0397e9d5-bc9d-3834-134e-b7a73585c4fc,Website Generator by B12,Available,B12,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2025-12-18,2026-10-10,REAL
+P_29df7123-7067-9a82-562f-043ba46a0ccf,Certifi,Available,OptimusInformation,ThirdParty,Not Available,2.0.1,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2025-11-28,2026-10-16,REAL
+P_a6a731cd-5a3f-e4c1-d758-275759248a0e,Cornerstone,Available,Cornerstone OnDemand,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2025-11-18,2026-09-24,REAL
+P_91fe45e4-9413-b0e6-dad9-c855b4952367,Workflows (Frontier),Available,Microsoft Corporation,FirstParty,Not Available,1.1.5,,Microsoft-managed,Copilot,acquiredForNone,,,2025-09-18,2026-09-24,REAL
+P_6d45247b-483c-192b-bf7a-dbfdd31e2262,Youkeeps AI Personal Assistant,Available,Youkeeps Global,ThirdParty,Not Available,2.27.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-02-02,2026-10-28,REAL
+P_a1812e73-8273-01a6-7ee7-45a3dab2145b,License Agent,Available,Data-Driven AI,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-04-01,2026-09-24,REAL
+P_15de840c-6838-3e58-c00f-43634b01a712,LawVu for Microsoft Teams,Available,LAWVU LIMITED,ThirdParty,Not Available,1.7.7,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-02-09,2026-10-16,REAL
+P_720226f2-da2b-b5c6-c0b9-4ff3405ad25e,Frontline Agent (Preview),Available,Microsoft Corporation,FirstParty,Not Available,1.1.4,,Microsoft-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-09-11,2026-10-10,REAL
+P_e5366c60-5b41-8588-696e-e8bc2328e608,Finance Admin for Xero,Available,Data-Driven AI,ThirdParty,Not Available,1.0.4,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-11-14,2026-09-24,REAL
+P_f57f56cb-990d-82b4-0610-b9ed0e200bfa,Contract Stress Test,Available,Dovetail by Pivotal Edge AI,ThirdParty,Not Available,1.0.241,,Publisher-managed,Copilot,acquiredForNone,,,2026-02-17,2026-09-24,REAL
+P_47c082d3-392a-90ba-9503-2b5c2f97137a,App Builder (Frontier),Available,Microsoft Corporation,FirstParty,Not Available,1.0.10,,Microsoft-managed,Copilot,acquiredForNone,,,2025-10-06,2026-09-24,REAL
+P_8ec49549-56ac-e7d4-e3a5-da5cb51c3319,Starmind,Available,Starmind (inc),ThirdParty,Not Available,7.0.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-02-19,2026-10-10,REAL
+P_2fb58bc2-917d-9b6f-af31-ccae69949a72,ADP Assist,Available,"ADP, Inc.",ThirdParty,Not Available,1.0.22,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-11-12,2026-09-24,REAL
+P_2a48ff95-9223-2af0-69c4-fd49382f0226,Snowflake Cortex Agents,Available,Snowflake Inc,ThirdParty,Not Available,1.2.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-08-27,2026-09-24,REAL
+P_b35428a0-993b-1b79-97bc-901732a24ee6,Fusion™ EXECUTIVE EDGE,Available,The Fusion Syndicate,ThirdParty,Not Available,2.2.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-03-05,2026-10-16,REAL
+P_b6fc21a0-58f6-eaf8-6cbd-6b9951673855,Sophos Intelix,Available,Sophos Ltd.,ThirdParty,Not Available,1.0.37,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-11-20,2026-09-24,REAL
+P_c22e65a4-6345-bbdc-2dc8-18fa142c629d,Genspark,Available,Genspark,ThirdParty,Not Available,1.0.5,,Publisher-managed,Copilot,acquiredForNone,,,2026-03-12,2026-09-24,REAL
+P_8c19c64a-216e-11de-e3f5-ced9ae08c233,Content Aviator (CA),Available,OpenText Americas,ThirdParty,Not Available,26.1.5,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2026-04-22,2026-10-16,REAL
+P_27501ac8-65bd-4487-2604-ca8848da76d7,MyHub,Available,"AvePoint, inc.",ThirdParty,Not Available,1.2.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2025-07-17,2026-09-24,REAL
+P_bef3a50c-337a-2c9d-3d13-b8cd1f1589a4,AI for Work,Available,KoreaiAzureAgentMarketplace,ThirdParty,Not Available,1.0.4,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-03-18,2026-10-16,REAL
+P_482b5243-c377-5a5d-d187-63349eb2d106,Supermetrics Marketing Analyst,Available,Supermetrics,ThirdParty,Not Available,1.0.5,,Publisher-managed,Copilot,acquiredForNone,,,2026-03-18,2026-09-24,REAL
+P_2060d6a9-48f3-fdcf-bb8e-ee328a5fc4d2,Oceans of Data,Available,Oceans ehf,ThirdParty,Not Available,1.0.4,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-03-27,2026-10-15,REAL
+P_e44c9c07-7cc1-8060-b1f7-04283153c3e9,Sight Machine Agent,Available,"Sight Machine, Inc",ThirdParty,Not Available,1.0.5,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-29,2026-10-29,REAL
+P_fad8695c-d038-7938-d570-1367034f1790,Helpdesk 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.324.1738,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-03-28,2026-09-25,REAL
+P_79bc29cb-cae9-b032-0e02-85d897c538ff,Wegrow for Copilot,Available,Wegrow,ThirdParty,Not Available,1.0.24,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-15,2026-10-15,REAL
+P_cefdf231-554e-ff6e-547e-24d43136bf44,Content Aviator (US),Available,OpenText Americas,ThirdParty,Not Available,26.1.6,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2026-03-27,2026-09-24,REAL
+P_95284335-5094-c9fa-625a-a1c81cbbfa57,Content Aviator (AU),Available,OpenText Americas,ThirdParty,Not Available,26.1.6,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2026-03-30,2026-10-16,REAL
+P_85e36237-1320-c5c7-bb43-6b22e3f34673,ClickWith Copilot,Available,Smart Leader,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-04-08,2026-09-25,REAL
+P_09044e4c-5168-a9d5-bb05-9862e8097281,TeamViewer for Microsoft 365 and Copilot,Available,teamviewergmbh,ThirdParty,Not Available,1.1.11,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-11-02,2026-11-04,REAL
+P_4dd0c925-0af3-90c6-eda0-814ec3bbc3c7,Human Success Agent,Available,Zensai International Aps,ThirdParty,Not Available,2.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-04-02,2026-10-16,REAL
+P_563ee028-1600-28fe-4347-887fd09e2a5c,TagMyFav,Available,AVISHKARAM TECHNOLOGIES PVT. LTD.,ThirdParty,Not Available,1.0.3,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-04-08,2026-10-16,REAL
+P_b8fa35e9-6b2e-b5e7-e2da-36bba360567b,Abe,Available,Dalikoo,ThirdParty,Not Available,1.0.82,,Publisher-managed,Teams;Outlook;Copilot;Office,acquiredForNone,,,2026-04-09,2026-10-16,REAL
+P_332c56a5-83ff-3de1-5eda-0700f9e15e87,GPTfy AI + Salesforce,Available,GPTfy,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-06,2026-10-10,REAL
+P_ee8b021b-1ea3-4424-90bd-31734a4e89f7,DataMiner Assistant,Available,Skyline Communications NV,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-04-23,2026-10-10,REAL
+P_e960eca5-93c2-ccc8-cf56-a7c879f51338,Perform & Engage 365,Available,Zensai UKI LTD,ThirdParty,Not Available,1.8.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-04-23,2026-10-21,REAL
+P_88bb4e49-4933-4c06-b006-ecc37797a1cc,Webex AI Agent,Available,Cisco  Webex,ThirdParty,Not Available,1.0.5,,Publisher-managed,Copilot,acquiredForNone,,,2026-04-22,2026-09-24,REAL
+P_05ee3857-9c3b-6c73-f980-cf529794c14b,Zoho Desk,Available,Zoho Corporation Private Limited,ThirdParty,Not Available,3.0.0,,Publisher-managed,Copilot;Outlook;Teams;Office,acquiredForNone,,,2026-04-23,2026-09-24,REAL
+P_3b54840a-9ba6-3c26-2294-740d1566f8e5,Waldo Desk & Parking Booking,Available,Moffi,ThirdParty,Not Available,2.2.5,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2023-11-20,2026-09-24,REAL
+P_217a610c-3b42-d0aa-c5bb-5ead8aa49d9f,Workday,Available,Workday,ThirdParty,Not Available,4.0.12,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2025-05-10,2026-09-13,REAL
+P_5646deed-6665-9ce2-2be5-68d0462bdbc3,Zendesk Support Assistant,Available,Zendesk Inc,ThirdParty,Not Available,1.3.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-04-30,2026-09-24,REAL
+P_5401d6bf-428f-3e0a-e92a-8f45c7d9b02a,Darwinbox Super Agent,Available,Darwinbox Digital Solutions Private Limited,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-18,2026-10-10,REAL
+P_945a9ea3-3475-9cb0-d057-75cfae8aed5d,Diagram Maker Pro,Available,Witivio,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-03-27,2026-09-24,REAL
+P_153d4a36-d181-9ace-36d6-ff633e38304d,Growthguru.ai Partner Agents,Available,Growthguru.ai,ThirdParty,Not Available,2.5.1,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-05-06,2026-10-16,REAL
+P_56800449-bc8a-44b9-0b97-979e841c643c,NetDocuments Copilot (UK),Available,NetDocuments Inc,ThirdParty,Not Available,1.0.15,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2026-05-08,2026-10-16,REAL
+P_2a39b84d-a02d-377e-9930-299d7c385d49,Inventory Ops,Available,"Blue Yonder Group, Inc",ThirdParty,Not Available,2026.1.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-23,2026-10-27,REAL
+P_e26e0a7b-4d1e-9a21-d0b6-ddf4a2f214f9,Backbone AI,Available,Backbone AI,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-05,2026-10-16,REAL
+P_2760a8ae-0412-fb83-d6b0-9f04d143b706,AutoMemo,Available,ソースネクスト株式会社,ThirdParty,Not Available,1.0.8,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-05,2026-10-16,REAL
+P_bdd828ff-f72d-5659-3158-935eed885bf0,LegalMike,Available,Legalmike.ai,ThirdParty,Not Available,1.1.6,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-03-28,2026-09-24,REAL
+P_c12fe216-6f88-d2a0-eb26-bc2345ec7a79,Manager Insights Pro,Available,Witivio,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-19,2026-10-10,REAL
+P_a9b4f135-6c81-77c5-4118-5598d77905c2,SharePoint page agent,Available,Microsoft Corporation,FirstParty,Not Available,1.0.25,,Microsoft-managed,Copilot,acquiredForNone,,,2026-10-19,2026-10-19,REAL
+P_cfb85a3c-f731-60f8-0d8d-438f22b5eab9,AI Document Processor - UK Healthcare,Available,Connectbatch  Limited,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-17,2026-10-16,REAL
+P_d0d240ba-2fdc-f617-4190-ad1249b7217f,Kanban Project Task Board,Available,IE Ilia Pirozhenko,ThirdParty,Not Available,1.0.7,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2026-05-15,2026-10-10,REAL
+P_23c023c8-704f-fb8e-7627-17e4b15b3bca,MyHub for AOS-US,Available,"AvePoint, inc.",ThirdParty,Not Available,1.2.1,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-05-20,2026-10-16,REAL
+P_41b8be48-b122-ed35-a01d-6e87dae002f3,CLM365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.515.1530,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-05-20,2026-09-18,REAL
+P_5b99927c-dcd2-3654-aacb-f8d82a980c83,Finance (Frontier),Available,Microsoft Corporation,FirstParty,Not Available,1.20260520.1,,Microsoft-managed,Copilot,acquiredForNone,,,2026-05-20,2026-10-16,REAL
+P_43c0d7d5-8728-691a-a53d-c668d331f27f,Vantage Circle Agent,Available,Bargain Technologies,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-21,2026-10-15,REAL
+P_5d415318-004b-a362-f6a8-b1aba0e3f120,Data-Driven Sales Agent,Available,Data-Driven AI,ThirdParty,Not Available,1.0.1,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-05-25,2026-10-16,REAL
+P_b16281ca-a328-705f-bc57-0b86af9074b4,Velocity - Leave Agent,Available,PEAKUP,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-01,2026-10-16,REAL
+P_4fec069c-d5ac-5abc-152e-ef930681d508,ChalkHR Polls & Surveys,Available,ChalkHR,ThirdParty,Not Available,1.0.51,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-05-25,2026-10-27,REAL
+P_3c0d787e-952b-aad1-2b19-1720102093b2,YDISTRI Industry Copilot,Available,YDISTRI,ThirdParty,Not Available,1.0.13,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-05-25,2026-10-16,REAL
+P_96cdbd86-caf7-77c9-93c1-fe4731655983,1Task,Available,Idea3 llc,ThirdParty,Not Available,1.1.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-27,2026-09-25,REAL
+P_a64931a6-8080-b1e7-e057-8e775a24ed66,Surveys,Available,Microsoft Corporation,FirstParty,Not Available,1.0.15,,Microsoft-managed,Copilot,acquiredForNone,,,2026-09-01,2026-10-10,REAL
+P_a8f2ed7d-faf1-5ad5-e4bc-dbd09bf80ed8,SME Finder,Available,Microsoft Corporation,FirstParty,Not Available,1.0.0,,Microsoft-managed,Copilot,acquiredForNone,,,2026-05-29,2026-09-24,REAL
+P_8c75de5c-bfa0-68eb-5528-89a1c35a90b7,AI Learning Advisor,Available,Microsoft Corporation,FirstParty,Not Available,1.0.0,,Microsoft-managed,Copilot,acquiredForNone,,,2026-05-29,2026-09-25,REAL
+P_ba30b62a-2a65-5db1-5925-b1889ad225f8,Plan My Day,Available,Microsoft Corporation,FirstParty,Not Available,1.0.0,,Microsoft-managed,Copilot,acquiredForNone,,,2026-05-29,2026-09-24,REAL
+P_442cee20-fdd0-b84e-b85d-bc12a03125e4,Polivada,Available,Data Mama Ltd,ThirdParty,Not Available,3.5.55,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-03,2026-10-16,REAL
+P_03d4401f-ab80-c757-ed50-e93e316f557e,Message Center Adoption Agent,Available,Cloud and Clear,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-01,2026-10-16,REAL
+P_1bdf2169-4670-f280-4b85-a39557f1e586,AIP Integrity Assistant,Available,Irth,ThirdParty,Not Available,1.0.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-05,2026-10-16,REAL
+P_39f86212-5b95-7fcf-162b-b91709933f7f,Gerald,Available,Jetdocs,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-05,2026-10-16,REAL
+P_dbd9caf8-8408-b176-1e0c-b99401d5dcb7,SideKick - CoPilot,Available,XOPS,ThirdParty,Not Available,2.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-04-03,2026-09-24,REAL
+P_e9ccc85f-116d-0fd4-64bf-17f4b4210a43,HR AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.521.1725,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-08,2026-10-16,REAL
+P_1054b4c9-1ba0-119e-ac29-1b8931437680,WorkBoardAI for Copilot,Available,WorkboardAI,ThirdParty,Not Available,2.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-04-04,2026-09-24,REAL
+P_057b249d-1fcd-c93c-0556-04e54a042f7c,ArcGIS for Teams,Available,"Esri, Inc.",ThirdParty,Not Available,2026.2,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2024-05-19,2026-09-24,REAL
+P_b2f25cb5-1ccd-b7ed-8a74-35d2b43e0130,Planner Agent,Available,Microsoft Corporation,FirstParty,Not Available,1.0.26,,Microsoft-managed,Copilot,acquiredForSome,,,2026-03-12,2026-09-24,REAL
+P_6bd9cf23-7bec-bad8-ca54-0538b59819e5,Flinq,Available,Flinq,ThirdParty,Not Available,1.1.8,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-03,2026-10-16,REAL
+P_3cb7b6f2-0b06-8686-9626-21eb51d2dbcb,Moody's Credit MCP,Available,Moody's MCP,ThirdParty,Not Available,2.2.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-14,2026-10-15,REAL
+P_3761ac1d-61b6-2c85-bb52-0ffe56b2097e,AI Meeting Notes TeamsMaestro,Available,MailMaestro,ThirdParty,Not Available,4.0.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2025-02-28,2026-09-24,REAL
+P_7348f352-c98c-5ba4-3209-70957f4f75a3,Loopio®,Available,Loopio,ThirdParty,Not Available,2.3.0,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-06-16,2026-10-27,REAL
+P_9a751af8-3e3e-b321-6eef-4deedaf2ef5c,Loopio Copilot Agent - Legacy,Available,Loopio,ThirdParty,Not Available,1.3.20,,Publisher-managed,Copilot,acquiredForNone,,,2026-01-19,2026-09-24,REAL
+P_5e538e98-37ef-2ccf-3727-db78c0ab74de,Harvey,Available,Counsel AI Corporation,ThirdParty,Not Available,1.1.1,,Publisher-managed,Copilot,acquiredForNone,,,2025-07-17,2026-09-24,REAL
+P_1a4bff3e-7f54-4396-cf9d-20948af4c309,Achievers,Available,Achievers,ThirdParty,Not Available,2.6.5,,Publisher-managed,Copilot;Office;Outlook;Teams,acquiredForNone,,,2024-10-12,2026-09-24,REAL
+P_44314319-35c9-8e6c-bb0a-fae041edd5bf,Sales Development (Frontier),Available,Microsoft Corporation,FirstParty,Not Available,1.1.0,,Microsoft-managed,Copilot,acquiredForNone,,,2026-01-16,2026-09-24,REAL
+P_1cf04c0e-94ab-3146-c5b0-7a703f54433b,OrbitShift,Available,ORBITSHIFT INC,ThirdParty,Not Available,1.0.16,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-17,2026-10-16,REAL
+P_a46d5ac8-1d92-dc30-b1f4-6bc823372a79,SkyWatch,Available,SkyWatch,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-19,2026-10-16,REAL
+P_0b170893-ed10-94b2-3bbb-6347f0f1f600,Loopio Copilot Agent-Legacy EU,Available,Loopio,ThirdParty,Not Available,1.3.21,,Publisher-managed,Copilot,acquiredForNone,,,2026-03-16,2026-09-24,REAL
+P_356b8e42-a08c-2404-e43f-7007148b779c,Monday Morning Agent,Available,MAQ LLC,ThirdParty,Not Available,1.3.2,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-23,2026-10-16,REAL
+P_11adfa4e-d7de-6251-3d07-c62bbd64e453,Loopio® (EU),Available,Loopio,ThirdParty,Not Available,2.4.0,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-06-24,2026-10-27,REAL
+P_e75b999c-d572-395d-f603-c6aa3a55d024,Normiqa Navigator,Available,Malach IS,ThirdParty,Not Available,1.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-26,2026-10-10,REAL
+P_dc917442-9419-b0c7-bff4-4f774a27f69f,Ekyam AI Agent,Available,Ekyam AI,ThirdParty,Not Available,2.2.6,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-29,2026-10-16,REAL
+P_fd9a877f-8e1e-6dc8-16eb-39768130894a,Logistics Ops,Available,"Blue Yonder Group, Inc",ThirdParty,Not Available,2026.1.2,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-30,2026-10-10,REAL
+P_56e10516-fd58-a05a-9502-43bfe9976f2a,Anyword,Available,Anyword,ThirdParty,Not Available,1.0.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-29,2026-10-10,REAL
+P_208dd89c-a14c-1d21-ac18-da9733c5b209,Warehouse Ops,Available,"Blue Yonder Group, Inc",ThirdParty,Not Available,2026.1.2,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-30,2026-10-16,REAL
+P_977acf5a-b1d0-a308-195f-716644b9c1dc,Project Health Agent,Available,SAXON INFOSYSTEMS PRIVATE LIMITED,ThirdParty,Not Available,1.0.15,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-30,2026-10-10,REAL
+P_bfae896a-ab75-6c95-2410-871ae641ec7a,AI Regulation Radar,Available,Kainos Software,ThirdParty,Not Available,1.0.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-30,2026-10-16,REAL
+P_1a18866c-35ef-82d7-b018-6d3d3632b80e,WorkBoardAI for Copilot (EU),Available,WorkboardAI,ThirdParty,Not Available,2.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-30,2026-10-16,REAL
+P_a3ed0dfd-85f5-439a-1c1b-ff843cd250b0,HUE エージェント,Available,株式会社ワークスアプリケーションズ,ThirdParty,Not Available,1.0.6,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-01,2026-10-16,REAL
+P_c0fd1ab0-cbf3-7eb9-1a7d-2d823549ef31,Microsoft 365 Admin,Available,Microsoft Corporation,FirstParty,Not Available,2.0.0,,Microsoft-managed,Teams;Copilot,acquiredForSome,,,2025-02-28,2026-09-24,REAL
+P_d26ffc92-fbed-650d-8fec-ee69926c4bc0,Expense 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.629.1730,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-07-03,2026-10-16,REAL
+P_0e941d88-7a9f-6e42-535a-cb84f7640522,Harvey EU,Available,Counsel AI Corporation,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-07,2026-09-25,REAL
+P_23193c8d-0406-0253-ad63-c34c455b552d,Insights Agent,Available,Microsoft Corporation,FirstParty,Not Available,1.0.10,,Microsoft-managed,Copilot,acquiredForNone,,,2026-07-07,2026-10-10,REAL
+P_1e99ea5b-86e5-07de-df31-3e0600d1f598,Gieni AI Market Research Agent,Available,Orderfox-Gieni,ThirdParty,Not Available,1.2.12,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-28,2026-10-28,REAL
+P_62ba4df7-4acb-4125-3fbb-615c482f3464,Wokelo Agent,Available,Wokelo AI,ThirdParty,Not Available,1.0.21,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-10,2026-10-16,REAL
+P_69b35555-56a5-c0b8-7149-4ad08dde4c87,AskRystad - Analytics,Available,Rystad Energy AS,ThirdParty,Not Available,1.0.24,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-03,2026-10-10,REAL
+P_a4192c27-3294-6a36-c47b-292eafeb7ad0,C.조직도,Available,Coraise Inc,ThirdParty,Not Available,1.0.5,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-07-13,2026-10-15,REAL
+P_75e664c6-9375-003e-f163-ca6747be38cb,Lux AI,Available,Lux Research,ThirdParty,Not Available,1.0.39,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-15,2026-09-24,REAL
+P_f03788b0-b117-a75f-40ed-e24317d12999,LexisNexis Protégé™ (US),Available,"LexisNexis.,",ThirdParty,Not Available,1.0.9,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2024-11-14,2026-09-24,REAL
+P_ee7f8523-7666-a6e7-7866-dbdb7ea81073,MSCI,Available,MSCI Inc.,ThirdParty,Not Available,1.0.15,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-15,2026-09-24,REAL
+P_dd7b4240-7e23-75ab-cea0-a9dca40135fc,SwiftAssess Co-Assist,Available,Gamma Computers,ThirdParty,Not Available,1.0.36,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-07-16,2026-10-16,REAL
+P_c01d160b-6ade-ca98-8863-016b8fc3b517,Financial Plan Stress Test,Available,Dovetail by Pivotal Edge AI,ThirdParty,Not Available,1.2.34,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-16,2026-10-16,REAL
+P_d8c4c2ae-24dc-15aa-d88b-0cc49ca25f80,Factorial One,Available,"Everyday Software, S.L.",ThirdParty,Not Available,1.1.1,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-06-22,2026-09-25,REAL
+P_5ac3401b-4c73-833b-5cb8-521c9cc882b7,FUGO Screens,Available,FUGO,ThirdParty,Not Available,2.0.14,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-21,2026-09-25,REAL
+P_da507877-4faf-2941-ba1c-3193b184c9e0,CommunitycliQ,Available,"Mentorcliq, Inc.",ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-16,2026-10-16,REAL
+P_2eacbfe4-58f6-aacd-4400-d042c96e2c76,Statista Connect,Available,Statista GmbH,ThirdParty,Not Available,1.6.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-21,2026-10-16,REAL
+P_281d28e0-695e-6654-8b06-79b90716c89e,NetQuery,Available,NetQuery,ThirdParty,Not Available,1.0.4,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-09-03,2026-10-16,REAL
+P_9987e4d2-efbd-eadd-fa54-969dd354742a,Content Aviator (EU),Available,OpenText Americas,ThirdParty,Not Available,26.3.8,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2026-07-22,2026-10-16,REAL
+P_9e66a955-2c73-139f-3626-38e70b3e41b4,Appspace,Available,"Appspace, Inc",ThirdParty,Not Available,1.3.0,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2026-07-24,2026-10-10,REAL
+P_946f84ba-d687-cc76-93d8-4d8655439fea,Fitch Solutions,Available,fitchgroup,ThirdParty,Not Available,1.0.16,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-24,2026-10-16,REAL
+P_6d3d999f-d78d-6a09-81f2-b2b99d7f2897,Landstack MCP,Available,Thovex Ltd,ThirdParty,Not Available,1.1.8,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-27,2026-10-10,REAL
+P_5a1131cc-7e44-2629-af35-128f06eb63db,Cascade IT,Available,Cascade AI,ThirdParty,Not Available,1.0.11,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-07-27,2026-10-16,REAL
+P_b4c62e57-a628-0a4c-089c-b77a5372dc45,MentorcliQ,Available,"Mentorcliq, Inc.",ThirdParty,Not Available,3.1.5,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2026-07-26,2026-10-10,REAL
+P_ff926635-069a-535c-7a8d-801a1d352429,Coachello,Available,Coachello SAS,ThirdParty,Not Available,3.0.8,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2025-05-05,2026-09-25,REAL
+P_20f79e7b-e876-2027-75af-a888a5926698,Lexoris IQ,Available,Inovitus9,ThirdParty,Not Available,1.0.14,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-07-26,2026-10-16,REAL
+P_1dac1633-e3ce-25f1-98fe-afe00e752bda,Signal AI,Available,Signal AI,ThirdParty,Not Available,1.0.14,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-28,2026-10-16,REAL
+P_54b2cac4-b9c8-00e1-ddb8-2c3cd0a97b6c,UiPath Autopilot,Available,UiPath Incorporated,ThirdParty,Not Available,6.0.0,,Publisher-managed,Teams;Outlook;Copilot;Office,acquiredForNone,,,2026-07-29,2026-10-16,REAL
+P_f010b57a-3a57-bb5a-2ba0-4ea2913d291a,Employee Performance 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.706.1010,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-07-30,2026-10-16,REAL
+P_552435af-b62d-233e-02cd-a7c5330ba26c,Morningstar,Available,"Morningstar, Inc.",ThirdParty,Not Available,1.5.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-19,2026-09-24,REAL
+P_8ab0b011-6c80-9553-d67a-8d9db3462d3f,Nexoya,Available,nexoya,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-31,2026-10-16,REAL
+P_299855a9-b562-9312-a237-0e6e007358ff,LSEG Workspace,Available,LSEG,ThirdParty,Not Available,1.0.130,,Publisher-managed,Teams;Outlook;Copilot;Office,acquiredForNone,,,2026-08-03,2026-10-27,REAL
+P_04bd11c3-6ac7-7b55-6c0a-4a99918be9f1,Cowork,Available,Microsoft Corporation,FirstParty,Not Available,1.4.0,,Microsoft-managed,Copilot,acquiredForNone,,,2026-03-07,2026-08-04,REAL
+P_7407529c-f7b2-4410-4b01-44eaceb5159d,Klaxoon by Wrike,Available,Klaxoon by Wrike,ThirdParty,Not Available,1.4.1,,Publisher-managed,Outlook;Teams;Copilot;Office,acquiredForNone,,,2026-08-04,2026-10-16,REAL
+P_3fd0272a-4145-f4ae-9e98-2c6e918efbb0,Jewel Case Research,Available,MiAILaw,ThirdParty,Not Available,1.5.8,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-11-02,2026-11-04,REAL
+P_3dd4b666-7d9e-1d29-33ee-2259f01f1907,Sophos Partners,Available,Sophos Ltd.,ThirdParty,Not Available,1.0.4,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-04,2026-10-16,REAL
+P_f22975c9-e768-eb2a-6394-7978fb14a7f5,Lemonsoft MCP,Available,LEMONSOFT OYJ,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-03,2026-10-10,REAL
+P_24cffaed-b055-e933-d506-eb74f41e17f2,Coveo,Available,Coveo,ThirdParty,Not Available,1.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-03,2026-10-10,REAL
+P_662b4f9c-7b26-f749-7c5a-d3d9f80099f4,ServiceNow Otto (Now Assist),Available,ServiceNow,ThirdParty,Not Available,1.6.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-07-18,2026-09-24,REAL
+P_395bb373-075d-a8ae-3e77-c6f38e859942,Tavily,Available,Tavily,ThirdParty,Not Available,1.3.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-04,2026-10-10,REAL
+P_a1e84d10-4556-6029-bddb-7bf785c4e587,Paycor WISE Assistant,Available,Paycor WISE Assistant,ThirdParty,Not Available,1.0.18,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-21,2026-10-16,REAL
+P_ec1cfdd5-9851-6039-356a-8f12de48ce71,GlobalData Ava (Consumer),Available,GlobalData Plc,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-10,2026-10-16,REAL
+P_84525ab5-34ec-45c1-f625-63bd09ba89b6,Savvly,Available,Savvly,ThirdParty,Not Available,1.0.88,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-10,2026-10-16,REAL
+P_caee2610-19d5-a532-3789-554d2c72eaa4,Amadeus Advisor™,Available,Amadeus IT Group SA,ThirdParty,Not Available,1.0.7,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-19,2026-10-19,REAL
+P_1c1d579b-38df-a13a-d3e0-0f317fcc5c87,Avvoka MCP,Available,Avvoka,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-13,2026-10-16,REAL
+P_7e7e86b1-e330-1e22-b4c7-d3cca1a3f26f,Directory 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.730.2140.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-12,2026-10-16,REAL
+P_96f8d869-b05e-6ddf-751e-122fda4f5c44,Asset Vision,Available,Asset Vision,ThirdParty,Not Available,1.0.12,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-08,2026-10-16,REAL
+P_28056cf3-1c69-5d39-006d-c02c274e73c7,Fluix,Available,Fluix,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-14,2026-09-25,REAL
+P_0673306f-ea72-77d9-d8d9-7a01893297fe,re:Members AMS,Available,reMembers AMS,ThirdParty,Not Available,1.0.4,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-18,2026-10-16,REAL
+P_c49f86f4-c199-cbfa-0984-905ba9220738,Asana,Available,Asana,ThirdParty,Not Available,1.4.0,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2026-08-13,2026-11-03,REAL
+P_2ed1f336-6224-5fa2-87ad-87d4b09a7880,Causaly Agentic Research,Available,Causaly,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-18,2026-09-25,REAL
+P_82b02ff7-35d4-c3d3-0d5c-9355160ae541,Xero,Available,Xero Limited.,ThirdParty,Not Available,1.1.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-04,2026-10-05,REAL
+P_dfee60fc-d885-07fa-6af8-0d907c42bc7a,LMS 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.813.2052.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-18,2026-10-16,REAL
+P_15f67c5b-bfb1-fbd9-043a-cbb047bb7bd0,Word (Agent),Available,Microsoft Corporation,FirstParty,Not Available,1.0.28,,Microsoft-managed,Copilot,acquiredForSome,,,2025-11-16,2026-09-24,REAL
+P_54c3f25e-3850-e1e6-231a-aa85fbe9447b,PowerPoint (Agent),Available,Microsoft Corporation,FirstParty,Not Available,1.0.35,,Microsoft-managed,Copilot,acquiredForSome,,,2025-11-15,2026-09-24,REAL
+P_8d830dc1-9a14-1528-1182-c8e3be94cf5a,Excel (Agent),Available,Microsoft Corporation,FirstParty,Not Available,1.0.25,,Microsoft-managed,Copilot,acquiredForSome,,,2025-11-15,2026-09-24,REAL
+P_b00442a9-8542-8084-0154-b91f1b1cade7,Ansvar,Available,Ansvar Systems AB,ThirdParty,Not Available,2.0.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-18,2026-10-16,REAL
+P_ee9aadd6-000d-97c5-f01c-4707d39fa0e4,FactSet,Available,FactSet,ThirdParty,Not Available,3.8.0,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2020-09-14,2026-09-24,REAL
+P_b55f8f1d-2299-a1d5-20c5-2d4c49e765bf,GovTribe,Available,GovExec Media Group,ThirdParty,Not Available,2.0.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-21,2026-10-16,REAL
+P_f4411377-a6f5-6e29-41af-28b5ff4815f0,AskRystad - Data,Available,Rystad Energy AS,ThirdParty,Not Available,2.0.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-03,2026-10-10,REAL
+P_cee13b52-3ca2-f561-866d-5f91fdbf6689,Workforce Insights (Frontier),Available,Microsoft Corporation,FirstParty,Not Available,3.2.1,,Microsoft-managed,Copilot,acquiredForNone,,,2026-08-24,2026-10-10,REAL
+P_13a38e0a-fa27-c481-cf60-aff09052c6a7,Zywave,Available,Zywave Inc,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-25,2026-10-16,REAL
+P_ac132bfc-5a58-d988-1e2e-a67a73b57d22,Onboarding 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.819.1759.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-25,2026-10-10,REAL
+P_c8a5eb2b-213d-f023-3e04-cb43447e2765,Kompetenskartan agent,Available,Kompetenskartan Sverige AB,ThirdParty,Not Available,1.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-26,2026-10-10,REAL
+P_7763d7cc-a2f2-1b5e-ff30-ca8b63dc9ba7,SciLeads,Available,SciLeads,ThirdParty,Not Available,1.0.8,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-24,2026-10-10,REAL
+P_86b94baf-0247-b340-b82a-27b380fd7be4,LexisNexis Protégé™ (UK),Available,"LexisNexis.,",ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-27,2026-10-10,REAL
+P_ca61ce76-48e5-ae37-5510-8b70d33e2967,2do Uniconta AI Agent,Available,2do IT,ThirdParty,Not Available,1.1.40,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-16,2026-09-25,REAL
+P_b9feec1c-21c0-8dcb-0e68-90b1026c8fd8,GlobalData Ava (Retail),Available,GlobalData Plc,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-27,2026-10-16,REAL
+P_72c52903-0e00-aa91-01f1-3407a2865f1b,GlobalData Ava (Construction),Available,GlobalData Plc,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-02,2026-10-16,REAL
+P_2ab7af60-7644-6dfd-6e61-6db553779021,ImpleAI Support Agent,Available,Betahub AI,ThirdParty,Not Available,1.3.2,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-09-02,2026-10-10,REAL
+P_71338410-15e6-e627-de48-6a211041f9b2,GlobalData Ava (Technology),Available,GlobalData Plc,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-31,2026-10-16,REAL
+P_5bcadf40-cc73-23be-d78c-fe6944f8baa4,TextMine,Available,TextMine,ThirdParty,Not Available,1.1.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-01,2026-10-16,REAL
+P_131d6cff-a3dd-9822-87d7-0a8e2c423c0e,WatchMyCompetitor,Available,WatchMyCompetitor,ThirdParty,Not Available,1.0.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-04,2026-10-16,REAL
+P_06d4ab18-9a33-daf9-cc95-b4867c6f386c,Insightech Analytics (US),Available,Insightech,ThirdParty,Not Available,1.0.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-07,2026-10-16,REAL
+P_9138d3fa-0cb9-d16b-57a3-494b9d3b9978,Second Nature AI,Available,Second Nature,ThirdParty,Not Available,1.0.6,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-06,2026-10-16,REAL
+P_c870c1e9-d393-0cfd-1087-f760f1df97f2,MT Newswires,Available,MT Newswires,ThirdParty,Not Available,2.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-07,2026-10-16,REAL
+P_1ca73b9c-eba9-1ffb-a81d-ccb74b648324,Timesheet 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.829.1825,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-09-07,2026-10-16,REAL
+P_20c6ef81-0e66-f28c-df5e-2dbc779be687,Contentsquare,Available,Contentsquare,ThirdParty,Not Available,1.1.19,,Publisher-managed,Copilot,acquiredForNone,,,2026-04-21,2026-09-24,REAL
+P_bfb5ac71-97d6-3a0c-a7f4-a64b112a768c,Quartr,Available,Quartr,ThirdParty,Not Available,1.0.22,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-08,2026-10-16,REAL
+P_0780ad6b-c1b4-850d-f306-3ff59ef3ff9a,DeepL MCP,Available,DeepL,ThirdParty,Not Available,1.52.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-19,2026-09-24,REAL
+P_c2442fe4-fffc-149e-2443-bc95ae51c94b,Adobe CX Enterprise Coworker,Available,Adobe,ThirdParty,Not Available,2.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-04-28,2026-09-24,REAL
+P_3dc8de0c-389d-1177-91ca-f2756177c504,EasyVista,Available,EasyVista Inc,ThirdParty,Not Available,1.0.5,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-09-08,2026-10-10,REAL
+P_2d869107-607f-9bc7-b0b1-5c819bfcbda5,Kunjani,Available,Kunjani LTD,ThirdParty,Not Available,1.1.31,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2021-05-15,2026-09-18,REAL
+P_f2d59f29-0bdb-3d4c-a5cb-3e8127a5f7d5,Zacks Financial Data,Available,Zacks Investment Research,ThirdParty,Not Available,1.0.9,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-11,2026-10-16,REAL
+P_bb4808bd-75dd-349f-2d61-4e20eb47a2b2,Loyalty Manager Copilot AI,Available,IntelliThing,ThirdParty,Not Available,6.0.13,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-03,2026-10-16,REAL
+P_1501cc6a-cfca-c210-3762-f5e8eb2e825a,oNabu AI Team Coach,Available,oNabu,ThirdParty,Not Available,1.4.4,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-09-03,2026-10-16,REAL
+P_ec06164f-12bb-d6b6-f3ec-5782b1c6d984,GlobalData Ava (Oil & Gas),Available,GlobalData Plc,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-31,2026-10-16,REAL
+P_54f9bc8a-f832-6e0c-a3fa-3b6195501979,JUNE Agent,Available,JUNE GmbH,ThirdParty,Not Available,1.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-28,2026-10-28,REAL
+P_d113caab-ea61-e576-5341-98be705636d9,Morningstar Credit Analytics,Available,Morningstar Credit Analytics LLC,ThirdParty,Not Available,1.0.20260914,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-28,2026-09-22,REAL
+P_a0138535-c41e-973d-18df-5af3436ff990,goFLUENT Language Academy,Available,goFLUENT Group,ThirdParty,Not Available,1.0.17,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-09-15,2026-10-16,REAL
+P_6c6446e7-5f3b-d142-123b-f4723416dff6,SeekOut,Available,SeekOut MCP,ThirdParty,Not Available,1.10.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-18,2026-09-18,REAL
+P_3fe96b3c-3ff6-0270-8c1f-a46916e305eb,Learn365,Available,Zensai International Aps,ThirdParty,Not Available,2.2.6,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2018-02-23,2026-09-18,REAL
+P_c2e6b2b2-0ba7-7c0d-b863-e935df6f7ab1,Trackunit IrisX,Available,Trackunit,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-08,2026-10-13,REAL
+P_0b49fcf7-6e76-2785-0671-ecb7961032ad,Unifyr,Available,Unifyr Global,ThirdParty,Not Available,1.0.57,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-09,2026-09-30,REAL
+P_7d6cb43b-3aa7-0545-71a1-70425421f0a2,In Parallel,Available,In Parallel Oy,ThirdParty,Not Available,1.1.1,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-01-17,2026-09-19,REAL
+P_c0280736-a719-9e55-99fe-6125b4286a18,Ballast - Shopify Settlement,Available,TALONOID Technologies Private Limited,ThirdParty,Not Available,1.0.8,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-02,2026-09-19,REAL
+P_8dd2096f-61e9-8c1a-e8de-41c8faeb934e,Zoviz,Available,Zoviz,ThirdParty,Not Available,1.1.10,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-13,2026-09-25,REAL
+P_ae1e267b-28ec-d07c-2ba5-be92e9720c75,Circuitry,Available,Circuitry,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-07,2026-09-21,REAL
+P_3b7af06c-492d-bc33-166d-852e51b91961,Miro,Available,Miro,ThirdParty,Not Available,3.0.0,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2018-09-13,2026-09-22,REAL
+P_818e38de-43ac-3ab3-e22f-c39e98ae65e8,AI Usage Coach,Available,ATM Bilgisayar,ThirdParty,Not Available,1.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-21,2026-09-23,REAL
+P_6e51096e-34d7-b6cc-6289-ba106e6553f5,Dockflow,Available,Dockflow Tracking,ThirdParty,Not Available,1.0.16,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-24,2026-09-23,REAL
+P_57c1cb44-c8c8-a46e-7892-593c0e486673,Teamcenter Agent,Available,Siemens DISW,ThirdParty,Not Available,2606.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-11,2026-09-23,REAL
+P_a8ae2ab0-312a-7c94-0d07-68576c8a54c9,Midpage Legal Research,Available,midpage,ThirdParty,Not Available,1.0.23,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-05,2026-09-24,REAL
+P_1c65252e-71e9-7512-2ad8-e4a3ddabf621,LegalZoom,Available,LegalZoom.com Inc,ThirdParty,Not Available,1.3.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-23,2026-09-24,REAL
+P_99028264-8010-902a-559d-f3db884f1073,SharePoint Admin Agent,Available,Microsoft Corporation,FirstParty,Not Available,3.0.0,,Microsoft-managed,Copilot,acquiredForNone,,,2025-12-12,2026-09-24,REAL
+P_18002e4a-e60c-27ff-6204-da4e8feb377c,XMReality,Available,XMReality AB,ThirdParty,Not Available,2.1.2,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2021-10-28,2026-09-24,REAL
+P_a82a8ac3-b48d-ffa2-56d6-5b2155db0592,Spotter,Available,"ThoughtSpot, Inc",ThirdParty,Not Available,1.0.1,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2025-07-21,2026-09-24,REAL
+P_cd541ae3-efd7-0bdc-1933-191a8ed632f5,Blackbaud,Available,Blackbaud Inc,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-06,2026-09-24,REAL
+P_0eb5cac0-8deb-f8d5-c877-8dbed5dd52a8,Strety,Available,Strety,ThirdParty,Not Available,3.5.1,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-09-24,2026-10-27,REAL
+P_52f88dfa-91c9-c9f6-6205-ec9eb4082eb2,Coursera Learning Agent,Available,Coursera,ThirdParty,Not Available,1.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-03-09,2026-09-25,REAL
+P_ecd534ca-1417-7133-cde5-6d16e290d1f0,Dovetail,Available,DOVETAIL RESEARCH PTY. LTD.,ThirdParty,Not Available,1.2.7,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2023-07-14,2026-09-28,REAL
+P_6b1f7048-4140-5e18-5ea1-a9881030b6bc,Clay,Available,Clay Labs Inc,ThirdParty,Not Available,1.2.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-06-11,2026-09-30,REAL
+P_deddb90f-f59a-782a-54f3-ae378aea227a,Service,Available,Microsoft Corporation,FirstParty,Not Available,63.26272.6,,Microsoft-managed,Copilot,acquiredForNone,,,2024-02-27,2026-09-30,REAL
+P_280ba0c3-7951-e7a8-68d3-8d65f9ca8149,Sales,Available,Microsoft Corporation,FirstParty,Not Available,63.26272.63,,Microsoft-managed,Copilot;Outlook;Teams;Office,acquiredForNone,,,2026-09-30,2026-10-29,REAL
+P_249104a7-daa0-7bc2-4798-64b7570fef4f,Rovo,Available,Atlassian.com,ThirdParty,Not Available,2026.4.11,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-02-07,2026-09-30,REAL
+P_f16cbdd2-f5a6-b7b5-0ec7-047f1e463629,Breakthru Move Your Mood,Available,"Breakthru Immersive, INC",ThirdParty,Not Available,1.1.17,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-09-30,2026-09-30,REAL
+P_925b0186-d777-7ef9-ed6a-8483f7d224a3,Obli,Available,LataSys Limited,ThirdParty,Not Available,1.3.0,,Publisher-managed,Teams;Office;Outlook;Copilot,acquiredForNone,,,2026-09-25,2026-10-27,REAL
+P_fbba5986-55ec-2828-4124-e068a42cbf57,Box,Available,Box.,ThirdParty,Not Available,2.4.2,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-09-30,2026-10-27,REAL
+P_db057d6e-394c-6545-a977-8fac6cf5e058,nBold,Available,nBold,ThirdParty,Not Available,8.7.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2022-09-14,2026-10-01,REAL
+P_ad232a09-f5fa-7d1a-3be6-b3fa10e29395,Euromonitor Passport,Available,Euromonitor International,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-30,2026-10-01,REAL
+P_76caec93-d7b0-c710-a9fc-b826d8301578,Legora for Copilot,Available,Legora AB,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-01,2026-10-02,REAL
+P_ac84e8ff-718b-8ff8-db5c-f52347e5b0cb,OnsiteIQ Copilot MCP Agent,Available,OnsiteIQ Inc,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-24,2026-10-02,REAL
+P_32ef992f-4869-bf55-1e8e-bae284ea6998,Databricks Genie,Available,Databricks Inc.,ThirdParty,Not Available,1.0.17,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-01,2026-10-27,REAL
+P_27f693c9-7648-bcd4-4ccc-fec8177ba9a0,Reflexivity,Available,Knabble Inc. dba Reflexivity,ThirdParty,Not Available,2.0.6,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-04-28,2026-10-02,REAL
+P_ffa967c5-7580-3118-f510-b87c3b443cbe,Datasite Copilot Agent,Available,Datasite Global Corporation,ThirdParty,Not Available,1.2.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-04-27,2026-10-02,REAL
+P_ac16613d-b5bf-568c-7f10-cd0736aafa73,IPOne Trademark Search Agent,Available,Clarivate,ThirdParty,Not Available,1.0.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-30,2026-10-13,REAL
+P_7da060c1-104f-038e-2f77-367cc0aab95c,Conductor AEO,Available,"Conductor, Inc.",ThirdParty,Not Available,2.0.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-18,2026-10-03,REAL
+P_f1102987-92c0-97a6-204d-521daf4cca2b,Bitly,Available,"Bitly, Inc.",ThirdParty,Not Available,1.0.20,,Publisher-managed,Copilot,acquiredForNone,,,2025-12-10,2026-10-03,REAL
+P_8b35a80b-87f1-8849-8b5c-418be1202aba,Cypris Q,Available,Cypris,ThirdParty,Not Available,1.2.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-30,2026-10-03,REAL
+P_b9010c65-e8d9-1df1-759e-21e781087fc6,EULEX.AI,Available,EULEX.AI,ThirdParty,Not Available,5.1.6,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-18,2026-10-03,REAL
+P_d739e24a-90c9-fb08-9d91-0bfe7829df4c,TeamWheels,Available,HMZ-DIGITAL,ThirdParty,Not Available,1.14.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-08-19,2026-10-05,REAL
+P_1f5ffa7d-3c5a-5537-5d8c-8c21ca8dc3d6,TechWolf Analyst Agent,Available,TechWolf BV,ThirdParty,Not Available,2.1.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-02,2026-10-13,REAL
+P_39495e92-c69d-fee9-0158-7fe7211d2c57,Merge,Available,Merge.dev,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-07-07,2026-10-06,REAL
+P_58ca00bd-9b1d-bbbb-ab61-a95e737bd067,Rydoo,Available,Rydoo,ThirdParty,Not Available,1.1.7,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-04,2026-10-13,REAL
+P_6ed9c8f2-12db-f47d-c0ed-ea9dbdee2a83,CB Insights,Available,CB Insights,ThirdParty,Not Available,1.1.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-05-18,2026-10-06,REAL
+P_5bb87891-8043-7429-ddd8-3d3ab1bb252b,askpolly,Available,Advanced Symbolics Inc,ThirdParty,Not Available,1.0.47,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-02-05,2026-10-06,REAL
+P_f47e3373-5388-89bb-dd83-18ac0138b4ce,Speeda AI Agent,Available,UZABASE,ThirdParty,Not Available,1.0.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-20,2026-10-20,REAL
+P_7c80308b-bdb4-5738-eb54-0821289cb1f0,Rhythm Systems Agent,Available,Rhythm Systems,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-08-21,2026-10-06,REAL
+P_92f3518d-bb67-61e0-278d-a7660ffab353,Humantic AI MCP,Available,"Humantic AI, Inc.",ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-07,2026-10-28,REAL
+P_b176999e-33ec-87a0-ee12-6259e24740d7,Zensai,Available,Zensai International Aps,ThirdParty,Not Available,1.0.9,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-04-29,2026-10-08,REAL
+P_1dd6f013-d113-dd20-701f-8f12d059c5b4,Forrester AI,Available,Forrester Research,ThirdParty,Not Available,1.1.1,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2025-11-04,2026-10-08,REAL
+P_5abac949-11a6-cca6-9f70-8f47520ed97f,monday.com,Available,monday.com ltd,ThirdParty,Not Available,4.3.0,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2020-05-25,2026-10-08,REAL
+P_a4d4f941-abfb-636f-61b7-cddb7239823e,Servanta,Available,Kliping d.o.o.,ThirdParty,Not Available,1.0.1611015,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-09,2026-10-09,REAL
+P_eb4f75d1-a9f2-60d2-0767-f1b379045e97,Alizé,Available,Alizé,ThirdParty,Not Available,1.0.9,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-06,2026-10-13,REAL
+P_e0c51984-357b-dc74-ca5b-64846b4ba427,Trendata,Available,Trendata,ThirdParty,Not Available,1.0.8,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-11,2026-10-08,REAL
+P_f6247488-5516-ff09-b9b4-d09464733586,AIR Credit Intelligence,Available,"AIR Platforms, Inc",ThirdParty,Not Available,1.1.17,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-08,2026-10-10,REAL
+P_0be3e0d6-af51-fe64-4832-a9d51f9af790,Aphex,Available,Aphex Software,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-07,2026-10-10,REAL
+P_5d7f26b3-9c5e-3812-9a04-2fead5044d33,Meisterplan,Available,itdesign GmbH,ThirdParty,Not Available,1.1.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-09-25,2026-10-11,REAL
+P_855605a0-a369-fb02-2a7e-e2bc75717d58,Meisterplan EU,Available,itdesign GmbH,ThirdParty,Not Available,1.1.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-09-25,2026-10-27,REAL
+P_be66412e-0839-4490-1893-ebd6aabcc832,Adviser Agent,Available,C8 Technologies Ireland,ThirdParty,Not Available,1.0.10,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-13,2026-10-13,REAL
+P_03645e46-1086-ad1f-ee6e-20de8be388b6,Wood Mackenzie,Available,Wood Mackenzie,ThirdParty,Not Available,2.0.17,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-09,2026-10-12,REAL
+P_40a14b6d-5a8b-907c-9b98-ed9d612d8e21,Allocator Agent,Available,C8 Technologies Ireland,ThirdParty,Not Available,1.0.14,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-21,2026-10-22,REAL
+P_284242c3-289e-f762-4b0c-44985845852e,AEGENT-lite,Available,Kainos Software,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-13,2026-10-13,REAL
+P_976cd923-a86e-8ead-f710-5b40769362fe,Recruiterflow Assistant,Available,"Recruiterflow, Inc.",ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-09,2026-10-13,REAL
+P_67e37d5a-925b-4aa0-c7fc-ad58e06f4dff,Seaworthy Insurance,Available,Seaworthy Insurance,ThirdParty,Not Available,1.0.5,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-12,2026-10-13,REAL
+P_274dc0a5-8e68-ca78-297b-72ce777d321e,Time-off 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.929.910,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-13,2026-10-13,REAL
+P_0f81a761-6cb9-1c78-c6a5-3c0bcc3c2797,Seismic,Available,Seismic,ThirdParty,Not Available,2.1.3,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-10-06,2026-10-13,REAL
+P_e485f559-18ee-e916-e0ab-44ac85c247d4,Insightech Analytics (AU),Available,Insightech,ThirdParty,Not Available,1.0.5,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-07,2026-10-13,REAL
+P_be373803-9c6c-2af3-80c9-c857df4e4f8d,Perfect Wiki,Available,OOO RD17,ThirdParty,Not Available,1.0.55,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-10-12,2026-10-14,REAL
+P_4c03911c-567b-3f0c-c40c-e4a3fd242454,Blinq,Available,Blinq Technologies,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-12,2026-10-14,REAL
+P_b8fd9944-6424-8437-7108-8e6445047288,Semrush MCP,Available,Semrush INC,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-13,2026-10-20,REAL
+P_d1c3203d-2c4a-06f1-8486-b60b3e333cc8,Perfony Agent,Available,Perfony.com,ThirdParty,Not Available,1.0.30,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-13,2026-10-14,REAL
+P_bda11870-9fc6-3656-540b-d3d218e2d48d,Resolve,Available,KnBases LLC,ThirdParty,Not Available,1.5.1,,Publisher-managed,Outlook;Teams;Copilot;Office,acquiredForNone,,,2026-10-29,2026-10-29,REAL
+P_b74f5b17-4a56-2a87-38f7-973e9f930735,FX Hedge,Available,C8 Technologies Ireland,ThirdParty,Not Available,1.0.3,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-21,2026-10-22,REAL
+P_3da4a574-425e-0cf4-d6a4-bef5e5b45214,"Kipper for NetSuite, QuickBooks, and Xero",Available,Kipper Inc,ThirdParty,Not Available,1.0.6,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-14,2026-10-15,REAL
+P_0f3315c2-3dd8-4beb-1730-cb6df5ec4c73,MarketplaceJP Agent,Available,"ISAMI INNOVATIONS CO., LTD.",ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-22,2026-10-22,REAL
+P_6b0a591a-ef6f-1da0-2fa4-b9fe04755a2f,Guru,Available,"Guru Technologies, Inc.",ThirdParty,Not Available,1.2.0,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-10-14,2026-10-15,REAL
+P_9d6cd23f-496e-c1fc-9933-b08290d3ad30,Juro contracts,Available,JURO ONLINE LIMITED,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-15,2026-10-15,REAL
+P_37abedec-cdfc-4659-fc49-c4fef174abd5,Dillien VDR,Available,Dillien,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-23,2026-10-16,REAL
+P_6bd1d517-e885-bc02-eb24-a3fc1374f2f3,Gather QS AI,Available,Gather Insights,ThirdParty,Not Available,1.0.21,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-15,2026-10-16,REAL
+P_6a50c5ec-f9d5-136a-8721-698f8381a452,Persado,Available,Persado,ThirdParty,Not Available,1.5.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-23,2026-10-27,REAL
+P_3bb1c621-751c-6823-c72e-59f697d1e9b9,Gamma,Available,Gamma Tech,ThirdParty,Not Available,1.2.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-15,2026-10-20,REAL
+P_39fd8930-83cd-0aa2-63e7-3cf976eb007f,TaxGraph,Available,TaxGraph GmbH,ThirdParty,Not Available,1.0.13,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-15,2026-10-16,REAL
+P_59da6362-a633-89ba-9eaa-9e86fad68dc2,Study and Learn,Available,Microsoft Corporation,FirstParty,Not Available,1.1.14,,Microsoft-managed,Copilot,acquiredForSome,,,2026-10-15,2026-10-16,REAL
+P_31fdbc25-b134-5a57-8c3f-4bde95c7a228,S&P Global Energy,Available,SPGlobal,ThirdParty,Not Available,2.2.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-16,2026-10-16,REAL
+P_1d047d6d-6ff4-c8fe-85f5-e25b3b3cda07,Teamflect,Available,Teamflect,ThirdParty,Not Available,4.1.0,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-10-16,2026-10-19,REAL
+P_8a1f5069-fc39-3e9b-9b70-c8788bfd444f,CaDoMi.ai,Available,CaDoMi.ai,ThirdParty,Not Available,1.0.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-16,2026-11-03,REAL
+P_03111423-56ff-b63f-cc8b-289448fb5360,Financial Insights Assistant,Available,ATM Bilgisayar,ThirdParty,Not Available,6.1.5,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-18,2026-10-19,REAL
+P_07d26519-01f2-6ea1-db79-51999b0c9359,Wix,Available,Wix.com LTD,ThirdParty,Not Available,1.0.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-18,2026-10-19,REAL
+P_eb71771c-db2f-13b5-1dd0-e3f3e2b7a54b,Everest Group AI,Available,Everest Group,ThirdParty,Not Available,1.0.42,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-20,2026-10-20,REAL
+P_a3f956c2-d1ca-8505-865f-1164548d2c75,LASEC,Available,LASEC,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-09-20,2026-10-20,REAL
+P_59c1a358-91c0-52c8-59ad-c3b1647d4827,Shopify,Available,Shopify-Inc,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-26,2026-10-27,REAL
+P_cbf4aa4b-f68c-decc-8927-1a7c620809af,CV Review Assistant,Available,ATM Bilgisayar,ThirdParty,Not Available,1.1.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-08,2026-10-20,REAL
+P_3e90f00a-395f-b17a-d1ef-b234735cc38c,Kyber,Available,Kyber,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-22,2026-10-27,REAL
+P_c75c1260-6086-ce3d-630f-3340f8d55ad1,Laki.ai,Available,Helsinki AI Labs Oy,ThirdParty,Not Available,1.0.106,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-21,2026-10-27,REAL
+P_49d46d86-7030-a5b8-61c7-4eb138f7c7f3,IANS,Available,IANS,ThirdParty,Not Available,1.5.16,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-29,2026-10-30,REAL
+P_cdd1ebf1-8275-011d-7366-d83c7c18c1dd,Tango,Available,"Tango Technology, Inc.",ThirdParty,Not Available,2.0.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-23,2026-10-27,REAL
+P_bb130977-e63f-4fde-182d-3b16dda7e77c,Templafy,Available,Templafy,ThirdParty,Not Available,2.2.1,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2026-10-23,2026-10-27,REAL
+P_ce281f3a-58ca-17bc-87ef-1e14e94ec2cc,Mural,Available,MURAL,ThirdParty,Not Available,2.7.0,,Publisher-managed,Teams;Outlook;Office;Copilot,acquiredForNone,,,2026-10-26,2026-10-27,REAL
+P_a986e121-fd5e-9153-a4d9-3c7255d5dc4f,Matter,Available,MatterApp Inc.,ThirdParty,Not Available,1.8.9,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-23,2026-10-27,REAL
+P_c346cd28-9484-ba65-fbc6-f018e44cc974,Sitemate,Available,SITEMATE SERVICES PTY LTD.,ThirdParty,Not Available,1.3.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-23,2026-10-27,REAL
+P_351f9716-678d-3d5e-3e8d-a2e70f986633,Tembi Intelligence,Available,TembiAgent,ThirdParty,Not Available,1.0.9,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-23,2026-10-27,REAL
+P_6a866e42-381c-7e7f-9133-0bc755454119,LegalBrain エージェント,Available,弁護士ドットコム株式会社,ThirdParty,Not Available,1.1.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-26,2026-10-27,REAL
+P_57f94451-4495-4bff-fd94-44acc72b5a66,Druva,Available,Druva,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-21,2026-10-27,REAL
+P_8af4a23a-c458-bdc7-e376-e981dd49d0db,Deaglo AI,Available,Deaglo Technologies,ThirdParty,Not Available,1.0.6,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-26,2026-10-28,REAL
+P_3344ef18-2f37-1ce2-6d49-a90d5fb161b5,Task 365 AI Agent,Available,Apps 365 & HR365,ThirdParty,Not Available,26.1016.2230,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-26,2026-10-27,REAL
+P_8cfc4e6f-267e-db15-c6e7-3fc47a54f61e,Analyst,Available,Microsoft Corporation,FirstParty,Not Available,1.0.12,,Microsoft-managed,Copilot,acquiredForSome,,,2026-10-26,2026-10-27,REAL
+P_552e6eda-fc18-7fb9-0ef6-1bf2de3393e4,Researcher,Available,Microsoft Corporation,FirstParty,Not Available,1.4.20,,Microsoft-managed,Copilot,acquiredForSome,,,2026-10-26,2026-10-27,REAL
+P_95ececa2-8770-8e92-fd40-8983e3c2adab,"Adobe Acrobat for Microsoft Teams, Outlook, and Copilot",Available,ADOBE INC.,ThirdParty,Not Available,26.10.0,,Publisher-managed,Teams;Copilot;Outlook;Office,acquiredForNone,,,2026-10-26,2026-11-03,REAL
+P_596775ef-11f6-ea88-839c-aadf2015efdb,Kowalah,Available,Kowalah,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-27,2026-10-27,REAL
+P_010886bb-e96f-5a30-7a86-a1235f2400bb,Normalic Assistant,Available,Normalic,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-27,2026-10-28,REAL
+P_9ffb61f1-2c23-93f9-0fe9-6d41a67daa39,Affine - AI Legal Research,Available,NeuralShift,ThirdParty,Not Available,1.0.12,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-27,2026-10-28,REAL
+P_4c1b2db6-c55d-8a16-eefc-2ee1534830d5,LawQi,Available,LawQi Learning Inc.,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-28,2026-10-29,REAL
+P_f82429cb-3f9f-e869-0fd4-4fbc12775992,Linetrack,Available,Linetrack GmbH,ThirdParty,Not Available,1.0.8,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-27,2026-10-28,REAL
+P_54c77df8-da86-bbf7-3ebc-a43b891b3d51,Meltwater,Available,Meltwater,ThirdParty,Not Available,1.11.3,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-27,2026-10-28,REAL
+P_00abd633-cab3-5414-0ac6-93aa4413813d,FX Maestro,Available,ZeroVaR,ThirdParty,Not Available,1.4.3,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-27,2026-10-28,REAL
+P_029c31a4-ae1d-a29e-8d3e-24b4e932ff67,Egnyte,Available,"Egnyte, Inc.",ThirdParty,Not Available,4.5.0,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-10-28,2026-11-02,REAL
+P_3e3be670-72c9-540d-6e5b-c2df7290560a,Workpath,Available,Workpath GmbH,ThirdParty,Not Available,3.0.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-28,2026-10-29,REAL
+P_5c2d2509-54e4-4026-c435-c0399b2a238c,GoRoute E-Invoicing,Available,GoRoute E-Invoicing,ThirdParty,Not Available,1.0.5,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-28,2026-10-30,REAL
+P_bd446e97-1e7e-5e4a-75ac-2f54efe9770e,Draup for Sales,Available,Draup,ThirdParty,Not Available,1.1.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-29,2026-10-29,REAL
+P_d57d4da7-846d-b18b-1845-90ea5921bed8,SharePoint list agent,Available,Microsoft Corporation,FirstParty,Not Available,1.0.111,,Microsoft-managed,Copilot,acquiredForNone,,,2026-10-28,2026-10-29,REAL
+P_492f4d5a-1e12-334d-b5c9-c7a564491cb0,Merchant QBR AutoPilot,Available,IntelliThing,ThirdParty,Not Available,4.1.6,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-28,2026-10-30,REAL
+P_a3858059-22ad-18f6-beea-dce8565bbf94,Tastewise,Available,Tastewise,ThirdParty,Not Available,2.10.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-29,2026-10-30,REAL
+P_1830a57d-1566-4018-fe50-ddcc355700be,Daloopa MCP,Available,Daloopa,ThirdParty,Not Available,1.3.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-28,2026-10-30,REAL
+P_7aca693c-18fd-99c2-873b-9f3bbca433b4,Kamai,Available,Kamai Enterprises,ThirdParty,Not Available,1.0.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-29,2026-10-31,REAL
+P_8b903348-ed85-feba-ec71-6812954f69e2,HubSpot,Available,HubSpot Inc,ThirdParty,Not Available,1.0.6,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-10-29,2026-10-30,REAL
+P_307475bf-b2cf-94d8-95c4-9bc732fdbc72,Adobe Express,Available,ADOBE INC.,ThirdParty,Not Available,2.2.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-29,2026-10-30,REAL
+P_352efb26-0507-2810-b446-072d1df3b44a,Draup for Talent,Available,Draup,ThirdParty,Not Available,1.0.0,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-30,2026-10-30,REAL
+P_c1f57670-e931-82fc-b95a-8e38638bd0d4,Move Work Forward with Jira,Available,Move Work Forward Pte Ltd,ThirdParty,Not Available,1.0.19,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2026-10-30,2026-10-31,REAL
+P_c32a2f04-2a5b-7eaa-0ee7-7120b2fd3032,Magic Moment Playbook,Available,株式会社 Magic Moment,ThirdParty,Not Available,3.3.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-28,2026-10-31,REAL
+P_ac7dce59-027a-cbcb-3a7d-bb55bc0921ac,Bolt,Available,Stackblitz,ThirdParty,Not Available,1.4.2,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-21,2026-10-31,REAL
+P_33b8e64c-703d-af64-759d-c6dcef93708d,AB Projects,Available,RECEIPTROLLER,ThirdParty,Not Available,2.5.1,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-13,2026-11-02,REAL
+P_7de8717f-d825-b998-adba-466b416524e5,AB Sales,Available,RECEIPTROLLER,ThirdParty,Not Available,1.3.2,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-26,2026-11-02,REAL
+P_c7ca79e3-3733-0ddd-9ea0-d668f5402ac4,AB Support,Available,RECEIPTROLLER,ThirdParty,Not Available,1.4.0,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-14,2026-11-02,REAL
+P_67548d6a-11b5-e8f3-b46e-df6528e94204,Logistics Ops (EU),Available,"Blue Yonder Group, Inc",ThirdParty,Not Available,2026.3.5,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-31,2026-11-02,REAL
+P_b087c42e-af7a-9f11-5fef-12be4c3293a7,RuhBot ProjectOps Copilot,Available,BaffleSol Technologies Private Limited,ThirdParty,Not Available,1.0.14,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-30,2026-11-02,REAL
+P_5e79057d-fa98-9c14-daea-644a410fd9a0,Onplana,Available,Devsoft Solutions LLC,ThirdParty,Not Available,1.0.10,,Publisher-managed,Office;Outlook;Teams;Copilot,acquiredForNone,,,2026-10-30,2026-11-02,REAL
+P_395d9c9e-ee69-81fe-77f5-8e672a39da1a,Articulate EU,Available,Articulate,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-30,2026-11-02,REAL
+P_48aa95df-54a5-db52-ae68-1cf9258442d2,Harvey AU,Available,Counsel AI Corporation,ThirdParty,Not Available,1.0.2,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-29,2026-11-02,REAL
+P_9ee057f1-7810-889d-3371-dff5a291ef43,Articulate,Available,Articulate,ThirdParty,Not Available,1.1.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-30,2026-11-02,REAL
+P_ad3f22f7-c966-2226-0625-5498e4ef2f73,Learning,Available,Microsoft Corporation,FirstParty,Not Available,1.0.56,,Microsoft-managed,Copilot,acquiredForNone,,,2026-10-30,2026-11-02,REAL
+P_bda71a15-0747-b8e3-86c7-fec801cbd139,mfloow agent,Available,Micronity Inc.,ThirdParty,Not Available,1.0.11,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-29,2026-11-02,REAL
+P_812c7bbf-ccd8-63b0-9cc1-5a5c31af09ac,Patsnap Patent Paper Search,Available,Patsnap,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-11-02,2026-11-03,REAL
+P_e2df23dc-89e4-44bd-894a-d0352af73d74,chris-testcopilot1,Available,Test_Publisher_Chris_001,ThirdParty,Not Available,1.0.0,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-30,2026-11-03,REAL
+P_5bcd8659-523a-f242-7a6a-f80e2f2a67d4,Howzi for Google Analytics,Available,Velyoo AG,ThirdParty,Not Available,1.0.1,,Publisher-managed,Copilot,acquiredForNone,,,2026-11-02,2026-11-03,REAL
+P_72bb8fe1-ec7d-1bc0-0992-97baea476648,Glide,Available,glideapps.com,ThirdParty,Not Available,1.0.7,,Publisher-managed,Copilot,acquiredForNone,,,2026-11-02,2026-11-03,REAL
+P_216b3fd9-bd2e-873d-99ce-2ceee905edf2,Formspace,Available,VP LABS PTY LTD,ThirdParty,Not Available,1.0.10,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-11-02,2026-11-03,REAL
+P_a83d81df-8290-a144-9cb1-768ca9781bed,TruLata,Available,TruLata,ThirdParty,Not Available,1.1.4,,Publisher-managed,Copilot,acquiredForNone,,,2026-11-03,2026-11-03,REAL
+P_645dbc7b-337f-98e7-7fc4-c531dff05068,Osmosis Analyst,Available,Osmosis Technologies,ThirdParty,Not Available,1.0.15,,Publisher-managed,Copilot,acquiredForNone,,,2026-10-15,2026-11-03,REAL
+P_9cbba571-08b3-fcc6-f589-56f5d3a84011,Decisions,Available,Decisions,ThirdParty,Not Available,6.0.2,,Publisher-managed,Outlook;Teams;Office;Copilot,acquiredForNone,,,2026-11-03,2026-11-03,REAL
+P_fade3bd4-a71e-6f9d-9219-32ef917a9dce,Warehouse Ops (EU),Available,"Blue Yonder Group, Inc",ThirdParty,Not Available,2026.3.5,,Publisher-managed,Teams;Copilot,acquiredForNone,,,2026-10-31,2026-11-03,REAL
+P_3e10abe4-10c4-d600-ea7f-ff63b427ff71,Eon,Available,eon.io,ThirdParty,Not Available,1.0.10,,Publisher-managed,Copilot,acquiredForNone,,,2026-11-03,2026-11-04,REAL
+P_a0cd25bf-1412-891d-0f5f-b44338347d73,Worq,Available,Reportworq,ThirdParty,Not Available,1.0.1791259111,,Publisher-managed,Copilot,acquiredForNone,,,2026-11-02,2026-11-04,REAL
+P_b7afaba4-7de5-85f1-13bc-8687cbb0948f,Figma,Available,Figma,ThirdParty,Not Available,2.2.1,,Publisher-managed,Outlook;Teams;Copilot,acquiredForNone,,,2026-11-03,2026-11-04,REAL
+P_dc7ff5c3-a585-8075-d148-1199548a7529,Canva.,Available,Canva Pty Ltd,ThirdParty,Not Available,1.0.11,,Publisher-managed,Teams;Outlook;Copilot,acquiredForNone,,,2026-11-03,2026-11-04,REAL
+P_1b3121cb-25e3-b301-2cca-6f0740a49f8f,Sales Retriever,Available,Sales Retriever,ThirdParty,Not Available,1.0.22,,Publisher-managed,Copilot,acquiredForNone,,,2026-11-04,2026-11-04,REAL
+T_8a66deeb-f5c7-edb3-ddd5-92d8c70d401f,ChatAgent,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,ff88da89-008b-44a3-9e3d-53347b9db78a,,2026-08-04,2026-08-04,REAL
+T_077369cb-a0f3-6163-b4aa-9ce7299a007d,TitleAgent,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,a11ab414-9e09-4b9d-bc04-60e85d30ba7a,,2026-08-04,2026-08-04,REAL
+T_9e8484eb-c9c2-ebe1-36fb-7ff6e63f4b77,rti_dataagent_rtidemoz7shu,Available,Fabric Data Agent,Shared,Microsoft 365 Agents Toolkit,1.0.1,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Copilot,acquiredForNone,,,2026-08-04,2026-08-04,REAL
+T_99be899e-9d12-c374-b0f3-e3fa451d7353,Contoso Coffee Analyst,Available,Fabric Data Agent,Shared,Microsoft 365 Agents Toolkit,1.0.1,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Copilot,acquiredForNone,,,2026-08-05,2026-08-05,REAL
+T_ec05b5af-5617-f704-36c7-939b47428f4c,Agent808,Available,Alison Pouw,Shared,Foundry,1.0.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Teams;Copilot,acquiredForNone,7ec7502e-d465-4847-945d-0d7c9c632916,,2026-09-11,2026-09-11,REAL
+T_1349d9e5-d4fb-d58f-cdf7-3c8edf06dd34,contoso-sales-agent,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,c98e9fad-3a78-4e2f-a5b6-4a0b30f2d8a5,,2026-09-11,2026-09-11,REAL
+T_c16947df-d1cc-0d9f-697f-d7ef0e15f253,communication,Available,,Shared,Foundry,1.0,,Unowned tenant agent,,acquiredForNone,b709481d-4a2f-4898-bc2e-d233e1212059,,2026-09-16,2026-09-16,REAL
+T_eaee1e86-8ad0-cf5a-4c49-75b61a5ef177,astra,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,ebb5b44e-9fc5-49ad-9ac5-f54576ec42b8,,2026-09-16,2026-09-16,REAL
+T_a451eb8a-dd77-1c46-1b36-b84e8d2cadeb,sales-metrics-dashboard-builder,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,96a6d4ed-93ea-4a03-9a04-53b5ab757216,,2026-09-16,2026-09-16,REAL
+T_9cf16941-b4c2-5d60-71dc-8420f25aae32,claim-assessor,Available,,Shared,Foundry,1.0,,Unowned tenant agent,,acquiredForNone,142ae3cc-d776-4400-aa9f-fdd6f106ef2f,,2026-09-16,2026-09-16,REAL
+T_c8f7e062-9d44-39e0-c088-15f7676f76bd,policy-checker,Available,,Shared,Foundry,1.0,,Unowned tenant agent,,acquiredForNone,51d7da55-236a-40ee-8a7d-e643245aa252,,2026-09-16,2026-09-16,REAL
+T_84688197-27ef-a5f7-90ba-abff33d8d9df,risk-analyst,Available,,Shared,Foundry,1.0,,Unowned tenant agent,,acquiredForNone,26af408b-ee2a-46c1-8397-bc62b445cc24,,2026-09-16,2026-09-16,REAL
+T_baa7461f-7179-0bed-0ffd-59fb265b90fa,communication-agent,Available,,Shared,Foundry,1.0,,Unowned tenant agent,,acquiredForNone,a607f1b7-2e61-4dd5-8387-384839f615b0,,2026-09-16,2026-09-16,REAL
+T_52a30582-c3f7-44ec-36bd-d1f24c26b69a,claims-data-analyst,Available,,Shared,Foundry,1.0,,Unowned tenant agent,,acquiredForNone,2f9026d8-396d-4266-bcfc-b885f852b762,,2026-09-16,2026-10-04,REAL
+T_c04ca51b-bb76-b773-1c59-aa881cce1e7a,insurance-supervisor,Available,,Shared,Foundry,1.0,,Unowned tenant agent,,acquiredForNone,6d1ababb-b3ea-4207-808d-e0a3147e7994,,2026-09-16,2026-09-16,REAL
+T_acef0468-9410-4cf9-d3b4-3573ff9793c9,InsuranceDataAgent,Available,Fabric Data Agent,Shared,Microsoft 365 Agents Toolkit,1.0.1,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Copilot,acquiredForNone,,,2026-10-16,2026-10-16,REAL
+T_6e1c67a2-5ce5-75a6-0605-23ef4f2d1bf5,Insurance IQ Claims Agent demo,Available,Fabric Data Agent,Shared,Microsoft 365 Agents Toolkit,1.0.2,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Copilot,acquiredForNone,,,2026-10-26,2026-10-26,REAL
+T_cf0287f3-fd09-de27-4385-83edc4a3de9d,Insurance IQ Claims Copilot,Available,System Administrator,Shared,Copilot Studio,1.0.2,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Teams;Copilot,acquiredForNone,b03acf7b-cb47-4af7-a7f5-83df1eeb9884,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-10-26,2026-10-26,REAL
+T_c7dd7c22-5b38-3087-50b7-36e5e269b812,witty-agent-mlxrxqmd04,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,371e6a85-cf35-470c-8a0d-c3ff0ade862f,,2026-10-27,2026-10-27,REAL
+T_f6d8953e-7d3d-fbcb-731d-19b7d3bd3cd8,claims-data-analyst-iqdemo,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,2c894162-350e-481e-9d3b-9e4d150aaf02,,2026-10-27,2026-10-28,REAL
+T_7157aeea-3ee5-92ee-f73c-2df0318d5eee,claim-assessor-iqdemo,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,84d0cbe0-0743-41c1-afe4-e48ae7c9ffa9,,2026-10-27,2026-10-28,REAL
+T_b9d273b9-3d11-5187-3c37-6be2e3e96fe1,policy-checker-iqdemo,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,28c0e462-e2a1-4c96-a7d5-6fba03ec7fb1,,2026-10-27,2026-10-28,REAL
+T_c5326b86-9d52-b3cb-6e22-68e624632b59,communication-agent-iqdemo,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,40d72421-acd0-4fdc-b6bb-f859ba1bce80,,2026-10-27,2026-11-03,REAL
+T_7346da00-264e-a151-e88b-801cb99fc941,risk-analyst-iqdemo,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,825d92e6-663a-4f07-a163-5c3a87a3fbd0,,2026-10-27,2026-10-28,REAL
+T_64d56d24-1d82-5275-5480-7db1d753bc09,insurance-supervisor-iqdemo,Available,,Shared,Foundry,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,990d54c8-0d9e-454d-98d4-364a7536d61d,,2026-10-27,2026-10-28,REAL
+T_35ef7f6f-ab50-13e6-f3e4-8c2943dab045,Insurance IQ Claims Copilot,Available,System Administrator,LineOfBusiness,Copilot Studio,1.0.0,,Unowned tenant agent,Teams;Copilot,acquiredForNone,b03acf7b-cb47-4af7-a7f5-83df1eeb9884,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-10-26,2026-11-02,REAL
+T_79274dc9-9388-98b5-9653-81cb7761a725,Policy Agent,Available,System Administrator,Shared,Copilot Studio,1.0.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Teams;Copilot,acquiredForNone,f039645b-8a46-45ec-aee3-fa7ed30dd3f0,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-10-23,2026-11-03,REAL
+T_8ab88569-00ae-d18f-b42f-213b8d6c46aa,DA_DataAnalyst,Available,Fabric Data Agent,Shared,Microsoft 365 Agents Toolkit,1.0.4,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Copilot,acquiredForNone,,,2026-01-07,2026-01-08,REAL
+T_b47be868-47eb-8433-a76c-b4d71707f8a1,DA_ClaimsAnalysisV2,Available,Fabric Data Agent,Shared,Microsoft 365 Agents Toolkit,1.0.1,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Copilot,acquiredForNone,,,2026-01-08,2026-01-08,REAL
+T_a48371d4-a948-a16d-be21-6ee913a4452c,DA_loandataagent,Available,Fabric Data Agent,Shared,Microsoft 365 Agents Toolkit,1.0.1,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Copilot,acquiredForNone,,,2026-03-06,2026-03-06,REAL
+T_a58c7d36-4797-b8ee-1aee-f10efe1ab31d,UW_Briefing_Validator,Available,,Shared,Copilot Studio,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,8b6ab04d-3c11-4ef7-89c7-0d2f74e8f980,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-02-02,2026-09-15,REAL
+T_ae315943-b321-db10-c4dd-1b0fec4e741b,Financial Insights,Available,,Shared,Copilot Studio,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,12094bf5-61df-464b-9bc9-a54930adf885,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2025-04-10,2026-11-03,REAL
+T_dd50a815-8274-095d-1ae3-9b1bb7bb6efb,Underwriting Brief Orchestrator,Available,,Shared,Copilot Studio,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,32c722ac-f7d3-4ade-8d1a-ae95ac98d72b,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-01-29,2026-11-03,REAL
+T_95074423-5ae3-26dd-4049-c0da10dfee86,Agent,Available,,Shared,Copilot Studio,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,f076bdd4-a24f-4ba5-b793-29e37ff5a293,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2025-05-29,2026-09-29,REAL
+T_4e948029-7346-57d1-dce7-263f90e1711b,Copilot in Power Apps,Available,,Shared,Copilot Studio,1.0,,Unowned tenant agent,,acquiredForNone,,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2025-05-06,2026-08-08,REAL
+T_9fdf5223-19ee-3d93-017e-a34b42dd547d,Insurance Underwriting Intelligence Agent,Available,,Shared,Copilot Studio,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,181dbd46-cb2b-41f0-bab8-dba2bcf8b516,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-01-29,2026-11-03,REAL
+T_6575b0d9-803b-c328-77ca-e8e43ec42ca2,UW_Briefing_Generator,Available,,Shared,Copilot Studio,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,6715af6c-9395-40dc-ae16-1bd2569652b4,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-02-02,2026-09-15,REAL
+T_615a20b3-44e6-349d-3d72-2cb33debf235,UW_Briefing_Orchestrator,Available,,Shared,Copilot Studio,1.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,,acquiredForNone,eaf7f431-3f09-4d33-b12f-5854df1e678c,Default-840a80c0-e4a5-47be-8a1d-7ecfa61e839c,2026-02-02,2026-09-29,REAL
+T_4813bf5f-f569-7ae0-bb3e-b703d7ec1717,Test,Available,Your developer name,Shared,Copilot Studio,1.0.0,admin@mngenvmcap257273.onmicrosoft.com,Owner assigned,Teams,acquiredForNone,73a4c13e-cdf9-43b1-aaa5-820ce6232d74,fd105a39-4884-e15a-85b4-e02af45b1b1b,2026-06-02,2026-08-06,REAL

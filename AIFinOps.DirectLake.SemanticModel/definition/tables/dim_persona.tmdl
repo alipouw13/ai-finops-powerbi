@@ -1,0 +1,31 @@
+table dim_persona
+
+	column persona_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: persona_key
+
+	column persona_name
+		dataType: string
+		sortByColumn: persona_order
+		summarizeBy: none
+		sourceColumn: persona_name
+
+	column persona_order
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: persona_order
+
+	column description
+		dataType: string
+		summarizeBy: none
+		sourceColumn: description
+
+	partition dim_persona = entity
+		mode: directLake
+		source
+			entityName: dim_persona
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

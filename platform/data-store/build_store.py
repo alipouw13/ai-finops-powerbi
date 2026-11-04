@@ -129,9 +129,12 @@ def build():
         n = load_csv(con, t, path)
         total += n
         print(f"  + {t:<34} {n:>5} rows")
-    print("\nGold star schema (fact + dims):")
-    gold_files = sorted(glob.glob(os.path.join(GOLD, "fact_ai_usage.csv"))
-                        + glob.glob(os.path.join(GOLD, "dim_*.csv")))
+    print("\nGold star schema (facts, dims, bridges):")
+    gold_files = sorted(
+        glob.glob(os.path.join(GOLD, "fact_*.csv"))
+        + glob.glob(os.path.join(GOLD, "dim_*.csv"))
+        + glob.glob(os.path.join(GOLD, "bridge_*.csv"))
+    )
     gold_n = 0
     for path in gold_files:
         t = os.path.splitext(os.path.basename(path))[0]
@@ -143,10 +146,12 @@ def build():
     con.execute("DROP VIEW IF EXISTS gold")
     con.execute(
         "CREATE VIEW gold AS SELECT usage_date, platform_key, identity_key, model_key, "
-        "unit_type, CAST(cost_usd AS REAL) cost, CAST(quantity AS REAL) quantity, "
+        "unit_type, CAST(cost_usd AS REAL) cost, CAST(list_cost_usd AS REAL) list_cost, "
+        "CAST(quantity AS REAL) quantity, "
         "CAST(requests AS REAL) requests, CAST(input_tokens AS REAL) input_tokens, "
-        "CAST(output_tokens AS REAL) output_tokens, CAST(latency_ms AS REAL) latency_ms, "
-        "is_error, application_key, environment_key, business_unit_key FROM fact_ai_usage")
+        "CAST(output_tokens AS REAL) output_tokens, CAST(cached_tokens AS REAL) cached_tokens, "
+        "CAST(latency_ms AS REAL) latency_ms, is_error, cost_is_estimated, has_rate_card, "
+        "application_key, environment_key, business_unit_key, cost_center_key FROM fact_ai_usage")
     con.execute('DROP TABLE IF EXISTS extractable_data_catalog')
     con.execute("CREATE TABLE extractable_data_catalog "
                 "(product TEXT, category TEXT, field TEXT, description TEXT, source TEXT, grain TEXT)")

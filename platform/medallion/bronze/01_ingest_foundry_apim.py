@@ -1,58 +1,78 @@
-# Fabric notebook — BRONZE: Azure AI Foundry via APIM AI Gateway
+# Fabric notebook — BRONZE: FOCUS 1.2 Cost Export + APIM AI Gateway + Azure Monitor
 # ---------------------------------------------------------------------------
-# Source of fidelity: the ONLY per-user Foundry attribution path is the APIM
-# gateway (Entra JWT claims -> DCR -> Log Analytics). Azure Monitor token
-# metrics carry no identity dimension, so we never use them for attribution.
+# Architectural principle:
+#   1. FOCUS 1.2-preview (from Microsoft Cost Management export / OneLake shortcut)
+#      is the SOLE billing authority for all Azure AI, PTUs, Azure ML, Supporting
+#      Infrastructure (AI Search, APIM, Cosmos, Redis, Fabric, Monitor), and
+#      Copilot Studio / Cowork PAYG & P3 commitment plans.
+#   2. APIM AI Gateway logs (Entra JWT claims -> DCR -> Log Analytics / Eventhouse)
+#      are the per-request token & caller attribution driver (PromptTokens,
+#      CompletionTokens, CachedPromptTokens, ReasoningTokens, Oid, ClientId, AgentId).
+#   3. Azure Monitor metrics capture deployment-level PTU utilization % and 429 throttles.
 #
-# Bronze rule: land raw, append-only, source columns preserved, one file per
-# extract. NO reshaping here beyond adding lineage columns. This is the
-# historical system of record; silver/gold are always rebuildable from it.
-#
-# Real extract shape (data/foundry_gateway_raw.json), all values arrive as text:
-#   ApiName, Appid, ClientId, Oid, BusinessUnitClaim, CostCenterClaim,
-#   ModelName, ModelVersion, PromptTokens, CompletionTokens, CachedPromptTokens,
-#   IsError, IsStreaming, StatusCode, OperationName, DeploymentRegion,
-#   RequestId, TimeGenerated, BackendId
+# Bronze rule: land raw, append-only, source columns preserved, stamped with
+# lineage metadata (_ingested_at, _source_system, _source_api, _watermark, _batch_id).
 # ---------------------------------------------------------------------------
 from pyspark.sql import functions as F
 
-# Parameterised at pipeline runtime (Log Analytics export, ADLS landing, etc.)
-RAW_PATH   = "abfss://finops@<lake>.dfs.core.windows.net/landing/foundry/*.json"
-BRONZE_TBL = "finops_bronze.foundry_gateway_raw"
-EXTRACT_ID = spark.conf.get("finops.extract_id", "manual")   # pipeline run id
+LAKE = "abfss://finops@onelake.dfs.fabric.microsoft.com/LH_tokenomics_bronze.Lakehouse/Files"
+EXTRACT_ID = spark.conf.get("finops.extract_id", "manual")
 
-raw = (
-    spark.read.option("multiLine", True).json(RAW_PATH)
-    # lineage / retention columns — the only additions bronze is allowed to make
-    .withColumn("_ingest_ts",  F.current_timestamp())
-    .withColumn("_extract_id", F.lit(EXTRACT_ID))
-    .withColumn("_source",     F.lit("apim_ai_gateway"))
+
+def stamp_and_save(df, table_name: str, source_api: str, mode: str = "append"):
+    out = (
+        df.withColumn("_ingested_at", F.current_timestamp())
+        .withColumn("_source_system", F.lit("azure_finops"))
+        .withColumn("_source_api", F.lit(source_api))
+        .withColumn("_extract_id", F.lit(EXTRACT_ID))
+    )
+    (
+        out.write.format("delta")
+        .mode(mode)
+        .option("mergeSchema", "true")
+        .saveAsTable(f"finops_bronze.{table_name}")
+    )
+    print(f"bronze {mode}: finops_bronze.{table_name} ({out.count()} rows)")
+
+
+# 1. FOCUS 1.2-preview Cost & Usage Details (Parquet/CSV via OneLake shortcut or export)
+focus_raw = (
+    spark.read.option("header", "true")
+    .option("multiLine", "true")
+    .option("escape", '"')
+    .csv(f"{LAKE}/bronze/bronze_focus_cost.csv")
 )
+stamp_and_save(focus_raw, "bronze_focus_cost", "costmanagement.exports.focus_1.2_preview", mode="append")
 
-# Append-only: bronze retains full history. Partition by ingest day so that
-# incremental Cost-Management/LA exports (which REPLACE month-to-date) never
-# overwrite prior days.
-(raw.write
-    .format("delta")
-    .mode("append")
-    .partitionBy("_source")
-    .option("mergeSchema", "true")
-    .saveAsTable(BRONZE_TBL))
+# 2. APIM AI Gateway Per-Request Token & Identity Logs
+apim_raw = (
+    spark.read.option("header", "true")
+    .option("multiLine", "true")
+    .option("escape", '"')
+    .csv(f"{LAKE}/bronze/bronze_apim_gateway_logs.csv")
+)
+stamp_and_save(apim_raw, "bronze_apim_gateway_logs", "apim.ai_gateway.log_analytics", mode="append")
 
-print(f"bronze append complete: {raw.count()} rows -> {BRONZE_TBL}")
+# 3. Azure Monitor Metrics (Tokens, Latency, 429 Throttles, PTU Utilization %)
+metrics_raw = (
+    spark.read.option("header", "true")
+    .csv(f"{LAKE}/bronze/bronze_azure_ai_metrics.csv")
+)
+stamp_and_save(metrics_raw, "bronze_azure_ai_metrics", "microsoft.insights.metrics", mode="append")
 
-# Companion reference extracts (small, overwrite latest snapshot is fine):
-#   ApimClientOwnership_CL  -> identity/app ownership
-#   ApimModelRate_CL        -> effective per-1k model rates
-#   ApimTeamBudget_CL       -> team budgets
-for name, path in [
-    ("client_ownership", "landing/foundry/ownership/*.json"),
-    ("model_rate",       "landing/foundry/rates/*.json"),
-    ("team_budget",      "landing/foundry/budgets/*.json"),
+# 4. Reference / Master Data Tables (Identity Map, App Inventory, Business Hierarchy, Rate Card)
+for ref_name in [
+    "bronze_ref_identity_map",
+    "bronze_ref_app_inventory",
+    "bronze_ref_business_hierarchy",
+    "bronze_ref_agent_inventory",
+    "bronze_ref_rate_card",
 ]:
-    (spark.read.option("multiLine", True)
-        .json(f"abfss://finops@<lake>.dfs.core.windows.net/{path}")
-        .withColumn("_ingest_ts", F.current_timestamp())
-        .write.format("delta").mode("overwrite").option("overwriteSchema", "true")
-        .saveAsTable(f"finops_bronze.foundry_{name}"))
-    print(f"bronze snapshot: finops_bronze.foundry_{name}")
+    ref_df = (
+        spark.read.option("header", "true")
+        .option("multiLine", "true")
+        .option("escape", '"')
+        .csv(f"{LAKE}/bronze/{ref_name}.csv")
+    )
+    stamp_and_save(ref_df, ref_name, f"reference.{ref_name}", mode="overwrite")
+

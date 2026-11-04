@@ -1,0 +1,435 @@
+table fact_ai_usage
+
+	column usage_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		isHidden
+		summarizeBy: none
+		sourceColumn: usage_date
+
+	column platform_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: platform_key
+
+	column identity_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: identity_key
+
+	column model_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: model_key
+
+	column cost_center_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cost_center_key
+
+	column application_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: application_key
+
+	column environment_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: environment_key
+
+	column business_unit_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: business_unit_key
+
+	column unit_type
+		dataType: string
+		summarizeBy: none
+		sourceColumn: unit_type
+
+	column quantity
+		dataType: double
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: quantity
+
+	column input_tokens
+		dataType: int64
+		formatString: #,0
+		isHidden
+		summarizeBy: sum
+		sourceColumn: input_tokens
+
+	column output_tokens
+		dataType: int64
+		formatString: #,0
+		isHidden
+		summarizeBy: sum
+		sourceColumn: output_tokens
+
+	column cached_tokens
+		dataType: int64
+		formatString: #,0
+		isHidden
+		summarizeBy: sum
+		sourceColumn: cached_tokens
+
+	column requests
+		dataType: int64
+		formatString: #,0
+		isHidden
+		summarizeBy: sum
+		sourceColumn: requests
+
+	column cost_usd
+		dataType: double
+		formatString: \$#,0.0000
+		isHidden
+		summarizeBy: sum
+		sourceColumn: cost_usd
+
+	/// FOCUS ListCost / Rate-Card list price.
+	column list_cost_usd
+		dataType: double
+		formatString: \$#,0.0000
+		isHidden
+		summarizeBy: sum
+		sourceColumn: list_cost_usd
+
+	column cost_is_estimated
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: cost_is_estimated
+
+	/// TRUE when a genuine list/rate-card price was found.
+	column has_rate_card
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: has_rate_card
+
+	column is_error
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: is_error
+
+	column latency_ms
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: latency_ms
+
+
+	/// Primary AI FinOps cost measure (= FOCUS EffectiveCost for Azure/FOCUS sources, rate-card cost for seat/pack models).
+	measure 'Total AI Cost' = SUM(fact_ai_usage[cost_usd])
+		formatString: \$#,0.00
+
+	/// Cost sourced from a real billing surface (FOCUS 1.2 BilledCost/EffectiveCost, GitHub netAmount).
+	measure 'Billed Cost' = CALCULATE([Total AI Cost], fact_ai_usage[cost_is_estimated] = FALSE)
+		formatString: \$#,0.00
+
+	/// Cost derived from dim_rate_card (M365/GitHub flat seats, prepaid credit packs).
+	measure 'Modelled Cost' = CALCULATE([Total AI Cost], fact_ai_usage[cost_is_estimated] = TRUE)
+		formatString: \$#,0.00
+
+	/// Share of total spend that is invoice/FOCUS-backed rather than rate-card modelled.
+	measure 'Cost Confidence %' = DIVIDE([Billed Cost], [Total AI Cost])
+		formatString: 0.0%
+
+	/// Licence cost (M365 Copilot & GitHub Copilot seats). Does not vary with usage.
+	measure 'Fixed Cost' = ```
+			CALCULATE([Total AI Cost], fact_ai_usage[unit_type] IN { "seat_day" })
+			```
+		formatString: \$#,0.00
+
+	/// Consumption & reservation cost (tokens, PTUs, credits, premium requests, Azure AI meters).
+	measure 'Variable Cost' = ```
+			CALCULATE([Total AI Cost], NOT ( fact_ai_usage[unit_type] IN { "seat_day" } ))
+			```
+		formatString: \$#,0.00
+
+	measure 'Variable Cost %' = DIVIDE([Variable Cost], [Total AI Cost])
+		formatString: 0.0%
+
+	measure 'Total Tokens' = ```
+			CALCULATE(SUM(fact_ai_usage[quantity]), fact_ai_usage[unit_type] = "token")
+			```
+		formatString: #,0
+
+	measure 'Input Tokens' = SUM(fact_ai_usage[input_tokens])
+		formatString: #,0
+
+	measure 'Output Tokens' = SUM(fact_ai_usage[output_tokens])
+		formatString: #,0
+
+	measure 'Cached Tokens' = SUM(fact_ai_usage[cached_tokens])
+		formatString: #,0
+
+	/// Cached prompt tokens billed at 75% discount. Direct, actionable tokenomics lever.
+	measure 'Cache Hit Rate' = DIVIDE([Cached Tokens], [Input Tokens])
+		formatString: 0.0%
+
+	measure 'Cost per 1K Tokens' = ```
+			DIVIDE(CALCULATE([Total AI Cost], fact_ai_usage[unit_type] = "token"), DIVIDE([Total Tokens], 1000))
+			```
+		formatString: \$#,0.0000
+
+	measure 'Copilot Credits' = ```
+			CALCULATE(SUM(fact_ai_usage[quantity]), fact_ai_usage[unit_type] = "copilot_credit")
+			```
+		formatString: #,0
+
+	measure 'Premium Requests' = ```
+			CALCULATE(SUM(fact_ai_usage[quantity]), fact_ai_usage[unit_type] = "premium_request")
+			```
+		formatString: #,0
+
+	/// Usage signal only. Standard M365 Copilot prompts are included in the seat licence.
+	measure 'M365 Prompts' = ```
+			CALCULATE(SUM(fact_ai_usage[quantity]), fact_ai_usage[unit_type] = "prompt")
+			```
+		formatString: #,0
+
+	measure 'Licensed Seats' = ```
+			CALCULATE(DISTINCTCOUNT(fact_ai_usage[identity_key]), fact_ai_usage[unit_type] = "seat_day")
+			```
+		formatString: #,0
+
+	measure 'Total Requests' = SUM(fact_ai_usage[requests])
+		formatString: #,0
+
+	measure 'Active Users' = DISTINCTCOUNT(fact_ai_usage[identity_key])
+		formatString: #,0
+
+	measure 'Cost per Active User' = DIVIDE([Total AI Cost], [Active Users])
+		formatString: \$#,0.00
+
+	/// Users holding a paid seat with zero activity in 28 days. The recoverable seat count.
+	measure 'Idle Licensed Users' = ```
+			VAR Win = DATESINPERIOD(dim_date[date_key], MAX(dim_date[date_key]), -28, DAY)
+			RETURN
+			COUNTROWS(
+			FILTER(
+			VALUES(dim_identity[identity_key]),
+			CALCULATE([Licensed Seats], Win) > 0
+			&& CALCULATE([M365 Prompts] + [Premium Requests] + [Total Requests], Win) = 0
+			)
+			)
+			```
+		formatString: #,0
+
+	/// Recoverable monthly spend from idle paid seats, priced at the seat_day rate only.
+	measure 'Idle Seat Waste (monthly)' = ```
+			[Idle Licensed Users] * 30
+			* CALCULATE(AVERAGE(dim_rate_card[unit_price_usd]), dim_rate_card[unit_type] = "seat_day")
+			```
+		formatString: \$#,0.00
+
+	measure 'Error Rate' = ```
+			DIVIDE(CALCULATE([Total Requests], fact_ai_usage[is_error] = "True"), [Total Requests])
+			```
+		formatString: 0.0%
+
+	measure 'Avg Latency (ms)' = ```
+			AVERAGEX(FILTER(fact_ai_usage, fact_ai_usage[latency_ms] > 0), fact_ai_usage[latency_ms])
+			```
+		formatString: #,0
+
+	measure 'Cost PM' = CALCULATE([Total AI Cost], DATEADD(dim_date[date_key], -1, MONTH))
+		formatString: \$#,0.00
+
+	measure 'MoM Cost Delta %' = DIVIDE([Total AI Cost] - [Cost PM], [Cost PM])
+		formatString: +0.0%;-0.0%;0.0%
+
+	measure 'Cost (30d run-rate)' = ```
+			VAR D = COUNTROWS(VALUES(dim_date[date_key]))
+			RETURN DIVIDE([Total AI Cost], D) * 30
+			```
+		formatString: \$#,0.00
+
+	/// Actual cost after each platform's negotiated discount (dim_platform[enterprise_discount_pct]).
+	measure 'Discounted Cost' = ```
+			SUMX(
+			VALUES(dim_platform[platform_key]),
+			[Total AI Cost] * (1 - CALCULATE(SELECTEDVALUE(dim_platform[enterprise_discount_pct], 0)))
+			)
+			```
+		formatString: \$#,0.00
+
+	/// Savings unlocked by negotiated rates vs list. = Total AI Cost - Discounted Cost.
+	measure 'Discount Savings' = [Total AI Cost] - [Discounted Cost]
+		formatString: \$#,0.00
+
+	/// Spend at list / rate-card price across every platform (fact_ai_usage[list_cost_usd]).
+	measure 'Rate Card Cost' = SUM(fact_ai_usage[list_cost_usd])
+		formatString: \$#,0.00
+
+	/// Share of spend whose row carries a genuine rate-card price (has_rate_card = TRUE).
+	measure 'Rate Card Coverage %' = DIVIDE(CALCULATE([Total AI Cost], fact_ai_usage[has_rate_card] = TRUE), [Total AI Cost])
+		formatString: 0.0%
+
+	/// FOCUS ListCost / Rate-Card List Cost before negotiated EA/MCA or commitment discounts.
+	measure 'FOCUS List Cost' = SUM(fact_ai_usage[list_cost_usd])
+		formatString: \$#,0.00
+
+	/// Total FinOps savings from FOCUS ListCost to EffectiveCost (negotiated EA/MCA + commitment discounts).
+	measure 'Total FOCUS Savings' = [Rate Card Cost] - [Total AI Cost]
+		formatString: \$#,0.00
+
+	/// FinOps Foundation KPI: Effective Savings Rate = (ListCost - EffectiveCost) / ListCost.
+	measure 'Effective Savings Rate (ESR %)' = DIVIDE([Rate Card Cost] - [Total AI Cost], [Rate Card Cost])
+		formatString: 0.0%
+
+	/// M365 Copilot Cowork usage in Copilot Credits ($0.01 each). Consumptive add-on over the seat.
+	measure 'Cowork Credits' = CALCULATE(SUM(fact_ai_usage[quantity]), fact_ai_usage[unit_type] = "copilot_credit", dim_platform[platform_key] = "M365Copilot", dim_model[model_name] = "Cowork")
+		formatString: #,0
+
+	/// Cowork add-on spend. The credit count is metered, but the dollars are modelled from the
+	/// $0.01 Copilot Credit list price (cost_is_estimated = TRUE). Extra spend on top of the M365 seat.
+	measure 'Cowork Add-on Cost' = CALCULATE([Total AI Cost], fact_ai_usage[unit_type] = "copilot_credit", dim_platform[platform_key] = "M365Copilot", dim_model[model_name] = "Cowork")
+		formatString: \$#,0.00
+
+	/// Active share of licensed seats = (Licensed Seats - Idle Licensed Users) / Licensed Seats.
+	measure 'Seat Utilisation %' = DIVIDE([Licensed Seats] - [Idle Licensed Users], [Licensed Seats])
+		formatString: 0.0%
+
+	/// Licensed identities with 1-20 requests in the trailing 28 days. Idle (0) is counted separately.
+	measure 'Low-Use Licensed Seats' = ```
+			VAR Win = DATESINPERIOD(dim_date[date_key], MAX(dim_date[date_key]), -28, DAY)
+			RETURN
+			COUNTROWS(
+			FILTER(
+			VALUES(dim_identity[identity_key]),
+			CALCULATE([Licensed Seats], Win) > 0
+			&& CALCULATE([Total Requests], Win) >= 1
+			&& CALCULATE([Total Requests], Win) <= 20
+			)
+			) + 0
+			```
+		formatString: #,0
+
+	/// Monthly spend carried by low-use seats, priced at the seat_day rate.
+	measure 'Downgrade Candidate Spend (monthly)' = ```
+			[Low-Use Licensed Seats] * 30
+			* CALCULATE(AVERAGE(dim_rate_card[unit_price_usd]), dim_rate_card[unit_type] = "seat_day")
+			```
+		formatString: \$#,0.00
+
+	/// Per-identity recommendation from 28-day activity. Text measure - use on the seat action queue.
+	measure 'Seat Action' = ```
+			VAR Win = DATESINPERIOD(dim_date[date_key], MAX(dim_date[date_key]), -28, DAY)
+			VAR Seats = CALCULATE([Licensed Seats], Win)
+			VAR Act = CALCULATE([Total Requests], Win)
+			RETURN
+			SWITCH(TRUE(),
+			Seats = 0, "No licensed seat",
+			Act = 0, "Reclaim - no activity in 28d",
+			Act <= 20, "Review - low use (<20 req/28d)",
+			"Healthy")
+			```
+		formatString: @
+
+	/// Requests from telemetry carrying no principal (dim_identity[identity_class] = "Unknown").
+	measure 'Unattributed Requests' = CALCULATE([Total Requests], dim_identity[identity_class] = "Unknown") + 0
+		formatString: #,0
+
+	measure 'Attributed Requests' = [Total Requests] - [Unattributed Requests]
+		formatString: #,0
+
+	measure 'Unattributed Request %' = DIVIDE([Unattributed Requests], [Total Requests])
+		formatString: 0.0%
+
+	/// Spend on APP-UNKNOWN whose source feed named no workload (derived in 20_build_star.py).
+	measure 'Unattributed Workload Cost' = CALCULATE([Total AI Cost], dim_application[application_key] = "APP-UNKNOWN")
+		formatString: \$#,0.00
+
+	/// Share of spend that resolves to a named workload = 1 - unattributed / total.
+	measure 'Workload Attribution %' = 1 - DIVIDE([Unattributed Workload Cost], [Total AI Cost])
+		formatString: 0.0%
+
+	/// Business units with a monthly budget set (> 0).
+	measure 'Budgeted Business Units' = CALCULATE(DISTINCTCOUNT(dim_business_unit[business_unit_key]), dim_business_unit[monthly_budget_usd] > 0)
+		formatString: #,0
+
+	/// Share of business units that have a budget set.
+	measure 'Budget Coverage %' = DIVIDE([Budgeted Business Units], CALCULATE(DISTINCTCOUNT(dim_business_unit[business_unit_key]), ALL(dim_business_unit)))
+		formatString: 0.0%
+
+	/// Spend on Azure AI Services (invoiced via FOCUS: Document Intelligence, Speech, Content Safety, etc.).
+	measure 'Azure AI Service Spend' = CALCULATE([Total AI Cost], dim_platform[platform_key] = "AzureAI")
+		formatString: \$#,0.00
+
+	/// Spend on Azure AI Supporting Infrastructure (AI Search, APIM, Cosmos DB, Redis Semantic Cache, Fabric, Monitor).
+	measure 'Supporting AI Infra Spend' = CALCULATE([Total AI Cost], dim_platform[platform_key] = "AzureInfra")
+		formatString: \$#,0.00
+
+	/// Supporting infrastructure share of total AI TCO.
+	measure 'Supporting Infra % of TCO' = DIVIDE([Supporting AI Infra Spend], [Total AI Cost])
+		formatString: 0.0%
+
+	measure 'Cost MTD' = CALCULATE([Total AI Cost], DATESMTD(dim_date[date_key]))
+		formatString: \$#,0.00
+
+	/// Straight-line projection of the current month's MTD spend to month end.
+	measure 'Forecast Cost (EOM)' = ```
+			VAR LastDay = MAX(dim_date[date_key])
+			VAR DaysInMonth = DAY(EOMONTH(LastDay, 0))
+			VAR DaysElapsed = DAY(LastDay)
+			RETURN DIVIDE([Cost MTD], DaysElapsed) * DaysInMonth
+			```
+		formatString: \$#,0.00
+
+	/// 30-day forward projection at the trailing run-rate. Discounted basis.
+	measure 'Forecast Cost (next 30d, net)' = ```
+			VAR D = COUNTROWS(VALUES(dim_date[date_key]))
+			RETURN DIVIDE([Discounted Cost], D) * 30
+			```
+		formatString: \$#,0.00
+
+	/// Spend that maps to a real business unit (excludes BU-UNALLOC). The directly billable pool.
+	measure 'Attributable Cost' = ```
+			CALCULATE([Total AI Cost], dim_business_unit[business_unit_key] <> "BU-UNALLOC")
+			```
+		formatString: \$#,0.00
+
+	measure 'Unallocated Cost' = ```
+			CALCULATE([Total AI Cost], dim_business_unit[business_unit_key] = "BU-UNALLOC")
+			```
+		formatString: \$#,0.00
+
+	/// Share of spend attributable to a business unit. The chargeback readiness number.
+	measure 'Chargeback Coverage %' = DIVIDE([Attributable Cost], [Total AI Cost])
+		formatString: 0.0%
+
+	/// Full allocation: a BU's direct spend plus its pro-rata share of unallocated spend.
+	measure 'Chargeback Cost' = ```
+			VAR Direct = [Attributable Cost]
+			VAR TotalAttrib = CALCULATE([Attributable Cost], ALL(dim_business_unit))
+			VAR Pool = CALCULATE([Unallocated Cost], ALL(dim_business_unit))
+			RETURN Direct + Pool * DIVIDE(Direct, TotalAttrib)
+			```
+		formatString: \$#,0.00
+
+	measure 'Monthly Budget' = SUM(dim_business_unit[monthly_budget_usd])
+		formatString: \$#,0
+
+	/// Projected month-end spend vs budget. Positive = over budget.
+	measure 'Budget Variance' = [Forecast Cost (EOM)] - [Monthly Budget]
+		formatString: +\$#,0;-\$#,0;\$0
+
+	measure 'Budget Variance %' = DIVIDE([Forecast Cost (EOM)] - [Monthly Budget], [Monthly Budget])
+		formatString: +0.0%;-0.0%;0.0%
+
+	partition fact_ai_usage = entity
+		mode: directLake
+		source
+			entityName: fact_ai_usage
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

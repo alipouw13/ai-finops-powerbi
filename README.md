@@ -1,14 +1,13 @@
-# AI FinOps & Tokenomics — Power BI PoC
+# AI FinOps & Tokenomics — FOCUS 1.2 & Multi-Platform Power BI Accelerator
 
-A working Power BI Project (PBIP) showing unified AI spend across **Microsoft 365 Copilot**,
-**Copilot Studio**, **GitHub Copilot Enterprise**, and **Azure AI Foundry**.
+A working Power BI Project (PBIP) and Microsoft Fabric Medallion pipeline delivering a unified **FOCUS 1.2-native** FinOps & Tokenomics view across **all Azure AI Services** (**Azure AI Foundry / Azure OpenAI PAYG & PTUs**, **Document Intelligence**, **Speech**, **Content Safety**, **Azure Machine Learning**, and **Supporting AI Infrastructure** like **AI Search**, **APIM AI Gateway**, **Cosmos DB**, **Managed Redis**, and **Fabric Capacity**), plus **Microsoft 365 Copilot**, **M365 Copilot Cowork / Work IQ**, **Microsoft Copilot Studio**, **GitHub Copilot Enterprise**, and **Agent 365 Governance**.
 
-One slice is real. Three are mocked. **Which is which is a first-class column in the model**
-(`dim_platform[data_source]`) rather than a footnote, because the difference between billed
-and modelled dollars is the single most important thing to be honest about in an AI FinOps
-conversation.
+Real vs. modelled provenance is a **first-class column in the model** (`dim_platform[data_source]` and `fact_ai_usage[cost_is_estimated]`) surfaced as **`Cost Confidence %`** on Page 1.
 
-> **Want the runnable demo (persona dashboards + AI layer, no Fabric/license)?**
+> **Deploying for an enterprise customer with live FOCUS 1.2 exports, APIM AI Gateway, Agent 365 & GitHub Copilot APIs?**
+> See **[docs/CUSTOMER-IMPLEMENTATION-GUIDE.md](docs/CUSTOMER-IMPLEMENTATION-GUIDE.md)** for the complete production blueprint, APIM XML policies, Graph/GitHub scopes, and FOCUS 1.2 column mappings.
+>
+> **Want the runnable demo (persona dashboards + AI Q&A layer, no Fabric/license)?**
 > See **[RUNBOOK.md](RUNBOOK.md)** — clone, run two commands, open http://localhost:8080.
 
 ---
@@ -16,30 +15,35 @@ conversation.
 ## Quick start
 
 ```bash
-git clone https://github.com/natesanshreyas/ai-finops-powerbi.git
+git clone https://github.com/alipouw13/ai-finops-powerbi.git
 cd ai-finops-powerbi
-python3 build_data.py        # regenerate CSVs
+python3 platform/fabric/gen_bronze_data.py   # regenerate FOCUS 1.2 & multi-platform Bronze CSVs
+python3 build_data.py                        # conform Bronze -> 16 Gold star-schema CSVs (0 orphans, tied-out)
+python3 build_pbip.py                        # regenerate TMDL semantic model (16 tables, 25 relationships, 80 measures)
+python3 build_report.py                      # regenerate all 13 Power BI report pages
 ```
 
 1. Open `AIFinOps.pbip` in **Power BI Desktop** (Dec 2023+, with *Preview → Power BI Project* on).
-2. **Transform data → Manage Parameters → `DataFolder`** — set to the absolute path of
-   `AIFinOps.SemanticModel/data/` (trailing slash, escaped backslashes on Windows).
+2. **Transform data → Manage Parameters → `DataFolder`** — defaults automatically to your local `AIFinOps.SemanticModel\data\` folder.
 3. **Refresh.**
 
-> If Desktop rejects `report.json`, delete it and reopen the `.pbip`. Desktop regenerates a
-> blank report bound to the same semantic model and you drag the measures on. The semantic
-> model is the durable artifact — 11 tables, 8 relationships, 42 measures.
+> The semantic model is the durable artifact — **16 tables, 25 relationships, 80 DAX measures, and 13 report pages**.
 
 ---
 
 ## Data provenance — read this before demoing
 
-| Platform | Source | Status |
+| Platform (`dim_platform`) | Billing & Telemetry Source | Status in Repo |
 |---|---|---|
-| **Azure AI Foundry** | `law-apim-finops` → `ApimAiGateway_CL` | ✅ **REAL** — 176 requests, real tokens, real per-user identity |
-| GitHub Copilot Enterprise | — | ⚠️ MOCK — org has **0 Copilot seats**; metrics policy disabled |
-| Copilot Studio | — | ⚠️ MOCK — Dataverse readable, `msdyn_aievents` returned **0 rows** |
-| Microsoft 365 Copilot | Bundled synthetic extract | ⚠️ MOCK — live licensing verified separately on 2026-10-23; usage-report authorization remains blocked |
+| **Azure AI Foundry & OpenAI** (`Foundry`) | `law-apim-finops` → `ApimAiGateway_CL` + `bronze_focus_cost.csv` (PAYG, MaaS, PTU Reservations) | ✅ **REAL** (176 live APIM requests on `2026-08-07`) + **FOCUS 1.2** multi-day |
+| **Azure AI Services** (`AzureAI`) | `bronze_focus_cost.csv` (Document Intelligence, Speech STT/TTS, Content Safety) | ✅ **FOCUS 1.2 Schema** (Mock values, production schema) |
+| **Azure Machine Learning** (`AzureML`) | `bronze_focus_cost.csv` (`Standard_NC24ads_A100_v4` GPU + Managed Endpoints) | ✅ **FOCUS 1.2 Schema** (Mock values, production schema) |
+| **Azure AI Supporting Infra** (`AzureInfra`) | `bronze_focus_cost.csv` (AI Search S2, APIM v2, Cosmos DB, Redis Semantic Cache, Log Analytics, Fabric F8 CU) | ✅ **FOCUS 1.2 Schema** (Captures RAG & gateway TCO) |
+| **Agent 365 Registry** (`dim_agent`) | M365 Admin Center > Agents export (`393` tenant agents) | ✅ **REAL** tenant registry export (`2026-10-26`), linked via `agent_key` |
+| **Microsoft 365 Copilot** (`M365Copilot`) | Graph `subscribedSkus` + `getMicrosoft365CopilotUsageUserDetail` | ✅ **2 REAL seats** verified in tenant + 8 persona mock seats |
+| **M365 Copilot Cowork / Work IQ** (`CopilotCowork`) | M365 Admin Cost Mgmt / FOCUS `Microsoft Copilot Studio` meter | ⚠️ **MOCK** (Cowork, Autopilot, Work IQ API, SharePoint Agents) |
+| **Microsoft Copilot Studio** (`CopilotStudio`) | Dataverse `msdyn_aievents` + FOCUS P3 Commit & PAYG meters | ⚠️ **MOCK** (Models Prepaid Pack vs P3 Commit vs PAYG, M365 zero-rating & BYOM exclusion) |
+| **GitHub Copilot Enterprise** (`GitHubCopilot`) | REST `/copilot/billing/seats`, `/settings/billing/usage`, `/copilot/metrics` | ⚠️ **MOCK** (Seats + Premium Request overages w/ 13× Code Review multiplier) |
 
 ### Live M365 source check — 2026-10-23
 
@@ -121,22 +125,20 @@ negotiated rates), `Forecast Cost (EOM)`, `Forecast Cost (next 30d, net)`,
 (direct + pro-rata unallocated), `Monthly Budget`, `Budget Variance`, `Budget Variance %`.
 These answer actual / discounted / forecast / chargeback for the CFO persona.
 
-### Pages
-1. **Spend Overview** — total, fixed vs variable, confidence, platform capability matrix
-2. **Foundry Tokenomics** — the only real tokenomics; in/out/cached, cache hit rate, $/1K
-3. **Waste & Utilisation** — idle seats and recoverable spend
-4. **Rate Card** — the editable input, plus billed-vs-modelled by platform
-
-**Persona pages (v2)** — one page per stakeholder, built on the conformed dims:
-5. **CFO — Finance** — spend, discounts, forecast, budget variance, chargeback by BU
-6. **Governance** — adoption by principal type, platform usage, REAL-vs-MOCK risk register
-7. **Engineering** — token consumption, unit economics by model, latency, error rate (Foundry REAL)
-8. **Application Owner** — spend by application, trend, MoM delta, criticality
-9. **License Optimization** — idle licensed users, reclaimable spend, seat utilisation
-10. **Extractable Data Spectrum** — full catalogue of every AI cost signal per platform (source API, identity grain, cost fidelity) and its status: REAL / AVAILABLE / MOCK / ROADMAP
-
-Persona pages are (re)generated additively by `python3 build_personas.py`, which
-preserves pages 1–4 and only touches sections named `PERSONA_*` / `DATA_SPECTRUM`.
+### Pages (13 Report Pages)
+1. **1 · FOCUS & FinOps Executive Overview** — FOCUS List → Contracted → Effective waterfall, FinOps Effective Savings Rate (`ESR %`), Billed vs Modelled `Cost Confidence %`, Actionable Waste
+2. **2 · Foundry, APIM & Azure AI Tokenomics** — LLM tokens, prompt cache hit %, $/1K tokens, PTU reservation spend, PTU & P3 utilization %, APIM Gateway coverage %, and full Azure AI Service & Supporting Infra TCO breakdown
+3. **3 · Waste, PTU & Seat Optimization** — Idle Copilot seats (28d), Unused PTU reservation capacity (`CommitmentDiscountStatus = 'Unused'`), Bypassed APIM Gateway spend, and per-principal reclamation table
+4. **4 · Rate Card & FOCUS Discounts** — `dim_rate_card` customer input + EA/MCA Negotiated Discount Savings vs PTU/P3 Commitment Discount Savings
+5. **5 · CFO — Finance & Chargeback** — FOCUS Effective Cost, ESR %, EOM Forecast, Budget Variance, and full BU Chargeback (Direct + Pro-Rata Unallocated)
+6. **6 · Governance & Gateway Control** — APIM Gateway routing coverage %, Bypassed Gateway shadow-AI spend, Supporting Infra % of TCO, Agent Attributed spend, and Human vs SP vs Agent mix
+7. **7 · Engineering — APIM & Model SLOs** — Token consumption trend, $/1K tokens across OpenAI/MaaS/Reasoning models, P95/avg latency, and error rates
+8. **8 · Application & RAG TCO Owner** — Total Application TCO (combining LLM tokens + AI Search + Cosmos DB + Redis Semantic Cache + DocIntel), accountable owners, and MoM velocity
+9. **9 · License & Credit Optimization** — Reclaimable seat waste by BU and Copilot Credit breakdown (`CreditPack` vs `Committed P3` vs `Standard PAYG` vs `ZeroRated`)
+10. **10 · Extractable Data Spectrum** — Full catalogue of every AI cost & telemetry signal across FOCUS 1.2, APIM, Agent 365, M365, Studio, and GitHub (`REAL` / `AVAILABLE` / `MOCK`)
+11. **11 · User Cost Allocation** — `fact_user_cost_allocation` re-keying 100% of AI spend to human accountability (`DIRECT` vs `OWNER` vs `UNALLOCATED`)
+12. **12 · Agent 365 Governance & Spend** — 393 real Agent 365 registry agents (`Owner assigned`, `Microsoft-managed`, `Publisher-managed`, `Unowned tenant agent`) linked directly to attributed AI spend
+13. **13 · Persona Coverage** — Spend and primary vs secondary tool affinity across the 7 enterprise stakeholder personas
 
 ---
 

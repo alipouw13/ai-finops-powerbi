@@ -1,9 +1,9 @@
 platform_key,platform_name,billing_model,native_unit,has_token_telemetry,has_native_cost,is_variable_cost,data_source,enterprise_discount_pct,addon_unit,addon_billing_model
-M365Copilot,Microsoft 365 Copilot,Per-seat licence,seat_day,FALSE,FALSE,FALSE,MOCK/REAL - Graph seats + Cowork Copilot Credits (add-on modelled from the rate card),0.0,copilot_credit,Usage-based (Copilot Credits) - Cowork
-AzureInfra,Azure AI Supporting Infrastructure,Consumption (Azure meters),azure_meter,FALSE,TRUE,TRUE,REAL - Cost Management FOCUS 1.2-preview export via OneLake shortcut - invoiced supporting infrastructure,0.0,,
-AzureAI,Azure AI Services (invoiced),Consumption (Azure meters),azure_meter,FALSE,TRUE,TRUE,REAL - Cost Management FOCUS 1.2-preview export via OneLake shortcut - invoiced AI service spend,0.0,,
-CopilotStudio,Microsoft Copilot Studio,Copilot Credits,copilot_credit,FALSE,FALSE,TRUE,"MOCK - Dataverse msdyn_aievent - connected, tenant has zero consumption",0.2,,
-GitHubCopilot,GitHub Copilot Enterprise,Seats + premium requests,premium_request,FALSE,TRUE,TRUE,MOCK - GitHub billing API (needs classic PAT),0.05,,
-Foundry,Azure AI Foundry,Consumption (tokens),token,TRUE,TRUE,TRUE,MOCK - APIM AI Gateway / Log Analytics (per-user token attribution),0.15,,
-CopilotCowork,Copilot Cowork / Agents,Metered (not yet confirmed),unmeasured,,,,NOT INGESTED - no meter seen in Cost Management,,,
-AzureML,Azure Machine Learning,Compute (Azure FOCUS),compute_hour,,,,NOT INGESTED - available via Azure FOCUS export,,,
+Foundry,Azure AI Foundry & OpenAI,Consumption (Tokens + PTU Reservations),token,TRUE,TRUE,TRUE,REAL (APIM Gateway 2026-08-07) + FOCUS 1.2 (Mock multi-day),0.15,ptu_hour,Provisioned Managed (PTU) Reservation
+AzureAI,"Azure AI Services (DocIntel, Speech, Content Safety)",Consumption (FOCUS Azure Meters),azure_meter,FALSE,TRUE,TRUE,"FOCUS 1.2-preview (Document Intelligence, Speech, Content Safety)",0.15,,
+AzureML,Azure Machine Learning,Compute & Online Endpoints (FOCUS),compute_hour,FALSE,TRUE,TRUE,FOCUS 1.2-preview (GPU Compute + Managed Endpoints),0.18,,
+AzureInfra,Azure AI Supporting Infrastructure,"Consumption (AI Search, APIM, Cosmos, Redis, Fabric, Logs)",azure_meter,FALSE,TRUE,TRUE,"FOCUS 1.2-preview (AI Search, APIM v2, Cosmos DB, Redis, Fabric CU)",0.1,,
+CopilotStudio,Microsoft Copilot Studio,Copilot Credits (Prepaid Pack + P3 Commit + PAYG),copilot_credit,FALSE,TRUE,TRUE,MOCK - Dataverse msdyn_aievents + FOCUS 1.2 P3/PAYG meters,0.2,,
+M365Copilot,Microsoft 365 Copilot,Per-seat licence ($30/user/mo),seat_day,FALSE,FALSE,FALSE,REAL (2 live tenant seats) + MOCK (8 persona seats & usage),0.0,copilot_credit,Usage-based Copilot Credits (see CopilotCowork)
+CopilotCowork,"M365 Copilot Cowork, Autopilot & Work IQ API",Usage-based (Copilot Credits),copilot_credit,FALSE,TRUE,TRUE,MOCK - M365 Admin Cost Management / FOCUS Copilot Credits,0.0,,
+GitHubCopilot,GitHub Copilot Enterprise,Seats ($39/mo) + Metered Premium Requests ($0.04 x mult),premium_request,FALSE,TRUE,TRUE,MOCK - GitHub REST /copilot/billing/seats + /settings/billing/usage,0.05,seat_day,Fixed Enterprise Seat ($39/user/mo)

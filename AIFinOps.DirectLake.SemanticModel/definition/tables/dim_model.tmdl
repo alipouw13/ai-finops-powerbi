@@ -1,0 +1,35 @@
+table dim_model
+
+	column model_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: model_key
+
+	column model_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: model_name
+
+	column model_version
+		dataType: string
+		summarizeBy: none
+		sourceColumn: model_version
+
+	column provider
+		dataType: string
+		summarizeBy: none
+		sourceColumn: provider
+
+	column modality
+		dataType: string
+		summarizeBy: none
+		sourceColumn: modality
+
+	partition dim_model = entity
+		mode: directLake
+		source
+			entityName: dim_model
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

@@ -44,7 +44,6 @@ table dim_identity
 		sourceColumn: cost_center_key
 
 	/// Universal identity class: Human · ServicePrincipal · ManagedIdentity · Agent · Application.
-	/// Not every AI request maps to a person; this normalizes principals across all platforms.
 	column identity_class
 		dataType: string
 		summarizeBy: none

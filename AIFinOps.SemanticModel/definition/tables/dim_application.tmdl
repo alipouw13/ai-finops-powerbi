@@ -40,7 +40,7 @@ table dim_application
 		summarizeBy: none
 		sourceColumn: criticality
 
-	/// TRUE where the application's telemetry is mocked (see dim_platform[data_source]).
+	/// TRUE where the application's telemetry is mocked.
 	column is_mock
 		dataType: boolean
 		summarizeBy: none

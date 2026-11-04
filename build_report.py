@@ -23,6 +23,16 @@ MEASURES = {
     "Licensed Seats", "Total Requests", "Active Users", "Cost per Active User",
     "Idle Licensed Users", "Idle Seat Waste (monthly)", "Error Rate",
     "Avg Latency (ms)", "Cost PM", "MoM Cost Delta %", "Cost (30d run-rate)",
+    "Discounted Cost", "Discount Savings", "FOCUS List Cost", "FOCUS Contracted Cost",
+    "FOCUS Effective Cost", "FOCUS Billed Cost", "Total FOCUS Savings",
+    "Effective Savings Rate (ESR %)", "Negotiated Discount Savings",
+    "Commitment Discount Savings", "PTU Commitment Cost", "PTU Unused Waste",
+    "Commitment Utilization %", "Total Actionable Waste", "Gateway Routed Spend",
+    "Bypassed Gateway Spend", "Gateway Governance %", "Supporting AI Infra Spend",
+    "Supporting Infra % of TCO", "Agent Attributed Spend", "Cost MTD",
+    "Forecast Cost (EOM)", "Forecast Cost (next 30d, net)", "Attributable Cost",
+    "Unallocated Cost", "Chargeback Coverage %", "Chargeback Cost",
+    "Monthly Budget", "Budget Variance", "Budget Variance %",
 }
 
 _alias = {}
@@ -91,59 +101,79 @@ def tbl(x, y, w, h, refs, title):
 
 
 pages = [
-    ("ReportSection1", "1 · Spend Overview", [
-        card(16, 16, 240, 120, "Total AI Cost", "Total AI Spend"),
-        card(272, 16, 240, 120, "Fixed Cost", "Fixed (licences)"),
-        card(528, 16, 240, 120, "Variable Cost", "Variable (consumption)"),
-        card(784, 16, 240, 120, "Cost Confidence %", "Billed vs Modelled"),
-        card(1040, 16, 224, 120, "Cost (30d run-rate)", "30-day run-rate"),
+    ("ReportSection1", "1 · FOCUS & FinOps Executive Overview", [
+        card(16, 16, 200, 120, "Total AI Cost", "FOCUS Effective Cost"),
+        card(224, 16, 200, 120, "FOCUS List Cost", "FOCUS Retail List Cost"),
+        card(432, 16, 200, 120, "Total FOCUS Savings", "Total FOCUS Savings"),
+        card(640, 16, 200, 120, "Effective Savings Rate (ESR %)", "FinOps ESR %"),
+        card(848, 16, 200, 120, "Cost Confidence %", "Billed vs Modelled %"),
+        card(1056, 16, 208, 120, "Total Actionable Waste", "Actionable Waste"),
         chart("clusteredColumnChart", 16, 152, 624, 280,
-              "dim_platform.platform_name", [f"{F}.Total AI Cost"], "Spend by platform"),
+              "dim_platform.platform_name",
+              [f"{F}.FOCUS List Cost", f"{F}.FOCUS Contracted Cost", f"{F}.Total AI Cost"],
+              "FOCUS Price Waterfall by Platform: List -> Contracted -> Effective"),
         chart("lineChart", 656, 152, 608, 280,
-              "dim_date.date_key", [f"{F}.Total AI Cost"], "Daily spend trend"),
+              "dim_date.date_key",
+              [f"{F}.Total AI Cost", f"{F}.Billed Cost", f"{F}.Modelled Cost"],
+              "Daily AI Spend Trend: FOCUS Billed vs Rate-Card Modelled"),
         tbl(16, 448, 1248, 250, [
             "dim_platform.platform_name", "dim_platform.billing_model",
-            "dim_platform.data_source", f"{F}.Total AI Cost", f"{F}.Cost Confidence %"],
-            "Platform capability matrix — note data_source: REAL vs MOCK"),
+            "dim_platform.data_source", f"{F}.FOCUS List Cost", f"{F}.Total AI Cost",
+            f"{F}.Total FOCUS Savings", f"{F}.Effective Savings Rate (ESR %)",
+            f"{F}.Cost Confidence %"],
+            "Platform FinOps & FOCUS Capability Matrix — REAL vs FOCUS vs Rate-Card Provenance"),
     ]),
-    ("ReportSection2", "2 · Foundry Tokenomics (REAL)", [
-        card(16, 16, 240, 120, "Total Tokens", "Total tokens"),
-        card(272, 16, 240, 120, "Input Tokens", "Input"),
-        card(528, 16, 240, 120, "Output Tokens", "Output"),
-        card(784, 16, 240, 120, "Cache Hit Rate", "Cache hit rate"),
-        card(1040, 16, 224, 120, "Cost per 1K Tokens", "$ / 1K tokens"),
+    ("ReportSection2", "2 · Foundry, APIM & Azure AI Tokenomics", [
+        card(16, 16, 200, 120, "Total Tokens", "Total LLM Tokens"),
+        card(224, 16, 200, 120, "Cache Hit Rate", "Prompt Cache Hit %"),
+        card(432, 16, 200, 120, "Cost per 1K Tokens", "Effective $ / 1K Tokens"),
+        card(640, 16, 200, 120, "PTU Commitment Cost", "PTU Reservation Cost"),
+        card(848, 16, 200, 120, "Commitment Utilization %", "PTU & P3 Utilization %"),
+        card(1056, 16, 208, 120, "Gateway Governance %", "APIM Gateway Routed %"),
         chart("clusteredBarChart", 16, 152, 624, 280,
-              "dim_model.model_name", [f"{F}.Total Tokens"], "Tokens by model"),
+              "dim_model.model_name", [f"{F}.Total AI Cost"],
+              "Spend by Model & AI Engine (OpenAI, MaaS, DocIntel, Speech, AML, AI Search)"),
         chart("clusteredBarChart", 656, 152, 608, 280,
-              "dim_identity.team", [f"{F}.Total AI Cost"], "Cost by team"),
+              f"{F}.service_name", [f"{F}.Total AI Cost"],
+              "All Azure AI Services & Supporting Infrastructure TCO (FOCUS ServiceName)"),
         tbl(16, 448, 1248, 250, [
-            "dim_model.model_name", f"{F}.Input Tokens", f"{F}.Output Tokens",
-            f"{F}.Cached Tokens", f"{F}.Total Requests", f"{F}.Total AI Cost"],
-            "Per-model detail"),
+            "dim_model.model_name", "dim_model.provider", "dim_model.modality",
+            f"{F}.Input Tokens", f"{F}.Output Tokens", f"{F}.Cached Tokens",
+            f"{F}.Cache Hit Rate", f"{F}.Cost per 1K Tokens", f"{F}.Total AI Cost"],
+            "Per-Model & Azure AI Service Unit Economics"),
     ]),
-    ("ReportSection3", "3 · Waste & Utilisation", [
-        card(16, 16, 300, 140, "Idle Licensed Users", "Idle licensed users (28d)"),
-        card(332, 16, 300, 140, "Idle Seat Waste (monthly)", "Recoverable / month"),
-        card(648, 16, 300, 140, "Licensed Seats", "Total paid seats"),
-        card(964, 16, 300, 140, "Cost per Active User", "Cost / active user"),
-        tbl(16, 172, 1248, 300, [
+    ("ReportSection3", "3 · Waste, PTU & Seat Optimization", [
+        card(16, 16, 200, 120, "Total Actionable Waste", "Total Actionable Waste"),
+        card(224, 16, 200, 120, "Idle Seat Waste (monthly)", "Idle Seat Waste / mo"),
+        card(432, 16, 200, 120, "PTU Unused Waste", "Unused PTU Capacity $"),
+        card(640, 16, 200, 120, "Bypassed Gateway Spend", "Bypassed APIM Gateway $"),
+        card(848, 16, 200, 120, "Idle Licensed Users", "Idle Copilot Seats (28d)"),
+        card(1056, 16, 208, 120, "Cost per Active User", "Cost / Active Principal"),
+        chart("clusteredColumnChart", 16, 152, 624, 260,
+              f"{F}.pricing_category", [f"{F}.Total AI Cost"],
+              "AI Spend by FOCUS Pricing Category (Standard, Committed PTU/P3, Seat, CreditPack)"),
+        chart("clusteredBarChart", 656, 152, 608, 260,
+              f"{F}.commitment_discount_status", [f"{F}.Total AI Cost"],
+              "Commitment Discount Utilization (Used vs Unused PTU & P3 Reservations)"),
+        tbl(16, 428, 1248, 270, [
             "dim_identity.display_name", "dim_identity.team", "dim_identity.business_unit",
             f"{F}.Licensed Seats", f"{F}.M365 Prompts", f"{F}.Premium Requests",
-            f"{F}.Total AI Cost"],
-            "Per-user activity — a paid seat with zero prompts is a reclaim candidate"),
-        chart("clusteredColumnChart", 16, 488, 1248, 210,
-              "dim_cost_center.cost_center_name", [f"{F}.Total AI Cost"],
-              "Spend by cost centre"),
+            f"{F}.Total Requests", f"{F}.Total AI Cost"],
+            "Per-Principal Seat & Consumption Audit — Paid Seat with Zero Activity = Reclaim Candidate"),
     ]),
-    ("ReportSection4", "4 · Rate Card (edit me)", [
-        tbl(16, 16, 1248, 420, [
+    ("ReportSection4", "4 · Rate Card & FOCUS Discounts", [
+        card(16, 16, 300, 110, "FOCUS List Cost", "FOCUS Retail List Cost"),
+        card(332, 16, 300, 110, "FOCUS Contracted Cost", "FOCUS Contracted Cost"),
+        card(648, 16, 300, 110, "Negotiated Discount Savings", "EA/MCA Negotiated Savings"),
+        card(964, 16, 300, 110, "Commitment Discount Savings", "PTU & P3 Reservation Savings"),
+        tbl(16, 142, 1248, 310, [
             "dim_rate_card.platform", "dim_rate_card.unit_type", "dim_rate_card.model",
             "dim_rate_card.unit_price_usd", "dim_rate_card.source", "dim_rate_card.note"],
-            "dim_rate_card — the single customer-supplied input"),
-        chart("clusteredBarChart", 16, 452, 1248, 246,
+            "dim_rate_card — Customer Rate Card for Seats, Credit Packs & Effective Token Rates"),
+        chart("clusteredBarChart", 16, 468, 1248, 230,
               "dim_platform.platform_name",
               [f"{F}.Billed Cost", f"{F}.Modelled Cost"],
-              "Billed vs modelled by platform"),
+              "FOCUS Billed Cost vs Rate-Card Modelled Cost by Platform"),
     ]),
 ]
 
@@ -177,4 +207,9 @@ layout = {
 
 (RP / "report.json").write_text(json.dumps(layout, indent=2), encoding="utf-8")
 n = sum(len(v) for _, _, v in pages)
-print(f"  report.json — {len(pages)} pages, {n} visuals, all with bound queries")
+print(f"  report.json base — {len(pages)} pages, {n} visuals, all with bound queries")
+
+# Always append/refresh the persona, Agent 365, User Allocation & Spectrum pages
+import build_personas
+build_personas.main()
+

@@ -1,5 +1,21 @@
 model_key,model_name,model_version,provider,modality
-gpt-4.1-mini,gpt-4.1-mini,2025-04-14,Azure OpenAI,text
-nonexistent-model,nonexistent-model,2025-04-14,Azure OpenAI,text
 gpt-4.1,gpt-4.1,2025-04-14,Azure OpenAI,text
-claude-sonnet-4.5,claude-sonnet-4.5,,GitHub Copilot,text
+gpt-4.1-mini,gpt-4.1-mini,2025-04-14,Azure OpenAI,text
+o3-mini,o3-mini,2025-01-31,Azure OpenAI,reasoning
+o3,o3,2025-04,GitHub Copilot,reasoning
+Mistral-Large-2,Mistral-Large-2,2411,Mistral AI (Foundry MaaS),text
+claude-sonnet-4.5,claude-sonnet-4.5,2025-09,GitHub Copilot,text
+code-review,Copilot Code Review (13x),2026,GitHub Copilot,code
+Cowork,Cowork,1.0,M365 Copilot,agent
+classic_answer,Classic Answer (1 cr),1.0,Copilot Studio,agent
+generative_answer,Generative Answer (2 cr),1.0,Copilot Studio,agent
+agent_action,Autonomous Agent Action (5 cr),1.0,Copilot Studio,agent
+tenant_graph_grounding,Tenant Graph Grounding (10 cr),1.0,Copilot Studio,agent
+agent_flow_action,Agent Flow Action (13 cr),1.0,Copilot Studio,agent
+doc-intelligence-s0,Document Intelligence Custom S0,4.0,Azure AI Services,document
+speech-neural-stt,Speech Neural STT/TTS,1.0,Azure AI Services,audio
+content-safety-s0,Content Safety Prompt Shield,1.0,Azure AI Services,guardrail
+aml-nc24-a100,AML Managed GPU (A100 v4),v4,Azure ML,compute
+ai-search-semantic-s2,AI Search Vector + Semantic S2,S2,Azure AI Search,retrieval
+MODEL-NA,(no model / seat or infra),,Platform,n/a
+unknown,Unresolved / Error Model,,Azure OpenAI,unknown

@@ -19,9 +19,10 @@
 import re
 from pyspark.sql import functions as F
 
-WS_ID = "<injected>"
-BRONZE_ID = "<injected>"
-SILVER_ID = "<injected>"
+WS_ID = globals().get("WS_ID") or "0cb77528-27b4-4298-a48a-477caff105f3"
+BRONZE_ID = globals().get("BRONZE_ID") or "03c83faf-ae22-401f-bcc5-d7241ab05a28"
+SILVER_ID = globals().get("SILVER_ID") or "597401b8-65f9-4fff-802b-8b5a584fd8cf"
+BRONZE_REAL = globals().get("BRONZE_REAL_ID") or "0ac1d742-ef4b-49df-a5fc-4c5adf41370e"
 SNAPSHOT_DATE = "2026-10-26"
 endpoint = "onelake.dfs.fabric.microsoft.com"
 
@@ -35,16 +36,63 @@ def snake(name):
 
 
 def land(csv_name, table, source_file):
-    raw = (spark.read.option("header", "true").option("multiLine", "true").option("escape", '"')
-           .csv(f"abfss://{WS_ID}@{endpoint}/{BRONZE_ID}/Files/bronze/{csv_name}.csv"))
+    target_lh = BRONZE_REAL or BRONZE_ID
+    raw = None
+    for lh, folder in [(BRONZE_REAL, "bronze_real"), (BRONZE_ID, "bronze")]:
+        if not lh or lh.startswith("<"):
+            continue
+        try:
+            raw = (spark.read.option("header", "true").option("multiLine", "true").option("escape", '"')
+                   .csv(f"abfss://{WS_ID}@{endpoint}/{lh}/Files/{folder}/{csv_name}.csv"))
+            target_lh = lh
+            break
+        except Exception:                                         # noqa: BLE001
+            continue
+    if raw is None:
+        # Real-only fallback when the manual M365 Admin Center Agent 365 CSV has not
+        # been uploaded yet: synthesize from Dataverse bronze_ref_agent_inventory if present.
+        if csv_name == "bronze_agent365_agents" and BRONZE_REAL:
+            dv = spark.read.format("delta").load(path(BRONZE_REAL, "bronze_ref_agent_inventory"))
+            raw = dv.select(
+                F.col("agent_key").alias("title_id"),
+                F.col("agent_name").alias("name"),
+                F.lit("Available").alias("status"),
+                F.lit("Teams;Web").alias("channel"),
+                F.lit("Internal").alias("publisher"),
+                F.lit("Customer").alias("publisher_type"),
+                F.lit("1.0").alias("version"),
+                F.coalesce(F.col("owner_upn"), F.lit("")).alias("owner"),
+                F.coalesce(F.col("platform"), F.lit("Copilot Studio")).alias("platform"),
+                F.coalesce(F.col("environment_id"), F.lit("")).alias("environment_id"),
+                F.col("agent_key").alias("bot_id"),
+                F.lit("").alias("foundry_resource_id"),
+                F.lit("").alias("creator_id"),
+                F.lit("").alias("entra_agent_id"),
+                F.lit("Production").alias("deployment"),
+                F.coalesce(F.col("purpose"), F.lit("")).alias("description"),
+                F.concat(F.coalesce(F.col("created_on"), F.lit(SNAPSHOT_DATE)), F.lit("T00:00:00Z")).alias("date_created"),
+                F.concat(F.coalesce(F.col("created_on"), F.lit(SNAPSHOT_DATE)), F.lit("T00:00:00Z")).alias("last_modified"),
+                F.concat(F.lit(SNAPSHOT_DATE), F.lit("T00:00:00Z")).alias("last_used"),
+                F.lit("Yes").alias("custom_actions"),
+                F.lit("No").alias("can_use_code_interpreter"),
+                F.lit("Yes").alias("can_read_onedrive_and_sharepoint_items"),
+                F.lit("Yes").alias("can_read_onedrive_files"),
+                F.lit("Yes").alias("can_read_sharepoint_sites_and_files"),
+                F.lit("No").alias("can_extend_to_graph_connector"),
+            )
+        else:
+            raw = spark.createDataFrame(
+                [],
+                "user_principal_name string, total_agents_used string, total_sessions string, last_activity_date string",
+            )
     raw = raw.toDF(*[snake(c) for c in raw.columns])
     raw = (raw.withColumn("_snapshot_date", F.lit(SNAPSHOT_DATE))
            .withColumn("_source_system", F.lit("Agent 365 / M365 admin center export"))
            .withColumn("_source_file", F.lit(source_file))
            .withColumn("_data_class", F.lit("REAL"))
            .withColumn("_loaded_at", F.current_timestamp()))
-    raw.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(path(BRONZE_ID, table))
-    return spark.read.format("delta").load(path(BRONZE_ID, table))
+    raw.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(path(target_lh, table))
+    return spark.read.format("delta").load(path(target_lh, table))
 
 
 agents = land("bronze_agent365_agents", "bronze_agent365_agents", "Agents_2026-10-26_16_54_42.csv")
@@ -74,9 +122,9 @@ s_agents = (agents
                          .when(publisher_type == "ThirdParty", "Publisher-managed")
                          .otherwise("Unowned tenant agent"))
             .withColumn("entra_agent_id", blank_to_null("entra_agent_id"))
-            .withColumn("created_ts", F.to_timestamp(F.regexp_replace("date_created", "Z$", "")))
-            .withColumn("last_modified_ts", F.to_timestamp(F.regexp_replace("last_modified", "Z$", "")))
-            .withColumn("last_used_ts", F.to_timestamp(F.regexp_replace("last_used", "Z$", "")))
+            .withColumn("created_ts", F.expr("try_to_timestamp(nullif(trim(regexp_replace(date_created, 'Z$', '')), ''))"))
+            .withColumn("last_modified_ts", F.expr("try_to_timestamp(nullif(trim(regexp_replace(last_modified, 'Z$', '')), ''))"))
+            .withColumn("last_used_ts", F.expr("try_to_timestamp(nullif(trim(regexp_replace(last_used, 'Z$', '')), ''))"))
             .withColumn("has_custom_actions", yes("custom_actions"))
             .withColumn("can_use_code_interpreter", yes("can_use_code_interpreter"))
             .withColumn("can_read_files_or_sites",

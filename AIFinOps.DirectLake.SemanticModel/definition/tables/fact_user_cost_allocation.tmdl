@@ -1,0 +1,126 @@
+table fact_user_cost_allocation
+
+	column usage_date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: usage_date
+
+	column platform_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: platform_key
+
+	column application_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: application_key
+
+	column environment_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: environment_key
+
+	column business_unit_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: business_unit_key
+
+	column cost_center_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: cost_center_key
+
+	column user_identity_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: user_identity_key
+
+	column source_identity_key
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: source_identity_key
+
+	column allocation_basis
+		dataType: string
+		summarizeBy: none
+		sourceColumn: allocation_basis
+
+	column cost_is_estimated
+		dataType: string
+		summarizeBy: none
+		sourceColumn: cost_is_estimated
+
+	column input_tokens
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: input_tokens
+
+	column output_tokens
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: output_tokens
+
+	column total_tokens
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: total_tokens
+
+	column requests
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: requests
+
+	column cost_usd
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: cost_usd
+
+
+	/// Same dollars as Total AI Cost re-keyed to a person. Never add it to Total AI Cost.
+	measure 'User Allocated Cost' = SUM(fact_user_cost_allocation[cost_usd])
+		formatString: \$#,0.00
+
+	measure 'User Allocated Tokens' = SUM(fact_user_cost_allocation[total_tokens])
+		formatString: #,0
+
+	measure 'User Allocated Requests' = SUM(fact_user_cost_allocation[requests])
+		formatString: #,0
+
+	measure 'Directly Attributed Cost' = CALCULATE([User Allocated Cost], fact_user_cost_allocation[allocation_basis] = "DIRECT")
+		formatString: \$#,0.00
+
+	/// OWNER means a service principal or app cost allocated to the application owner. Accountability, not proof of who typed the prompts.
+	measure 'Owner Allocated Cost' = CALCULATE([User Allocated Cost], fact_user_cost_allocation[allocation_basis] = "OWNER")
+		formatString: \$#,0.00
+
+	measure 'Unallocated User Cost' = CALCULATE([User Allocated Cost], fact_user_cost_allocation[allocation_basis] = "UNALLOCATED")
+		formatString: \$#,0.00
+
+	measure 'Directly Attributed Cost %' = DIVIDE([Directly Attributed Cost], [User Allocated Cost])
+		formatString: 0.0%
+
+	measure 'Owner Allocated Tokens' = CALCULATE([User Allocated Tokens], fact_user_cost_allocation[allocation_basis] = "OWNER")
+		formatString: #,0
+
+	measure 'Allocated Users' = CALCULATE(DISTINCTCOUNT(fact_user_cost_allocation[user_identity_key]), fact_user_cost_allocation[allocation_basis] <> "UNALLOCATED")
+		formatString: #,0
+
+	partition fact_user_cost_allocation = entity
+		mode: directLake
+		source
+			entityName: fact_user_cost_allocation
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

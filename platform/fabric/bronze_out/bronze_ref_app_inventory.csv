@@ -6,4 +6,4 @@ APP-MOBILE,Mobile Shopping Assistant,agent,robin.hale@contoso.com,BU-RETAIL,ENV-
 APP-M365,Microsoft 365 Copilot,copilot,cio@contoso.com,BU-TECH,ENV-PROD,Medium,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
 APP-GHCP,GitHub Copilot,copilot,cio@contoso.com,BU-TECH,ENV-PROD,Medium,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
 APP-STUDIO,Employee Support Agent,agent,cio@contoso.com,BU-TECH,ENV-PROD,Medium,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
-APP-UNKNOWN,Unattributed Workload,unknown,,BU-UNALLOC,ENV-UNK,Unknown,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK
+APP-UNKNOWN,Unattributed Workload,unattributed,,BU-UNALLOC,ENV-UNK,Unassigned,2026-09-04T18:00:00Z,AI-FinOps-MOCK,cmdb / azure-resource-tags,2026-09-04,batch-2026-09-04,MOCK

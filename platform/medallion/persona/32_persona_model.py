@@ -17,8 +17,8 @@
 import json
 from pyspark.sql import functions as F
 
-WS_ID = "<injected>"
-SILVER_ID = "<injected>"
+WS_ID = globals().get("WS_ID") or "0cb77528-27b4-4298-a48a-477caff105f3"
+SILVER_ID = globals().get("SILVER_ID") or "597401b8-65f9-4fff-802b-8b5a584fd8cf"
 endpoint = "onelake.dfs.fabric.microsoft.com"
 
 
@@ -48,14 +48,56 @@ AFFINITY = [
     ("PERS-PLAT", "GitHubCopilot", "Primary"), ("PERS-PLAT", "M365Copilot", "Secondary"),
     ("PERS-PLAT", "Foundry", "Secondary"), ("PERS-PLAT", "AzureML", "Secondary"),
 ]
-TEAM_MAP = [("Underwriting", "PERS-KNOW"), ("Claims", "PERS-KNOW"),
-            ("Checkout", "PERS-DEV"), ("Search", "PERS-DEV"), ("Mobile", "PERS-DEV"),
-            ("Data", "PERS-AIDS"), ("DataScience", "PERS-AIDS"), ("Actuarial", "PERS-AIDS"),
-            ("Platform", "PERS-PLAT")]
+TEAM_MAP = [
+    # Demo / Retail / Insurance teams
+    ("Underwriting", "PERS-KNOW"), ("Claims", "PERS-KNOW"),
+    ("Checkout", "PERS-DEV"), ("Search", "PERS-DEV"), ("Mobile", "PERS-DEV"),
+    ("Data", "PERS-AIDS"), ("DataScience", "PERS-AIDS"), ("Actuarial", "PERS-AIDS"),
+    ("Platform", "PERS-PLAT"),
+    # Financial Services (FSI) & Enterprise Entra department names
+    ("Retail Banking", "PERS-KNOW"), ("Wealth Management", "PERS-KNOW"),
+    ("Commercial Banking", "PERS-KNOW"), ("Investment Banking", "PERS-KNOW"),
+    ("Capital Markets", "PERS-KNOW"), ("Risk & Compliance", "PERS-KNOW"),
+    ("Risk", "PERS-KNOW"), ("Compliance", "PERS-KNOW"), ("Legal", "PERS-KNOW"),
+    ("Internal Audit", "PERS-KNOW"), ("Operations", "PERS-KNOW"),
+    ("Customer Service", "PERS-KNOW"), ("Treasury", "PERS-KNOW"),
+    ("Finance & Strategy", "PERS-MAKER"), ("Finance", "PERS-MAKER"),
+    ("Business Automation", "PERS-MAKER"), ("Low-Code", "PERS-MAKER"),
+    ("Power Platform", "PERS-MAKER"), ("Operations Excellence", "PERS-MAKER"),
+    ("Software Engineering", "PERS-DEV"), ("Engineering", "PERS-DEV"),
+    ("Application Development", "PERS-DEV"), ("Core Banking", "PERS-DEV"),
+    ("Digital Channels", "PERS-DEV"), ("Digital", "PERS-DEV"),
+    ("Quantitative Research", "PERS-AIDS"), ("Quant", "PERS-AIDS"),
+    ("Model Risk", "PERS-AIDS"), ("Model Risk Management", "PERS-AIDS"),
+    ("AI & Machine Learning", "PERS-AIDS"), ("AI Engineering", "PERS-AIDS"),
+    ("Data Science", "PERS-AIDS"), ("Analytics", "PERS-AIDS"),
+    ("Platform Engineering", "PERS-PLAT"), ("Cloud Engineering", "PERS-PLAT"),
+    ("Infrastructure", "PERS-PLAT"), ("Cybersecurity", "PERS-PLAT"),
+    ("Information Security", "PERS-PLAT"), ("SecOps", "PERS-PLAT"),
+    ("SRE", "PERS-PLAT"), ("DevOps", "PERS-PLAT"), ("IT", "PERS-PLAT"),
+]
 
-# ---- SILVER: assumed team -> persona map -----------------------------------
+# ---- SILVER: assumed team -> persona map (externalizable via bronze_ref_persona_map)
+BRONZE_REAL = globals().get("BRONZE_REAL_ID") or ""
+BRONZE_MOCK = globals().get("BRONZE_ID") or ""
+custom_map = None
+for _lh in (BRONZE_REAL, BRONZE_MOCK):
+    if not _lh or _lh.startswith("<"):
+        continue
+    try:
+        custom_map = (spark.read.format("delta")
+                      .load(path(_lh, "bronze_ref_persona_map"))
+                      .select("team", "persona_key")
+                      .withColumn("_data_class", F.lit("REAL")))
+        break
+    except Exception:                                             # noqa: BLE001
+        continue
+
 s_map = spark.createDataFrame(TEAM_MAP, "team string, persona_key string").withColumn(
     "_data_class", F.lit("ASSUMED"))
+if custom_map is not None:
+    s_map = custom_map.unionByName(
+        s_map.join(custom_map.select("team"), "team", "left_anti"))
 s_map.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(
     path(SILVER_ID, "silver_persona_map"))
 s_map = spark.read.format("delta").load(path(SILVER_ID, "silver_persona_map"))
@@ -95,10 +137,26 @@ bridge.write.format("delta").mode("overwrite").option("overwriteSchema", "true")
 ident = spark.table("dbo.dim_identity")
 if "persona_key" in ident.columns:
     ident = ident.drop("persona_key")
-stamped = (ident.join(s_map.select("team", "persona_key"), "team", "left")
-           .withColumn("persona_key", F.when(F.col("is_human") == False, F.lit("PERS-WORKLOAD"))  # noqa: E712
-                       .when(F.col("identity_key") == "unknown", F.lit("PERS-UNASSIGNED"))
-                       .otherwise(F.coalesce("persona_key", F.lit("PERS-UNASSIGNED")))))
+s_map_norm = s_map.select(
+    F.lower(F.trim("team")).alias("_team_norm"),
+    F.col("persona_key").alias("_mapped_persona"),
+).dropDuplicates(["_team_norm"])
+t_lower = F.lower(F.coalesce(F.col("team"), F.lit("")))
+heuristic_persona = (
+    F.when(t_lower.rlike("quant|data|actuar|ai |ml |model risk|analytics"), F.lit("PERS-AIDS"))
+     .when(t_lower.rlike("platform|infra|cloud|secops|cyber|sre|devops|it "), F.lit("PERS-PLAT"))
+     .when(t_lower.rlike("eng|software|dev|checkout|search|mobile|core banking|digital"), F.lit("PERS-DEV"))
+     .when(t_lower.rlike("finance|strategy|automation|maker|power platform|low-code"), F.lit("PERS-MAKER"))
+     .when(t_lower.rlike("underwrit|claim|risk|compliance|legal|audit|wealth|retail|commercial|bank|ops|operation|treasury"), F.lit("PERS-KNOW"))
+     .otherwise(F.lit("PERS-UNASSIGNED"))
+)
+stamped = (ident.withColumn("_team_norm", F.lower(F.trim(F.coalesce("team", F.lit("")))))
+           .join(s_map_norm, "_team_norm", "left")
+           .withColumn("persona_key",
+                       F.when(F.col("is_human") == False, F.lit("PERS-WORKLOAD"))  # noqa: E712
+                        .when(F.col("identity_key") == "unknown", F.lit("PERS-UNASSIGNED"))
+                        .otherwise(F.coalesce("_mapped_persona", heuristic_persona)))
+           .drop("_team_norm", "_mapped_persona"))
 stamped = stamped.select(*ident.columns, "persona_key")
 stamped.cache().count()
 stamped.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("dbo.dim_identity")

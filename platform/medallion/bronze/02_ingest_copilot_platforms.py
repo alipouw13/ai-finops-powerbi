@@ -1,48 +1,42 @@
-# Fabric notebook — BRONZE: Copilot family (M365, GitHub, Copilot Studio)
+# Fabric notebook — BRONZE: Copilot Platforms (M365, Copilot Studio, GitHub Copilot)
 # ---------------------------------------------------------------------------
-# These three platforms are MOCK in the PoC because the tenant lacks the SKUs /
-# policies (see README "Data provenance"). This notebook is the real connector
-# scaffold: swap each mock reader for the documented API and NOTHING downstream
-# changes, because provenance is a data column (dim_platform.data_source), not a
-# code branch.
-#
-# Going-live requirements (see README "Going live"):
-#   M365 Copilot   -> Graph getMicrosoft365CopilotUsageUserDetail, Reports.Read.All
-#   GitHub Copilot -> REST /copilot/metrics + billing/usage, admin:enterprise PAT
-#   Copilot Studio -> Dataverse msdyn_aievent (per-environment)
+# Lands all Copilot platform feeds into Bronze Delta tables:
+#   - bronze_m365_copilot_seats     (Graph /subscribedSkus + /users?$select=assignedLicenses)
+#   - bronze_m365_copilot_usage     (Graph /reports/getMicrosoft365CopilotUsageUserDetail)
+#   - bronze_m365_copilot_credits   (M365 Admin Cost Mgmt: Cowork, Autopilot, Work IQ API)
+#   - bronze_studio_credits         (Dataverse msdyn_aievents + PPAC capacity)
+#   - bronze_ghc_seats              (GitHub REST /orgs/{org}/copilot/billing/seats)
+#   - bronze_ghc_premium_usage      (GitHub REST /enterprises/{ent}/settings/billing/usage)
+#   - bronze_ghc_metrics            (GitHub REST /orgs/{org}/copilot/metrics)
 # ---------------------------------------------------------------------------
 from pyspark.sql import functions as F
 
-LAKE = "abfss://finops@<lake>.dfs.core.windows.net"
+LAKE = "abfss://finops@onelake.dfs.fabric.microsoft.com/LH_tokenomics_bronze.Lakehouse/Files/bronze"
 
 
-def land(name: str, df, mode="append"):
-    (df.withColumn("_ingest_ts", F.current_timestamp())
-       .withColumn("_source", F.lit(name))
-       .write.format("delta").mode(mode).option("mergeSchema", "true")
-       .saveAsTable(f"finops_bronze.{name}_raw"))
-    print(f"bronze {mode}: finops_bronze.{name}_raw ({df.count()} rows)")
+def land_csv(table_name: str, source_api: str, mode="append"):
+    df = (
+        spark.read.option("header", "true")
+        .option("multiLine", "true")
+        .option("escape", '"')
+        .csv(f"{LAKE}/{table_name}.csv")
+        .withColumn("_ingest_ts", F.current_timestamp())
+        .withColumn("_source_api", F.lit(source_api))
+    )
+    (
+        df.write.format("delta")
+        .mode(mode)
+        .option("mergeSchema", "true")
+        .saveAsTable(f"finops_bronze.{table_name}")
+    )
+    print(f"bronze {mode}: finops_bronze.{table_name} ({df.count()} rows)")
 
 
-# --- M365 Copilot -----------------------------------------------------------
-# LIVE: call Graph report API (period D7/D30), page through userDetail rows.
-# Concealed user names MUST be disabled in M365 admin or UPNs arrive hashed.
-#   graph = MsGraphClient(scope="Reports.Read.All")
-#   rows  = graph.get_report("getMicrosoft365CopilotUsageUserDetail", period="D30")
-# MOCK today: read the PoC extract if present.
-m365 = spark.read.option("multiLine", True).json(f"{LAKE}/landing/m365copilot/*.json")
-land("m365copilot", m365)
+land_csv("bronze_m365_copilot_seats",   "graph.subscribedSkus+users.assignedLicenses")
+land_csv("bronze_m365_copilot_usage",   "graph.getMicrosoft365CopilotUsageUserDetail")
+land_csv("bronze_m365_copilot_credits", "m365.admin.costmanagement")
+land_csv("bronze_studio_credits",       "dataverse.msdyn_aievents+ppac.capacity")
+land_csv("bronze_ghc_seats",            "github.orgs.copilot.billing.seats")
+land_csv("bronze_ghc_premium_usage",    "github.enterprises.settings.billing.usage")
+land_csv("bronze_ghc_metrics",          "github.orgs.copilot.metrics")
 
-# --- GitHub Copilot ---------------------------------------------------------
-# LIVE: /enterprises/{ent}/copilot/metrics (seats, active users) and
-# /enterprises/{ent}/settings/billing/usage (premium-request netAmount USD).
-gh = spark.read.option("multiLine", True).json(f"{LAKE}/landing/githubcopilot/*.json")
-land("githubcopilot", gh)
-
-# --- Copilot Studio ---------------------------------------------------------
-# LIVE: Dataverse msdyn_aievent is per-environment; msdyn_creditconsumed is
-# already net of zero-rating -> use it directly, do NOT model credits from
-# activity counts (README rationale #7). Exclude bring-your-own-model rows to
-# avoid double-counting Foundry spend (rationale #6).
-studio = spark.read.option("multiLine", True).json(f"{LAKE}/landing/copilotstudio/*.json")
-land("copilotstudio", studio)

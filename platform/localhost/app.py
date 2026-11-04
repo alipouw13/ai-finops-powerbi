@@ -80,11 +80,13 @@ def build_db():
     con.execute(
         "CREATE VIEW gold AS SELECT usage_date, platform_key, identity_key, "
         "model_key, unit_type, CAST(cost_usd AS REAL) AS cost, "
+        "CAST(list_cost_usd AS REAL) AS list_cost, "
         "CAST(quantity AS REAL) AS quantity, CAST(requests AS REAL) AS requests, "
         "CAST(input_tokens AS REAL) AS input_tokens, "
         "CAST(output_tokens AS REAL) AS output_tokens, "
-        "CAST(latency_ms AS REAL) AS latency_ms, is_error, "
-        "application_key, environment_key, business_unit_key "
+        "CAST(cached_tokens AS REAL) AS cached_tokens, "
+        "CAST(latency_ms AS REAL) AS latency_ms, is_error, cost_is_estimated, has_rate_card, "
+        "application_key, environment_key, business_unit_key, cost_center_key "
         "FROM fact_ai_usage"
     )
     con.commit()
@@ -331,6 +333,28 @@ def ask(question):
 
     def has(*words):
         return any(w in ql for w in words)
+
+    # 0) FOCUS savings / ESR / PTU / Gateway bypass / Agent 365
+    if has("focus", "esr", "savings rate", "list cost", "ptu", "reservation", "bypass", "agent 365", "agents"):
+        rows = q(
+            """SELECT p.platform_name AS platform,
+                      ROUND(SUM(g.list_cost),2) AS list_cost_usd,
+                      ROUND(SUM(g.cost),2) AS effective_cost_usd,
+                      ROUND(SUM(g.list_cost - g.cost),2) AS focus_savings_usd
+               FROM gold g JOIN dim_platform p ON g.platform_key=p.platform_key
+               GROUP BY p.platform_name
+               ORDER BY effective_cost_usd DESC"""
+        )
+        list_tot = scalar("SELECT ROUND(SUM(list_cost),2) FROM gold")
+        eff_tot = scalar("SELECT ROUND(SUM(cost),2) FROM gold")
+        sav = round(list_tot - eff_tot, 2)
+        esr = round((sav / list_tot) * 100, 1) if list_tot else 0
+        ans = (f"FOCUS Summary: Retail List Cost is **${list_tot:,.0f}** vs Effective Cost **${eff_tot:,.0f}**, "
+               f"delivering **${sav:,.0f} in total FOCUS savings ({esr}% ESR)**.")
+        sql = ("SELECT platform_name, SUM(list_cost_usd), SUM(cost_usd),\n"
+               "       SUM(list_cost_usd - cost_usd) AS focus_savings\n"
+               "FROM fact_ai_usage JOIN dim_platform USING(platform_key) GROUP BY 1 ORDER BY 3 DESC;")
+        return ans, sql, rows
 
     # 1) idle / reclaim / unused licenses
     if has("idle", "reclaim", "unused", "wasted", "underutil", "under-util"):

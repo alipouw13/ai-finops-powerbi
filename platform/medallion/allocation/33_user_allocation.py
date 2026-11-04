@@ -90,8 +90,13 @@ mobile = (out.join(app.filter(F.col("application_name") == "Mobile Shopping Assi
           .join(ident.select("identity_key", "display_name"), out.user_identity_key == ident.identity_key)
           .groupBy("display_name", "allocation_basis").agg(F.sum("total_tokens").alias("tokens"),
                                                           F.sum("cost_usd").alias("cost")).collect())
+top_apps = (out.join(app.select("application_key", "application_name"), "application_key", "left")
+            .groupBy("application_key", "application_name", "allocation_basis")
+            .agg(F.sum("total_tokens").alias("tokens"), F.sum("cost_usd").alias("cost"))
+            .orderBy(F.col("cost").desc()).limit(10).collect())
 summary = {"rows": out.count(), "tie_out_diffs": diffs, "orphans": orph,
            "cost_and_tokens_by_basis": by_basis,
+           "top_applications_by_cost": [[r[0], r[1], r[2], r[3], round(r[4] or 0, 2)] for r in top_apps],
            "mobile_shopping_assistant": [[r[0], r[1], r[2], round(r[3] or 0, 2)] for r in mobile]}
 mssparkutils.fs.put("Files/live_source/user_allocation_validation.json", json.dumps(summary, default=str), True)
 mssparkutils.fs.put("Files/export/fact_user_cost_allocation.csv", out.toPandas().to_csv(index=False), True)

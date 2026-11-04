@@ -6,3 +6,7 @@ __pycache__/
 
 # demo build artifact (regenerate with build_demo_db.py)
 platform/demo/*.db
+
+# live tenant extracts (never commit real customer cost, identity, or license data)
+platform/fabric/bronze_real/
+

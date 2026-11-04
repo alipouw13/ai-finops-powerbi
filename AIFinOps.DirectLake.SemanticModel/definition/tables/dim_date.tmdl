@@ -1,0 +1,58 @@
+table dim_date
+	dataCategory: Time
+
+	column date_key
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		isKey
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column year
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: year
+
+	column quarter
+		dataType: string
+		summarizeBy: none
+		sourceColumn: quarter
+
+	column month
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: month
+
+	column month_name
+		dataType: string
+		sortByColumn: month
+		summarizeBy: none
+		sourceColumn: month_name
+
+	column day
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: day
+
+	column day_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: day_name
+
+	column is_weekday
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_weekday
+
+	column year_month
+		dataType: string
+		summarizeBy: none
+		sourceColumn: year_month
+
+	partition dim_date = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'

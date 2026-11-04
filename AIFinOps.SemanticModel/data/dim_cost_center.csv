@@ -1,5 +1,6 @@
 cost_center_key,cost_center_name,business_unit,owner_upn
-CC-1000,Checkout,Retail,
-CC-2000,Search,Discovery,
-CC-3000,DataScience,Platform,
-CC-4000,Mobile,Retail,
+CC-1000,Checkout & Insurance Ops,Retail / Insurance,robin.hale@contoso.com
+CC-2000,Search & Discovery,Discovery,sam.chen@contoso.com
+CC-3000,Platform & Data Science,Technology,jenny.oyelaran@contoso.com
+CC-4000,Mobile & Actuarial AI,Retail / Insurance,kim.arroyo@contoso.com
+CC-NA,Unallocated Cost Center,Unallocated,

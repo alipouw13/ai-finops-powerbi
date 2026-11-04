@@ -1,0 +1,30 @@
+table dim_environment
+
+	column environment_key
+		dataType: string
+		isHidden
+		isKey
+		summarizeBy: none
+		sourceColumn: environment_key
+
+	column environment_name
+		dataType: string
+		summarizeBy: none
+		sourceColumn: environment_name
+
+	column is_production
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_production
+
+	column sla_tier
+		dataType: string
+		summarizeBy: none
+		sourceColumn: sla_tier
+
+	partition dim_environment = entity
+		mode: directLake
+		source
+			entityName: dim_environment
+			schemaName: dbo
+			expressionSource: 'DirectLake - AIFinOps'
