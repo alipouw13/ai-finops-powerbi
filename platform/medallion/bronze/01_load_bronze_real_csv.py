@@ -47,6 +47,9 @@ MEASURES = {
     "bronze_azure_ai_metrics": ["processed_prompt_tokens", "generated_tokens",
                                 "total_tokens", "requests", "latency_ms",
                                 "throttled_count"],
+    "bronze_foundry_gateway": ["prompt_tokens", "completion_tokens",
+                               "cached_prompt_tokens", "total_tokens",
+                               "requests", "total_latency_ms"],
     "bronze_m365_license_inventory": ["prepaid_enabled", "prepaid_warning",
                                       "prepaid_suspended", "consumed_units"],
 }
