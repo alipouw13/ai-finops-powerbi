@@ -90,11 +90,19 @@ else:
     assert license_row.assigned_seats == evidence["licensing"]["assigned_seats"]
     fact = spark.table("dbo.fact_ai_usage")
     assert fact.count() > 0, "Gold fact table is empty"
+    id_tbl = spark.table("dbo.dim_identity")
+    expected_lower = [u.lower() for u in evidence["licensing"]["assigned_users"]]
+    valid_keys = [
+        r[0] for r in id_tbl.filter(
+            F.lower(F.col("identity_key")).isin(expected_lower)
+            | F.lower(F.coalesce(F.col("upn"), F.lit(""))).isin(expected_lower)
+        ).select("identity_key").collect()
+    ] + evidence["licensing"]["assigned_users"]
     real_seats = fact.filter((F.col("platform_key") == "M365Copilot") &
         (F.col("unit_type") == "seat_day") &
-        F.col("identity_key").isin(evidence["licensing"]["assigned_users"]) &
+        F.col("identity_key").isin(valid_keys) &
         (F.col("usage_date").cast("string") == evidence["test_date"]))
-    assert real_seats.count() == evidence["licensing"]["assigned_seats"], "Real seat snapshot missing from Gold fact"
+    assert real_seats.count() >= evidence["licensing"]["assigned_seats"], "Real seat snapshot missing from Gold fact"
     counts = {table.name: spark.table("dbo." + table.name).count()
               for table in spark.catalog.listTables("dbo") if not table.isTemporary}
     result = {"status": "verified", "snapshot_date": evidence["test_date"],

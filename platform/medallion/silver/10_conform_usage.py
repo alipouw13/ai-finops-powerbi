@@ -369,7 +369,10 @@ def conform(df):
         if col not in df.columns:
             df = df.withColumn(col, default)
     for col, typ in CASTS.items():
-        df = df.withColumn(col, F.col(col).cast(typ))
+        if col not in df.columns:
+            df = df.withColumn(col, F.lit(None).cast(typ))
+        else:
+            df = df.withColumn(col, F.col(col).cast(typ))
     return df.select(*USAGE_CONTRACT)
 
 
@@ -593,16 +596,17 @@ m365_parts.append(conform(usage
     .withColumn("cost_is_estimated", F.lit(False))))
 
 # Credits: credit meters carry real cost_usd -> billed, not modelled.
-credits = dedupe(bronze("bronze_m365_copilot_credits"), "bronze_m365_copilot_credits")
-credits = grain_guard(credits, "m365_credits", "usage_date",
-                      ["consumer_id"], "credits_consumed")
-m365_parts.append(conform(priced(credits
-    .withColumn("platform_key", F.lit("M365Copilot"))
-    .withColumn("identity_key", F.col("consumer_id"))
-    .withColumn("model_key", F.col("capability"))
-    .withColumn("unit_type", F.lit("copilot_credit"))
-    .withColumn("quantity", F.col("credits_consumed"))
-    .withColumn("cost_is_estimated", F.lit(False)), "M365Copilot", "copilot_credit")))
+if has_bronze("bronze_m365_copilot_credits"):
+    credits = dedupe(bronze("bronze_m365_copilot_credits"), "bronze_m365_copilot_credits")
+    credits = grain_guard(credits, "m365_credits", "usage_date",
+                          ["consumer_id"], "credits_consumed")
+    m365_parts.append(conform(priced(credits
+        .withColumn("platform_key", F.lit("M365Copilot"))
+        .withColumn("identity_key", F.col("consumer_id"))
+        .withColumn("model_key", F.col("capability"))
+        .withColumn("unit_type", F.lit("copilot_credit"))
+        .withColumn("quantity", F.col("credits_consumed"))
+        .withColumn("cost_is_estimated", F.lit(False)), "M365Copilot", "copilot_credit")))
 
 silver_m365 = m365_parts[0]
 for p in m365_parts[1:]:
@@ -610,75 +614,57 @@ for p in m365_parts[1:]:
 write_silver(silver_m365, "silver_usage_m365")
 
 # --------------------------------------------------- silver_usage_m365_cowork
-# Microsoft 365 Copilot Cowork add-on consumption, kept in its own curated
-# entity (like the other per-platform feeds) before it is unioned into
-# silver_usage_unified. The stakeholder calls these "Cowork units", but there is
-# no such billing unit: Cowork is billed in Copilot Credits at $0.01/credit, the
-# SAME currency Copilot Studio already uses, so it conforms to
-# unit_type = "copilot_credit" on platform_key = "M365Copilot" — a consumptive
-# add-on ON TOP of the fixed seat, not a second seat SKU.
-#
-# The credit export is expressed in credits, never dollars, so cost_usd is
-# MODELLED from the rate card (cost_is_estimated = TRUE); requests carry the
-# task count so the report can show tasks alongside credits.
-#
-# Double-count: these same credits also surface on the Azure bill under the
-# service "Microsoft Copilot Studio" (Cowork + Studio + Work IQ share one
-# meter). Silver's Azure conform EXCLUDES that service so the dollars are counted
-# exactly once — see the guard in the FOCUS branch below.
-cowork = dedupe(bronze("bronze_m365_cowork_usage"), "bronze_m365_cowork_usage")
-cowork = grain_guard(cowork, "m365_cowork", "report_date",
-                     ["user_id"], "credits_consumed")
-silver_cowork = conform(priced(cowork
-    .withColumn("usage_date", F.col("report_date"))
-    .withColumn("platform_key", F.lit("M365Copilot"))
-    .withColumn("identity_key", F.col("user_id"))
-    # model_key = "Cowork" is the discriminator that keeps this feed disjoint
-    # from the generic M365 credit feed (silver_usage_m365), which lands on the
-    # same platform + unit_type. [Cowork Credits] / [Cowork Add-on Cost] filter
-    # on this exact spelling (coordinated with WS-MODEL); without it the two
-    # feeds would sum together and double the reported Cowork consumption. It is
-    # a real, non-empty model_key so it survives into dim_model rather than being
-    # coerced to the MODEL-NA sentinel.
-    .withColumn("model_key", F.lit("Cowork"))
-    .withColumn("unit_type", F.lit("copilot_credit"))
-    .withColumn("quantity", F.col("credits_consumed").cast("double"))
-    .withColumn("requests", F.col("total_tasks"))
-    # Credits are metered but the export never states dollars, so the cost is
-    # modelled from the Copilot Credit list price and flagged estimated.
-    .withColumn("cost_usd", F.col("credits_consumed").cast("double")
-                * F.lit(rate("M365Copilot", "copilot_credit")))
-    .withColumn("cost_is_estimated", F.lit(True)), "M365Copilot", "copilot_credit"))
+if has_bronze("bronze_m365_cowork_usage"):
+    cowork = dedupe(bronze("bronze_m365_cowork_usage"), "bronze_m365_cowork_usage")
+    cowork = grain_guard(cowork, "m365_cowork", "report_date",
+                         ["user_id"], "credits_consumed")
+    silver_cowork = conform(priced(cowork
+        .withColumn("usage_date", F.col("report_date"))
+        .withColumn("platform_key", F.lit("M365Copilot"))
+        .withColumn("identity_key", F.col("user_id"))
+        .withColumn("model_key", F.lit("Cowork"))
+        .withColumn("unit_type", F.lit("copilot_credit"))
+        .withColumn("quantity", F.col("credits_consumed").cast("double"))
+        .withColumn("requests", F.col("total_tasks"))
+        .withColumn("cost_usd", F.col("credits_consumed").cast("double")
+                    * F.lit(rate("M365Copilot", "copilot_credit")))
+        .withColumn("cost_is_estimated", F.lit(True)), "M365Copilot", "copilot_credit"))
+else:
+    silver_cowork = conform(spark.createDataFrame([], "usage_date string"))
 write_silver(silver_cowork, "silver_usage_m365_cowork")
 
 # ---------------------------------------------------------- silver_usage_ghc
 ghc_parts = []
-ghc_seats = dedupe(bronze("bronze_ghc_seats"), "bronze_ghc_seats")
-ghc_parts.append(conform(priced(ghc_seats
-    .withColumn("usage_date", F.col("snapshot_date"))
-    .withColumn("platform_key", F.lit("GitHubCopilot"))
-    .withColumn("identity_key", F.col("assignee_login"))
-    .withColumn("unit_type", F.lit("seat_day"))
-    .withColumn("quantity", F.lit(1.0))
-    .withColumn("cost_usd", F.lit(rate("GitHubCopilot", "seat_day")))
-    .withColumn("cost_is_estimated", F.lit(True)), "GitHubCopilot", "seat_day")))
+if has_bronze("bronze_ghc_seats"):
+    ghc_seats = dedupe(bronze("bronze_ghc_seats"), "bronze_ghc_seats")
+    ghc_parts.append(conform(priced(ghc_seats
+        .withColumn("usage_date", F.col("snapshot_date"))
+        .withColumn("platform_key", F.lit("GitHubCopilot"))
+        .withColumn("identity_key", F.col("assignee_login"))
+        .withColumn("unit_type", F.lit("seat_day"))
+        .withColumn("quantity", F.lit(1.0))
+        .withColumn("cost_usd", F.lit(rate("GitHubCopilot", "seat_day")))
+        .withColumn("cost_is_estimated", F.lit(True)), "GitHubCopilot", "seat_day")))
 
-# net_amount is what GitHub actually charged -> the highest-fidelity cost here.
-prem = dedupe(bronze("bronze_ghc_premium_usage"), "bronze_ghc_premium_usage")
-prem = grain_guard(prem, "ghc_premium", "usage_date", ["login"], "quantity")
-ghc_parts.append(conform(priced(prem
-    .withColumn("platform_key", F.lit("GitHubCopilot"))
-    .withColumn("identity_key", F.col("login"))
-    .withColumn("model_key", F.coalesce(F.col("model"), F.lit("")))
-    .withColumn("unit_type", F.lit("premium_request"))
-    .withColumn("quantity", F.col("quantity").cast("double"))
-    .withColumn("requests", F.col("quantity"))
-    .withColumn("cost_usd", F.col("net_amount"))
-    .withColumn("cost_is_estimated", F.lit(False)), "GitHubCopilot", "premium_request")))
+if has_bronze("bronze_ghc_premium_usage"):
+    prem = dedupe(bronze("bronze_ghc_premium_usage"), "bronze_ghc_premium_usage")
+    prem = grain_guard(prem, "ghc_premium", "usage_date", ["login"], "quantity")
+    ghc_parts.append(conform(priced(prem
+        .withColumn("platform_key", F.lit("GitHubCopilot"))
+        .withColumn("identity_key", F.col("login"))
+        .withColumn("model_key", F.coalesce(F.col("model"), F.lit("")))
+        .withColumn("unit_type", F.lit("premium_request"))
+        .withColumn("quantity", F.col("quantity").cast("double"))
+        .withColumn("requests", F.col("quantity"))
+        .withColumn("cost_usd", F.col("net_amount"))
+        .withColumn("cost_is_estimated", F.lit(False)), "GitHubCopilot", "premium_request")))
 
-silver_ghc = ghc_parts[0]
-for p in ghc_parts[1:]:
-    silver_ghc = silver_ghc.unionByName(p)
+if ghc_parts:
+    silver_ghc = ghc_parts[0]
+    for p in ghc_parts[1:]:
+        silver_ghc = silver_ghc.unionByName(p)
+else:
+    silver_ghc = conform(spark.createDataFrame([], "usage_date string"))
 write_silver(silver_ghc, "silver_usage_ghc")
 
 # ------------------------------------------------------- silver_usage_studio

@@ -106,11 +106,12 @@ for f in sorted(files, key=lambda x: x.name):
         key = [c for c in business if c not in MEASURES.get(table, [])]
         # Newest extract wins for a given grain, so a restated row replaces the
         # one it supersedes instead of sitting beside it.
+        order_cols = [F.col("_loaded_at").desc()]
+        if "_ingested_at" in merged.columns:
+            order_cols.append(F.col("_ingested_at").desc())
         merged = (merged
                   .withColumn("_rn", F.row_number().over(
-                      Window.partitionBy(*key)
-                            .orderBy(F.col("_loaded_at").desc(),
-                                     F.col("_ingested_at").desc())))
+                      Window.partitionBy(*key).orderBy(*order_cols)))
                   .filter(F.col("_rn") == 1).drop("_rn"))
 
         (merged.write.format("delta").mode("overwrite")
